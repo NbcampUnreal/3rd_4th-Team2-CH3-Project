@@ -2,10 +2,7 @@
 
 
 #include "Item/Weapon/TShotgun.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/BoxComponent.h"
-#include "Test/TPlayerController.h"
-#include "Components/SphereComponent.h"
+
 
 ATShotgun::ATShotgun()
 {

@@ -2,10 +2,7 @@
 
 
 #include "Item/Weapon/TRifle.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/BoxComponent.h"
-#include "Test/TPlayerController.h"
-#include "Components/SphereComponent.h"
+
 
 ATRifle:: ATRifle()
 {

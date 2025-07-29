@@ -3,7 +3,7 @@
 
 #include "Item/TWeaponBase.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Test/TPlayerController.h"
+#include "TPlayerController.h"
 //#include "Bullet/TBullet.h"
 ATWeaponBase::ATWeaponBase()
 {

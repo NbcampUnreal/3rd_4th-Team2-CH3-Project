@@ -17,6 +17,7 @@ public class Team02 : ModuleRules
 			"EnhancedInput",
 			"AIModule",
 			"NavigationSystem",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
