@@ -1,4 +1,4 @@
-// TiTleUIPlyaerController.cpp
+// TiTleUIPlayerController.cpp
 
 #include "TitleUIPlayerController.h"
 #include "Blueprint/UserWidget.h"
@@ -46,17 +46,17 @@ void ATitleUIPlayerController::ShowMainMenu(bool bIsRestart)
 			SetInputMode(FInputModeUIOnly());
 		}
 
-		// if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName("Startbutton")))
-		// {
-		// 	if (bIsRestart)
-		// 	{
-		// 		ButtonText->SetText(FText::FromString("Restart"));
-		// 	}
-		// 	else
-		// 	{
-		// 		ButtonText->SetText(FText::FromString("Start"));
-		// 	}
-		// }
+		if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName("StartButton")))
+		{
+			if (bIsRestart)
+			{
+				ButtonText->SetText(FText::FromString("Restart"));
+			}
+			else
+			{
+				ButtonText->SetText(FText::FromString("Start"));
+			}
+		}
 	}
 }
 
