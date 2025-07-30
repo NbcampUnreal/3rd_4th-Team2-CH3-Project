@@ -17,7 +17,6 @@ public:
 	UPROPERTY()
 	ATWeaponBase* CurrentWeapon;
 	
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ATWeaponBase> DefaultWeaponClass;
 	
@@ -29,7 +28,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ReloadAction;
 
-	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -39,6 +37,4 @@ protected:
 	void OnFire();
 	UFUNCTION()
 	void OnReload();
-
-	
 };

@@ -26,9 +26,6 @@ void ATPlayerController::BeginPlay()
 			Subsystem->AddMappingContext(SpectatorMappingContext, 0);
 		}
 	}
-
-	
-	
 	
 	if (!CurrentWeapon)
 	{
