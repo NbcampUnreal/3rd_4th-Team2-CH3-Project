@@ -1,10 +1,11 @@
 #include "Character/TPlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "TPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/TInputConfig.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Item/TWeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ATPlayerCharacter::ATPlayerCharacter()
@@ -22,7 +23,7 @@ ATPlayerCharacter::ATPlayerCharacter()
 
         SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
         SpringArmComponent->SetupAttachment(RootComponent);
-        SpringArmComponent->TargetArmLength = 230.f;
+        SpringArmComponent->TargetArmLength = 190.f;
         SpringArmComponent->bUsePawnControlRotation = true;
         SpringArmComponent->bInheritPitch = true;
         SpringArmComponent->bInheritYaw = true;
@@ -40,12 +41,31 @@ void ATPlayerCharacter::BeginPlay()
         Super::BeginPlay();
 
         APlayerController* PlayerController = Cast<APlayerController>(GetController());
-        if (IsValid(PlayerController) == true)
+        if (IsValid(PlayerController))
         {
-                UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-                if (IsValid(Subsystem) == true)
+                if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
                 {
-                        Subsystem->AddMappingContext(PlayerCharacterInputMappingContext, 0);
+                        UEnhancedInputLocalPlayerSubsystem* Subsystem =
+                            LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+                        if (Subsystem && PlayerCharacterInputMappingContext)
+                        {
+                                Subsystem->AddMappingContext(PlayerCharacterInputMappingContext, 0);
+                        }
+                }
+        }
+
+        if (!CurrentWeapon)
+        {
+                if (DefaultWeaponClass)
+                {
+                        FActorSpawnParameters SpawnParams;
+                        SpawnParams.Owner = this;
+                        CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(DefaultWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+                }
+                else
+                {
+                        UKismetSystemLibrary::PrintString(this, TEXT("ShotgunClass not set!"));
                 }
         }
 }
@@ -59,6 +79,9 @@ void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
         {
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Move, ETriggerEvent::Triggered, this, &ThisClass::InputMove);
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Look, ETriggerEvent::Triggered, this, &ThisClass::InputLook);
+                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump);
+                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->FireAction, ETriggerEvent::Triggered, this, &ThisClass::OnFire);
+                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Triggered, this, &ThisClass::OnReload);
         }
 }
 
@@ -84,3 +107,26 @@ void ATPlayerCharacter::InputLook(const FInputActionValue& InValue)
         AddControllerPitchInput(LookVector.Y);
 }
 
+void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
+{
+        if (CurrentWeapon)
+        {
+                CurrentWeapon->Fire();
+
+                // 무기 타입 문자열 출력
+                FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
+                UKismetSystemLibrary::PrintString(this, Msg);
+        }
+}
+
+void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
+{
+        if (CurrentWeapon)
+        {
+                CurrentWeapon->Reload();
+
+                // 무기 타입 문자열 출력
+                FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
+                UKismetSystemLibrary::PrintString(this, Msg);
+        }
+}

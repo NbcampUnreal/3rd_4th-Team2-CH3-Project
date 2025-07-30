@@ -1,19 +1,20 @@
 ﻿#include "TPlayerController.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/Pawn.h"
+<<<<<<< Updated upstream
 #include "Item/TWeaponBase.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
+=======
+>>>>>>> Stashed changes
 
 ATPlayerController::ATPlayerController()
 {
-	
 }
 void ATPlayerController::BeginPlay()
 {
-	
 	Super::BeginPlay();
+<<<<<<< Updated upstream
 	
 	
 	
@@ -53,47 +54,12 @@ void ATPlayerController::BeginPlay()
 		}
 	}
 	
+=======
+>>>>>>> Stashed changes
 }
 
 
 void ATPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
-	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		EnhancedInput->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPlayerController::OnFire);
-		EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, this, &ATPlayerController::OnReload);
-	}
-}
-
-void ATPlayerController::OnFire()
-{
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->Fire();
-
-		// 무기 타입 문자열 출력
-		FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
-		UKismetSystemLibrary::PrintString(this, Msg);
-	}
-	else
-	{
-		//UKismetSystemLibrary::PrintString(this, TEXT("ShotgunClass not set!"));
-	}
-}
-void ATPlayerController::OnReload()
-{
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->Reload();
-
-		// 무기 타입 문자열 출력
-		FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
-		UKismetSystemLibrary::PrintString(this, Msg);
-	}
-	else
-	{
-		//UKismetSystemLibrary::PrintString(this, TEXT("ShotgunClass not set!"));
-	}
 }

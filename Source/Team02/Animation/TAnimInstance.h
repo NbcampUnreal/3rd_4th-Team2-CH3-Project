@@ -7,9 +7,6 @@
 class ATCharacterBase;
 class UCharacterMovementComponent;
 
-/**
- * 
- */
 UCLASS()
 class TEAM02_API UTAnimInstance : public UAnimInstance
 {
@@ -27,13 +24,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMovement;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float GroundSpeed;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	uint8 bShouldMove : 1;
 	
 	//점프중인지 확인

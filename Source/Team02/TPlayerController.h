@@ -14,19 +14,19 @@ class TEAM02_API ATPlayerController : public APlayerController
 public:
 	ATPlayerController();
 	
-	UPROPERTY()
-	ATWeaponBase* CurrentWeapon;
+	// UPROPERTY()
+	// ATWeaponBase* CurrentWeapon;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<ATWeaponBase> DefaultWeaponClass;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputMappingContext* SpectatorMappingContext;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	// TSubclassOf<ATWeaponBase> DefaultWeaponClass;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	// UInputMappingContext* SpectatorMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* FireAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* ReloadAction;
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	// UInputAction* FireAction;
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	// UInputAction* ReloadAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerUIWidgetClass;
@@ -36,9 +36,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
-	// 입력 콜백
-	UFUNCTION()
-	void OnFire();
-	UFUNCTION()
-	void OnReload();
+	// // 입력 콜백
+	// UFUNCTION()
+	// void OnFire();
+	// UFUNCTION()
+	// void OnReload();
 };

@@ -4,7 +4,7 @@
 #include "Item/TWeaponBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "TPlayerController.h"
-//#include "Bullet/TBullet.h"
+#include "Character/TPlayerCharacter.h"
 ATWeaponBase::ATWeaponBase()
 {
 	Damage = 20.0f;
@@ -13,10 +13,6 @@ ATWeaponBase::ATWeaponBase()
 	FireRate = 0.2f;
 	ReloadTime = 1.5f;
 	Range = 2000.0f;
-	
-
-	//Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("Collider"));
-	//Collider->SetupAttachment(RootComponent); // or WeaponMesh
 
 	MuzzlePoint = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzlePoint"));
 	MuzzlePoint->SetupAttachment(StaticMesh); // 총구 기준 잡고 싶으면 WeaponMesh에 Attach
@@ -35,7 +31,7 @@ void ATWeaponBase::OnOverlapBegin(
 	{
 		// 예시: 플레이어가 SpectatorPawn이면, SpectatorPlayerController를 가져와서 무기 소유 변수에 할당
 		// 소유자 컨트롤러/캐릭터 구하기
-		ATPlayerController* PC = Cast<ATPlayerController>(OtherActor->GetInstigatorController());
+		ATPlayerCharacter* PC = Cast<ATPlayerCharacter>(OtherActor);
 		if (PC)
 		{
 			// **이전 무기 파괴**

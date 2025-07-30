@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UTInputConfig;
 class UInputMappingContext;
+class ATWeaponBase;
 
 UCLASS()
 class TEAM02_API ATPlayerCharacter : public ATCharacterBase
@@ -19,8 +20,10 @@ class TEAM02_API ATPlayerCharacter : public ATCharacterBase
         
 public:
 	ATPlayerCharacter();
-
+	
 	virtual void BeginPlay() override;
+	
+	ATWeaponBase* CurrentWeapon;
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -40,12 +43,19 @@ private:
 	void InputMove(const FInputActionValue& InValue);
 
 	void InputLook(const FInputActionValue& InValue);
+	
+	void OnFire(const FInputActionValue& InValue);
+
+	void OnReload(const FInputActionValue& InValue);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UTInputConfig> PlayerCharacterInputConfig;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UInputMappingContext> PlayerCharacterInputMappingContext;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<ATWeaponBase> DefaultWeaponClass;
 
 #pragma endregion
 
