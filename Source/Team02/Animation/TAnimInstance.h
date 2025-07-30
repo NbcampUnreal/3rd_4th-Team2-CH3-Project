@@ -5,7 +5,6 @@
 #include "TAnimInstance.generated.h"
 
 class ATCharacterBase;
-class ATNonPlayerCharacter;
 class UCharacterMovementComponent;
 
 /**
@@ -36,14 +35,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	uint8 bShouldMove : 1;
-	
-	//오너 캐릭터 선언
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<ATNonPlayerCharacter> NPCCharacter;
-
-	//오너 캐릭터의 이동 컴포넌트 정의
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UCharacterMovementComponent> NPCMovement;
 	
 	//점프중인지 확인
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

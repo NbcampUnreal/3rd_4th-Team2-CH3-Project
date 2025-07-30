@@ -1,6 +1,7 @@
 #include "Animation/TAnimInstance.h"
 #include "Character/TCharacterBase.h"
 #include "Character/TPlayerCharacter.h"
+#include "Character/TNonPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -27,13 +28,13 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		float GroundAcceleration = UKismetMathLibrary::VSizeXY(OwnerCharacterMovement->GetCurrentAcceleration());
 		bool bIsAccelerationNearlyZero = FMath::IsNearlyZero(GroundAcceleration);
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerationNearlyZero == false);
-		
-		bIsFalling = OwnerCharacterMovement ->IsFalling();
 
-		if (ATPlayerCharacter* OwnerAICharacter = Cast<ATPlayerCharacter>(OwnerCharacter))
+		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
-			bShouldMove= KINDA_SMALL_NUMBER < GroundSpeed;
+			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
+
+		bIsFalling = OwnerCharacterMovement ->IsFalling();
 	}
 }
 

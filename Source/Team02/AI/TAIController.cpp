@@ -1,66 +1,85 @@
 #include "AI/TAIController.h"
 #include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardData.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
-//순찰 주기
-const float ATAIController::PatrolRepeatInterval(3.f);
 //순찰 범위
 const float ATAIController::PatrolRadius(500.f);
+int32 ATAIController::ShowAIDebug(0);
+
+FAutoConsoleVariableRef CVarShowAIDebug(
+	TEXT("TProject.ShowAIDebug"),
+	ATAIController::ShowAIDebug,
+	TEXT(""),
+	ECVF_Cheat
+);
+
+//블랙보드 키 연결
+const FName ATAIController::StarPatrolPositionKey(TEXT("StartPatrolPosition"));
+const FName ATAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
+const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 
 ATAIController::ATAIController()
 {
+	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
+	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BrainComponent"));
 }
 
 void ATAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//순찰 타이머
-	GetWorld()->GetTimerManager().SetTimer(
-		PatrolTimerHandle,
-		this,
-		&ThisClass::OnPatrolTimerElapsed,
-		PatrolRepeatInterval,
-		true
-	);
-		
+	// 설정한 폰이 Ai의 컨트롤 폰이 된다
+	APawn* ControlledPawn = GetPawn();
+	if (IsValid(ControlledPawn) == true)
+	{
+		BeginAI(ControlledPawn);
+	}
 }
 
 //플레이를 종료할때 출력되는 함수
 void ATAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	//경계 타이머를 끝낸다
-	GetWorld()->GetTimerManager().ClearTimer(PatrolTimerHandle);
+	EndAI();
 
 	Super::EndPlay(EndPlayReason);
 }
 
-//랜덤으로 경계하며 돌아다니는 함수
-void ATAIController::OnPatrolTimerElapsed()
+void ATAIController::BeginAI(APawn* InPawn)
 {
-	APawn* ControlledPawn = GetPawn();
-	
-	if (IsValid(ControlledPawn) == true)
+	UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(Blackboard);
+	if (IsValid(BlackboardComponent) == true)
 	{
-		//월드의 네비게이션 시스템을 가져온다.
-		UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-
-		if (IsValid(NavigationSystem) == true)
+		if (UseBlackboard(BlackboardDataAsset, BlackboardComponent) == true)
 		{
-			//현제 폰의 위치
-			FVector ActorLocation = ControlledPawn->GetActorLocation();
-			//랜덤 위지
-			FNavLocation NextLocation;
+			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
+			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
 
-			//경계 원안에서 랜덤 위치 찾기
-			if (NavigationSystem->GetRandomPointInNavigableRadius(
-				ActorLocation,
-				PatrolRadius,
-				NextLocation) == true)
+			//경계 시작위치를 AI 액터의 현제 위치로 지정
+			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
+
+			if (ShowAIDebug == 1)
 			{
-				//찾은 랜덤 위치로 이동
-				UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, NextLocation.Location);
+				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
 			}
+		}
+	}
+}
+
+void ATAIController::EndAI()
+{
+	UBehaviorTreeComponent* BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+
+	if (IsValid(BehaviorTreeComponent) == true)
+	{
+		BehaviorTreeComponent->StopTree();
+
+		if (ShowAIDebug == 1)
+		{
+			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("EndAI()")));
 		}
 	}
 }
