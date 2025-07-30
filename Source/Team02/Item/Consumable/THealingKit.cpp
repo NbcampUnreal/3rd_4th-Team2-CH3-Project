@@ -23,7 +23,7 @@ void ATHealingKit::OnOverlapBegin(
 	const FHitResult& SweepResult)
 {
 	// 플레이어 등 유효한 액터만 체크
-	if (OtherActor && OtherActor != this)
+	if (OtherActor && OtherActor != this &&  OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		
 
