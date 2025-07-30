@@ -4,6 +4,7 @@
 #include "Item/TWeaponBase.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
 
 ATPlayerController::ATPlayerController()
 {
@@ -26,6 +27,16 @@ void ATPlayerController::BeginPlay()
 			Subsystem->AddMappingContext(SpectatorMappingContext, 0);
 		}
 	}
+
+	if (PlayerUIWidgetClass)
+	{
+		UUserWidget* PlayerUIWidget = CreateWidget<UUserWidget>(this, PlayerUIWidgetClass);
+		if (PlayerUIWidget)
+		{
+			PlayerUIWidget->AddToViewport();
+		}
+	}
+	
 	
 	if (!CurrentWeapon)
 	{

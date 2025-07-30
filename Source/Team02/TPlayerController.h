@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ReloadAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> PlayerUIWidgetClass;
+	
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
