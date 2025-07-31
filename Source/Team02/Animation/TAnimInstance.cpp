@@ -26,8 +26,8 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
                 
 		float GroundAcceleration = UKismetMathLibrary::VSizeXY(OwnerCharacterMovement->GetCurrentAcceleration());
-		bool bIsAccelerationNearlyZero = FMath::IsNearlyZero(GroundAcceleration);
-		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerationNearlyZero == false);
+		bool bIsAccelerated = FMath::IsNearlyZero(GroundAcceleration) == false;
+		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
 
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
