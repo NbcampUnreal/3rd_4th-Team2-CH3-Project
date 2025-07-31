@@ -13,11 +13,31 @@ class TEAM02_API ATGameState : public AGameState
 
 public:
 	ATGameState();
-
 	virtual void BeginPlay() override;
-
-	void StartLevel();
-	void EndLevel();
-	void UpdateHUD();
 	
+	// 게임 시작 (초 단위)
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Time")
+	float GameTime;
+	
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Time")
+	float MaxGameTime;
+
+	//타이머
+	FTimerHandle GameTimerHandle; // 게임시간 감소용
+	FTimerHandle HUDUdpateTimerHandle; //UI 업데이트용
+
+	UFUNCTION(BlueprintCallable, Category="Game State")
+	void GameOver();
+	UFUNCTION(BlueprintCallable, Category="Game State")
+	void GameClear();
+
+	void GameStart();
+	void GameEnd();
+	void UpdateHUD();
+	void UpdateGameTime();
+	
+	// 탈환지와 관련된 코드 필요
+
+	// 레드존과 관련된 코드 필요
 };
