@@ -16,6 +16,8 @@ public:
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -23,15 +25,15 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMovement;
-
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	uint8 bShouldMove : 1;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float GroundSpeed;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	uint8 bShouldMove : 1;
 	
 	//점프중인지 확인
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
