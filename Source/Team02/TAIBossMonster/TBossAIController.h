@@ -19,10 +19,10 @@ public:
 	// FTimerHandle PatrolTimerHandle=FTimerHandle();
 	// //몬스터 클래스에서 가상함수로 빼고 리턴값만 변경해서 오버라이드 
 	//   static const float PatrolRepeatInterval;
-	   static const float PatrolRadius;
+	static const float PatrolRadius;
 	static const FName StartPatrolPositionKey;
 	static const FName EndPatrolPositionKey;
-	
+	static const FName TargetCharacterKey;
 
 	protected:
 	virtual void BeginPlay() override;
