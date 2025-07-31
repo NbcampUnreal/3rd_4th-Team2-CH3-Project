@@ -22,6 +22,7 @@ void ATGameState::BeginPlay()
 	// 	0.1f,
 	// 	true
 	// 	);
+
 }
 
 void ATGameState::GameStart()
@@ -54,6 +55,11 @@ void ATGameState::GameEnd()
 	// 게임을 멈추는 코드 필요
 
 	// 플레이어 컨트롤러에서 Restart와 Exit 버튼이 포함된 End 메뉴를 보여주는 코드 필요
+	
+}
+
+void ATGameState::UpdateGameTime()
+{
 	
 }
 
