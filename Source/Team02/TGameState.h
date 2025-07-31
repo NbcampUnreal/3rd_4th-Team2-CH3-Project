@@ -27,9 +27,17 @@ public:
 	FTimerHandle GameTimerHandle; // 게임시간 감소용
 	FTimerHandle HUDUdpateTimerHandle; //UI 업데이트용
 
-	void StartLevel();
-	void EndLevel();
+	UFUNCTION(BlueprintCallable, Category="Game State")
+	void GameOver();
+	UFUNCTION(BlueprintCallable, Category="Game State")
+	void GameClear();
+
+	void GameStart();
+	void GameEnd();
 	void UpdateHUD();
 	void UpdateGameTime();
 	
+	// 탈환지와 관련된 코드 필요
+
+	// 레드존과 관련된 코드 필요
 };
