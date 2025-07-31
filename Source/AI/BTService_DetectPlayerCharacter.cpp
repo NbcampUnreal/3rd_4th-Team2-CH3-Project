@@ -10,7 +10,7 @@ UBTService_DetectPlayerCharacter::UBTService_DetectPlayerCharacter(const FObject
 {
 	NodeName = TEXT("DetectPlayerCharacter");
 	//시간 간격
-	Interval = 1.f;
+	Interval = 0.5f;
 }
 
 void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -28,7 +28,7 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 			{
 				//중심점
 				FVector CenterPosition = NPC->GetActorLocation();
-				float DetectRadius = 300.f;
+				float DetectRadius = 500.f;
 				TArray<FOverlapResult> OverlapResults;
 				FCollisionQueryParams CollisionQueryParams(NAME_None, false, NPC);
 				// 시야

@@ -63,10 +63,7 @@ void ATPlayerCharacter::BeginPlay()
                         SpawnParams.Owner = this;
                         CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(DefaultWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
                 }
-                else
-                {
-                        UKismetSystemLibrary::PrintString(this, TEXT("ShotgunClass not set!"));
-                }
+
         }
 }
 
