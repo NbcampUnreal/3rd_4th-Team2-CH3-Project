@@ -25,9 +25,8 @@ public:
 	bool IsDead() const { return bIsDead; }
 
 	// 테스트용 데미지 함수
-
-	UFUNCTION(BlueprintCallable,Category ="UI")
-	void TakeDamage(float Damage);
+	virtual void TakeDamage(float Damage);
+	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
