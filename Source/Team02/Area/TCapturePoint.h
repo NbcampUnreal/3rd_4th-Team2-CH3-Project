@@ -5,6 +5,7 @@
 #include "TCapturePoint.generated.h"
 class UBoxComponent;
 class UStaticMeshComponent;
+class ATMovingWall;
 UCLASS()
 class TEAM02_API ATCapturePoint : public AActor
 {
@@ -18,6 +19,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	void NotifyWall();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* Root;
@@ -33,6 +35,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CapturePercent;
 
+	// MovingWall을 연결하는 CapturePoint 예시
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ATMovingWall*> LinkedWalls;
+	
 	// 플레이어가 영역 안에 있는지
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bPlayerInArea;
