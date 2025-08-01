@@ -25,7 +25,7 @@ public:
 
 	//타이머
 	FTimerHandle GameTimerHandle; // 게임시간 감소용
-	FTimerHandle HUDUdpateTimerHandle; //UI 업데이트용
+	
 
 	UFUNCTION(BlueprintCallable, Category="Game State")
 	void GameOver();
