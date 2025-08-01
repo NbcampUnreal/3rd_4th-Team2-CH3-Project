@@ -7,17 +7,12 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 const float ATBossAIController::PatrolRadius=500.f;
-int32 ATBossAIController::ShowAIDebug(0);
+int32 ATBossAIController::ShowAIDebug=1;
 const FName ATBossAIController::StartPatrolPositionKey(TEXT("StartPatrolPosition"));
 const FName ATBossAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ATBossAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 
-FAutoConsoleVariableRef CvarShowAIDebug(
-	TEXT("NXProject.ShowAiDebug"),
-	ATBossAIController::ShowAIDebug,
-	TEXT(""),
-	ECVF_Cheat
-	);
+
 
 ATBossAIController::ATBossAIController()
 {

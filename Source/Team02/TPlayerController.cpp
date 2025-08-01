@@ -13,20 +13,12 @@ void ATPlayerController::BeginPlay()
 
 	if (PlayerUIWidgetClass)
 	{
-		UUserWidget* PlayerUIWidget = CreateWidget<UUserWidget>(this, PlayerUIWidgetClass);
-			if (PlayerUIWidget)
-			{
-				PlayerUIWidget->AddToViewport();
-
-				//0.1초마다 업데이트
-				GetWorldTimerManager().SetTimer(
-					UIUpdateTimerHandle,
-					this,
-					&ATPlayerController::UpdateHPBar,
-					0.1f,
-					true
-					);
-			}
+		// 'UUserWidget*' 타입을 붙이지 않고, 멤버 변수에 대입!
+		PlayerUIWidget = CreateWidget<UUserWidget>(this, PlayerUIWidgetClass);
+		if (PlayerUIWidget)
+		{
+			PlayerUIWidget->AddToViewport();
+		}
 	}
 }
 

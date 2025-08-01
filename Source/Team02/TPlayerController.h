@@ -7,6 +7,7 @@
 class UInputMappingContext;
 class UInputAction;
 class ATWeaponBase;
+class UUserWidget;
 UCLASS()
 class TEAM02_API ATPlayerController : public APlayerController
 {
