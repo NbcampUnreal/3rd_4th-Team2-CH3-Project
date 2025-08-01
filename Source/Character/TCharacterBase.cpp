@@ -25,3 +25,9 @@ ATCharacterBase::ATCharacterBase()
 
 	bIsDead = false;
 }
+// 테스트용 함수
+void ATCharacterBase::TakeDamage(float Damage)
+{
+	SetCurrentHP(CurrentHP - Damage);
+	UE_LOG(LogTemp,Warning,TEXT("Current HP: %f"),CurrentHP);
+}
