@@ -4,6 +4,7 @@
 #include "Animation/TAnimInstance.h"
 #include "Item/TGunNPCWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ATNonPlayerCharacter::ATNonPlayerCharacter()
 	: bIsNowAttacking(false)
@@ -77,13 +78,28 @@ void ATNonPlayerCharacter::BeginAttack()
 		AnimInstance->Montage_Play(AttackFireMontage);
 
 		bIsNowAttacking = true;
+
+		//몽타주 종료
+		OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+		AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
+		
 	}
 }
 
-void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
+void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool)
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
 	bIsNowAttacking = false;
+
+	if (OnAttackMontageEndedDelegate.IsBound() == true)
+	{
+		//바인딩 했던 함수 해재
+		OnAttackMontageEndedDelegate.Unbind();
+	}
 }
 
+void ATNonPlayerCharacter::HandleOnCheckHit()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit()"));
+}
