@@ -32,10 +32,17 @@ void ATCapturePoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bPlayerInArea)
+	if (bPlayerInArea && CapturePercent < 100.f)
 	{
-		// 예시: 초당 10%씩 증가
-		CapturePercent = FMath::Min(CapturePercent + 10.f * DeltaTime, 100.f);
+		CapturePercent += DeltaTime * 20.f; // 초당 20% 증가 (조절 가능)
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
+		  FString::Printf(TEXT("점령률: %.1f%%"), CapturePercent));
+		
+		if (CapturePercent >= 100.f)
+		{
+			CapturePercent = 100.f;
+			NotifyWall();
+		}
 	}
 	// 필요하다면 감소 등도 구현 가능
 }
