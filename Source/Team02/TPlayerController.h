@@ -16,8 +16,19 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerUIWidgetClass;
+	
+	UPROPERTY()
+	class UUserWidget* PlayerUIWidget;
+
+	UFUNCTION(BlueprintCallable,Category="UI")
+	void UpdateHPBar();
+
+	UFUNCTION()
+	void OnGameTimeUpdate(float NewTime);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
+	FTimerHandle UIUpdateTimerHandle;
 };

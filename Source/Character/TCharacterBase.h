@@ -24,6 +24,11 @@ public:
 
 	bool IsDead() const { return bIsDead; }
 
+	//체력테스트 하려고 한 부분이라 주석처리 or 삭제하셔도 됩니다!
+	//삭제하기전에 레벨블루프린트에 있는 연결부분 삭제해주세요!
+	UFUNCTION(BlueprintCallable,Category="HP")
+	void TakeDamage(float Damage);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float MaxHP = 100.f;
