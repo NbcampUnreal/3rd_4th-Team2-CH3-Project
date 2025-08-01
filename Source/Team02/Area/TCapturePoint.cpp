@@ -1,7 +1,9 @@
 #include "TCapturePoint.h"
+
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
+#include "Gimmick/TMovingWall.h"
 
 ATCapturePoint::ATCapturePoint()
 {
@@ -36,6 +38,17 @@ void ATCapturePoint::Tick(float DeltaTime)
 		CapturePercent = FMath::Min(CapturePercent + 10.f * DeltaTime, 100.f);
 	}
 	// 필요하다면 감소 등도 구현 가능
+}
+
+void ATCapturePoint::NotifyWall()
+{
+	for (ATMovingWall* Wall : LinkedWalls)
+	{
+		if (Wall)    // nullptr 안전체크
+		{
+			Wall->OpenWall(); // 벽 열기
+		}
+	}
 }
 
 void ATCapturePoint::OnOverlapBegin(
