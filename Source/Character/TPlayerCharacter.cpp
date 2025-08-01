@@ -7,6 +7,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Item/TWeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
 
 ATPlayerCharacter::ATPlayerCharacter()
 {
@@ -55,16 +56,32 @@ void ATPlayerCharacter::BeginPlay()
                 }
         }
 
-        if (!CurrentWeapon)
+        if (DefaultWeaponClass)
         {
-                if (DefaultWeaponClass)
-                {
-                        FActorSpawnParameters SpawnParams;
-                        SpawnParams.Owner = this;
-                        CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(DefaultWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-                }
+                FActorSpawnParameters SpawnParams;
+                SpawnParams.Owner = this;
+                SpawnParams.Instigator = GetInstigator();
 
-        }
+                // 손 소켓에 붙이려면 Spawn 위치/회전은 대략 캐릭터 위치로
+                FVector SpawnLoc = GetMesh()->GetSocketLocation(TEXT("Hand_R_Socket"));
+                FRotator SpawnRot = GetMesh()->GetSocketRotation(TEXT("Hand_R_Socket"));
+
+                // 무기 액터 스폰
+                CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(
+                    DefaultWeaponClass, SpawnLoc, SpawnRot, SpawnParams);
+
+                if (CurrentWeapon)
+                {
+                        // 손에 Attach
+                        CurrentWeapon->AttachToComponent(
+                            GetMesh(),
+                            FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+                            TEXT("Hand_R_Socket")
+                        );
+                        CurrentWeapon->SetActorHiddenInGame(false);
+                        CurrentWeapon->SetActorEnableCollision(false);
+                }
+        } 
 }
 
 void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
