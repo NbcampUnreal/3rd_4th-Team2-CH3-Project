@@ -38,3 +38,11 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 }
 
+void UTAnimInstance::AnimNotify_CheckHit()
+{
+	if (OnCheckHit.IsBound() == true)
+	{
+		OnCheckHit.Broadcast();
+	}
+}
+

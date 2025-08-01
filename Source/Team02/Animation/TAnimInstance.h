@@ -7,6 +7,8 @@
 class ATCharacterBase;
 class UCharacterMovementComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
+
 UCLASS()
 class TEAM02_API UTAnimInstance : public UAnimInstance
 {
@@ -17,6 +19,12 @@ public:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+private:
+	UFUNCTION()
+	void AnimNotify_CheckHit();
+
+public:
+	FOnCheckHit OnCheckHit;
 
 	
 protected:
