@@ -25,6 +25,12 @@ public:
 	// HP바 업데이트 함수
 	UFUNCTION(BlueprintCallable,Category="UI")
 	void UpdateHPBar();
+
+	// 웨이브 델리게이트 관련함수
+	UFUNCTION()
+	void OnGameTimeUpdate(float NewTime);
+
+	
 	
 
 protected:
