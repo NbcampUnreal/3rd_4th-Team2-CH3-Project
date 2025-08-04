@@ -8,6 +8,7 @@ ATWeaponBase::ATWeaponBase()
 {
 	Damage = 20.0f;
 	MaxAmmo = 30;
+	TotalAmmo = 180;
 	CurrentAmmo = 30;
 	FireRate = 0.2f;
 	ReloadTime = 1.5f;
@@ -93,7 +94,7 @@ void ATWeaponBase::Fire()
 		UKismetSystemLibrary::PrintString(this, TEXT("Fire() called!"));
 		
 		// TODO: 투사체 발사 로직
-		CurrentAmmo--;
+		SetCurrentAmmo(GetCurrentAmmo() - 1);
 	}
 	else if (!bCanFire)
 	{
@@ -102,21 +103,33 @@ void ATWeaponBase::Fire()
 	else
 	{
 		UKismetSystemLibrary::PrintString(this, TEXT("Fire(): No ammo!"));
-		return;
 	}
 }
 
+
 void ATWeaponBase::Reload()
 {
-	if (!CanReload())
+	int32 NeedAmmo = MaxAmmo - GetCurrentAmmo();
+
+	if (NeedAmmo <= 0)
 	{
-		UKismetSystemLibrary::PrintString(this, TEXT("Reload(): Ammo full!"));
+		UKismetSystemLibrary::PrintString(this, TEXT("Reload(): Already Full!"));
+		return;
+	}
+	if (GetTotalAmmo() <= 0)
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("Reload(): No Ammo!"));
 		return;
 	}
 
-	UKismetSystemLibrary::PrintString(this, TEXT("Reload() called!"));
-	CurrentAmmo = MaxAmmo;
-	// TODO: 장전 애니메이션/딜레이 처리
+	int32 AmmoToReload = FMath::Min(NeedAmmo, GetTotalAmmo());
+
+	SetCurrentAmmo(GetCurrentAmmo() + AmmoToReload);
+	SetTotalAmmo(GetTotalAmmo() - AmmoToReload);
+
+	FString Msg = FString::Printf(TEXT("Reloaded: %d | Current: %d | Remain: %d"), AmmoToReload, GetCurrentAmmo(), GetTotalAmmo());
+	UKismetSystemLibrary::PrintString(this, Msg);
+
 }
 
 bool ATWeaponBase::CanFire() const
@@ -126,9 +139,8 @@ bool ATWeaponBase::CanFire() const
 
 bool ATWeaponBase::CanReload() const
 {
-	return CurrentAmmo < MaxAmmo;
+	return (GetCurrentAmmo() < MaxAmmo) && (GetTotalAmmo() > 0);
 }
-
 void ATWeaponBase::Equip()
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("Equip() called!"));

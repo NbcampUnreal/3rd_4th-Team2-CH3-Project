@@ -25,15 +25,7 @@ void ATEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (EnemyClass)
-	{
-		// 주기적으로 SpawnEnemy 호출
-		GetWorld()->GetTimerManager().SetTimer(
-			SpawnTimerHandle, this,
-			&ATEnemySpawner::SpawnEnemy,
-			SpawnInterval, true // 반복
-		);
-	}
+	
 }
 
 void ATEnemySpawner::SpawnEnemy()
@@ -72,4 +64,28 @@ FVector ATEnemySpawner::GetRandomPointInBox() const
 	);
 
 	return Origin + RandomLocal;
+}
+
+void ATEnemySpawner::ActivateSpawner()
+{
+	if (bIsActive) return;
+	bIsActive = true;
+	CurrentSpawned = 0; // 필요하면 소환수 리셋
+	// 타이머 시작 (중복 방지)
+	if (EnemyClass)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			SpawnTimerHandle, this,
+			&ATEnemySpawner::SpawnEnemy,
+			SpawnInterval, true
+		);
+	}
+}
+
+void ATEnemySpawner::DeactivateSpawner()
+{
+	if (!bIsActive) return;
+	bIsActive = false;
+	// 타이머 종료
+	GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 }
