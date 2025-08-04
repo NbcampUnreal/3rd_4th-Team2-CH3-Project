@@ -106,7 +106,7 @@ void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
                                        &ThisClass::Jump);
     EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->FireAction, ETriggerEvent::Triggered, this,
                                        &ThisClass::OnFire);
-    EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Started, this,
                                        &ThisClass::OnReload);
     EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Zoom, ETriggerEvent::Started, this,
                                        &ThisClass::InputStartZoom);

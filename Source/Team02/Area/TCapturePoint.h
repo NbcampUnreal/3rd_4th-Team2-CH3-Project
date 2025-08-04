@@ -23,6 +23,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* Root;
+
+
 	
 	// 캡처 영역을 표시할 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -43,6 +45,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bPlayerInArea;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 WaveIndex;
+	
 	// 오버랩 이벤트
 	UFUNCTION()
 	virtual void OnOverlapBegin(

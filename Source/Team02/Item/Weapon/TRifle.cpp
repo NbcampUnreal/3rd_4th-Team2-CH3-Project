@@ -8,6 +8,7 @@ ATRifle:: ATRifle()
 {
 	Damage = 15;
 	MaxAmmo = 30;
+	TotalAmmo = 50;
 	CurrentAmmo = 30;
 	FireRate = 0.2f;
 	ReloadTime = 1.5f;
