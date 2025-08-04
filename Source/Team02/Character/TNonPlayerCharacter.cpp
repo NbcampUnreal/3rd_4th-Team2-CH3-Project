@@ -78,7 +78,6 @@ void ATNonPlayerCharacter::BeginAttack()
 			//몽타주 종료
 			OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
 			AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
-		
 		}
 	}
 }

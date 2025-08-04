@@ -28,7 +28,6 @@ public:
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 
@@ -47,7 +46,7 @@ private:
 	void OnFire(const FInputActionValue& InValue);
 
 	void OnReload(const FInputActionValue& InValue);
-
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UTInputConfig> PlayerCharacterInputConfig;

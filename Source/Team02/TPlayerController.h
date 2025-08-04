@@ -30,9 +30,6 @@ public:
 	UFUNCTION()
 	void OnGameTimeUpdate(float NewTime);
 
-	
-	
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

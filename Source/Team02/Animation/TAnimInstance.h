@@ -8,6 +8,7 @@ class ATCharacterBase;
 class UCharacterMovementComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPostDead);
 
 UCLASS()
 class TEAM02_API UTAnimInstance : public UAnimInstance
@@ -22,11 +23,13 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_CheckHit();
+	UFUNCTION()
+	void AnimNotify_PostDead();
 
 public:
 	FOnCheckHit OnCheckHit;
 
-	
+	FOnPostDead OnPostDead;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<ATCharacterBase> OwnerCharacter;

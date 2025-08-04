@@ -33,7 +33,7 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
-
+		
 		bIsFalling = OwnerCharacterMovement ->IsFalling();
 	}
 }
@@ -43,6 +43,14 @@ void UTAnimInstance::AnimNotify_CheckHit()
 	if (OnCheckHit.IsBound() == true)
 	{
 		OnCheckHit.Broadcast();
+	}
+}
+
+void UTAnimInstance::AnimNotify_PostDead()
+{
+	if (OnPostDead.IsBound() == true)
+	{
+		OnPostDead.Broadcast();
 	}
 }
 

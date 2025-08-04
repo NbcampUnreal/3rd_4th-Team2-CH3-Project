@@ -4,6 +4,7 @@
 #include "Item/TItemBase.h"
 #include "Bullet/TBullet.h"
 #include "TWeaponBase.generated.h"
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
@@ -11,6 +12,7 @@ enum class EWeaponType : uint8
 	Rifle,
 	Pistol,
 };
+
 class ATItemBase;
 
 UCLASS()
@@ -19,7 +21,6 @@ class TEAM02_API ATWeaponBase : public ATItemBase
 	GENERATED_BODY()
 public:
 	ATWeaponBase();
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MuzzlPoint")
 	USceneComponent* MuzzlePoint;
@@ -80,7 +81,6 @@ public:
 		const FHitResult& SweepResult
 	);
 	virtual void ResetCanFire();
-
 	
 protected:
 	FTimerHandle FireRateTimerHandle;

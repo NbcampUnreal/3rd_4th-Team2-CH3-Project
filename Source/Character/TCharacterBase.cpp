@@ -3,8 +3,9 @@
 #include "Character/TCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/TAnimInstance.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Animation/TAnimInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 ATCharacterBase::ATCharacterBase()
@@ -19,38 +20,19 @@ ATCharacterBase::ATCharacterBase()
 	FVector PivotPosition(0.f, 0.f, -CharacterHalfHeight);
 	FRotator PivotRotation(0.f, -90.f, 0.f);
 	GetMesh()->SetRelativeLocationAndRotation(PivotPosition, PivotRotation);
-
+	GetMesh()->SetCollisionProfileName(TEXT("TCharacterMesh"));
+	
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-
+	GetCharacterMovement()->JumpZVelocity = 400.f;
+	GetCharacterMovement()->AirControl = 0.1f;
+	
 	bIsDead = false;
-}
-
-void ATCharacterBase::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
-}
-
-// 테스트용 함수
-void ATCharacterBase::TakeDamage(float Damage)
-{
-	SetCurrentHP(CurrentHP - Damage);
-	UE_LOG(LogTemp,Warning,TEXT("Current HP: %f"),CurrentHP);
 }
 
 void ATCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ATCharacterBase::HandleOnCheckInputAttack()
-{
-	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
-	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
-
 }
 
 void ATCharacterBase::BeginAttack()
@@ -81,4 +63,25 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		//바인딩 했던 함수 해재
 		OnNormalAttackMontageEndedDelegate.Unbind();
 	}
+}
+
+void ATCharacterBase::HandleOnCheckHit()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
+}
+
+float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	CurrentHP = FMath::Clamp(CurrentHP - FinalDamageAmount, 0.f, MaxHP);
+
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		bIsDead = true;
+		CurrentHP = 0.f;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	}
+	return FinalDamageAmount;
 }
