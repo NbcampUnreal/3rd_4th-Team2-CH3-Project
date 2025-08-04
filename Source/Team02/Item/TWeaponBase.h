@@ -17,6 +17,9 @@ UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
 	GENERATED_BODY()
+protected:
+	int32 TotalAmmo = 180;
+	int32 CurrentAmmo = 30;   // 탄창에 남은 탄약 (기본값)
 public:
 	ATWeaponBase();
 
@@ -28,12 +31,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float Damage;
 
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	int32 GetTotalAmmo() const { return TotalAmmo; }
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void SetTotalAmmo(int32 NewAmmo) { TotalAmmo = FMath::Clamp(NewAmmo, 0, MaxTotalAmmo); }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
+	int32 MaxTotalAmmo = 180;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int32 MaxAmmo;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	int32 CurrentAmmo;
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	int32 GetCurrentAmmo() const { return CurrentAmmo; }
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetCurrentAmmo(int32 NewAmmo)
+	{
+		CurrentAmmo = FMath::Clamp(NewAmmo, 0, MaxAmmo);
+		// (선택) 여기서 UI 업데이트, 사운드, 로그 등 추가 가능
+	}
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float FireRate;        // 연사 속도
 

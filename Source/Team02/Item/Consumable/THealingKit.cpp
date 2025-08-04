@@ -4,7 +4,7 @@
 #include "Item/Consumable/THealingKit.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "Character/TPlayerCharacter.h"
 
 ATHealingKit::ATHealingKit()
 {
@@ -29,5 +29,24 @@ void ATHealingKit::OnOverlapBegin(
 
 		Use(OtherActor);   // 회복 적용
 		Destroy();         // 아이템 파괴
+	}
+}
+
+
+
+
+void ATHealingKit::Use_Implementation(AActor* Target) 
+{
+	ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(Target);
+	if (Player)
+	{
+		float BeforeHP = Player->GetCurrentHP();
+		float MaxHP = Player->GetMaxHP();
+		float NewHP = FMath::Clamp(BeforeHP + Amount, 0.f, MaxHP);
+
+		Player->SetCurrentHP(NewHP);
+
+		FString Msg = FString::Printf(TEXT("[힐킷] HP: %.0f → %.0f (MAX: %.0f)"), BeforeHP, NewHP, MaxHP);
+		UKismetSystemLibrary::PrintString(this, Msg, true, true, FLinearColor::Green, 1.5f);
 	}
 }

@@ -95,7 +95,7 @@ void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Look, ETriggerEvent::Triggered, this, &ThisClass::InputLook);
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump);
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->FireAction, ETriggerEvent::Triggered, this, &ThisClass::OnFire);
-                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Triggered, this, &ThisClass::OnReload);
+                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Started, this, &ThisClass::OnReload);
         }
 }
 

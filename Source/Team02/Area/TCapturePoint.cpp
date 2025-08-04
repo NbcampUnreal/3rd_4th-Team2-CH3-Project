@@ -1,9 +1,9 @@
 #include "TCapturePoint.h"
-
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
+#include  "TGameMode.h"
 
 ATCapturePoint::ATCapturePoint()
 {
@@ -69,6 +69,17 @@ void ATCapturePoint::OnOverlapBegin(
 	if (OtherActor && OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		bPlayerInArea = true;
+
+		// 웨이브 시작 (최초 진입 때만, 혹은 조건에 따라 한 번만)
+		ATGameMode* GM = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+		if (GM)
+		{
+			// 예시: 한 번만 시작하도록 체크(중복 방지)
+			if (!GM->bIsWaveActive)
+			{
+				GM->StartWave(WaveIndex);
+			}
+		}
 	}
 }
 

@@ -35,10 +35,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	UBoxComponent* SpawnArea;
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateSpawner();
+
+	UFUNCTION(BlueprintCallable)
+	void DeactivateSpawner();
+
+
 protected:
 	virtual void BeginPlay() override;
 	void SpawnEnemy();
 
+	bool bIsActive = false;
 	int32 CurrentSpawned = 0;
 
 	FVector GetRandomPointInBox() const;
