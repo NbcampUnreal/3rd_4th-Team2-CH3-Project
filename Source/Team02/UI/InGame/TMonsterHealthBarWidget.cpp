@@ -12,8 +12,8 @@ void UTMonsterHealthBarWidget::UpdateHealthBar(float CurrentHP,float MaxHP)
 		// progress bar update
 		HealthProgressBar->SetPercent(HealthPercent);
 		
-		// hp text update (ex: 70/100)
-		FString HealthString=FString::Printf(TEXT("%.0f/%.0f"),CurrentHP,MaxHP);
+		// hp text update (ex: 70%/100%)
+		FString HealthString=FString::Printf(TEXT("%.0f%%"),HealthPercent * 100.0f);
 		HealthText->SetText(FText::FromString(HealthString));
 	}
 }
