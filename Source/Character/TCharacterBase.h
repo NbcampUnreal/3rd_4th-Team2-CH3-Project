@@ -4,9 +4,6 @@
 #include "GameFramework/Character.h"
 #include "TCharacterBase.generated.h"
 
-class USpringArmComponent;
-class UCameraComponent;
-
 UCLASS()
 class TEAM02_API ATCharacterBase : public ACharacter
 {
