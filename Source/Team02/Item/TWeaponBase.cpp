@@ -3,7 +3,6 @@
 
 #include "Item/TWeaponBase.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "TPlayerController.h"
 #include "Character/TPlayerCharacter.h"
 ATWeaponBase::ATWeaponBase()
 {
@@ -34,21 +33,26 @@ void ATWeaponBase::OnOverlapBegin(
 		ATPlayerCharacter* PC = Cast<ATPlayerCharacter>(OtherActor);
 		if (PC)
 		{
-			// **이전 무기 파괴**
+			// 기존 무기 파괴
 			if (PC->CurrentWeapon)
 			{
 				PC->CurrentWeapon->Destroy();
 			}
 
-			// **새 무기 등록**
+			// 새 무기 등록
 			PC->CurrentWeapon = this;
 
-			// 월드에서 숨기기/파괴 원할 경우
-			SetActorHiddenInGame(true);       // 화면에서 숨김
-			SetActorEnableCollision(false);   // 콜라이더 비활성
-			// 또는 Destroy(); // 실제로 컨트롤러에 소유 이전에 복사/이동 구조라면 사용
+			// 손에 붙이기
+			AttachToComponent(
+				PC->GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				TEXT("Hand_R_Socket")
+			);
+			SetActorHiddenInGame(false);          // <<<<<<<<<< 꼭 해줘야 함!
+			SetActorEnableCollision(false);
 		}
 		// 추가: 효과음, UI 표시, 인벤토리 추가 등
+		
 	}
 }
 
