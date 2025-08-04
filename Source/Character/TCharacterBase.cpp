@@ -55,10 +55,30 @@ void ATCharacterBase::HandleOnCheckInputAttack()
 
 void ATCharacterBase::BeginAttack()
 {
+	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
 	
+	bIsNowAttacking = true;
+	if (IsValid(AnimInstance) == true&& IsValid(AttackFireMontage) == true && AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+	{
+		AnimInstance->Montage_Play(AttackFireMontage);
+	}
+
+	if (OnNormalAttackMontageEndedDelegate.IsBound() == false)
+	{
+		OnNormalAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+		AnimInstance->Montage_SetEndDelegate(OnNormalAttackMontageEndedDelegate, AttackFireMontage);
+	}
 }
 
 void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 {
-	
+	bIsAttackKeyPressed = false;
+	bIsNowAttacking = false;
+
+	if (OnNormalAttackMontageEndedDelegate.IsBound() == true)
+	{
+		//바인딩 했던 함수 해재
+		OnNormalAttackMontageEndedDelegate.Unbind();
+	}
 }
