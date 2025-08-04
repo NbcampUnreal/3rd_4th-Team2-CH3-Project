@@ -32,6 +32,9 @@ public:
 
 	bool IsDead() const { return bIsDead; }
 
+	// 테스트용 데미지 함수
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float MaxHP = 100.f;
@@ -48,10 +51,10 @@ protected:
 #pragma region Attack
 
 public:
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	void HandleOnCheckInputAttack();
 	
 	virtual void BeginAttack();
-	
+
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 
@@ -61,18 +64,16 @@ public:
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
 
+	int32 MaxComboCount = 3;
+
+	int32 CurrentComboCount = 0;
+
 	bool bIsNowAttacking = false;
 
 	bool bIsAttackKeyPressed = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackFireMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackMeleeRange = 50.f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackMeleeRadius = 20.f;
 
 	FOnMontageEnded OnNormalAttackMontageEndedDelegate;
 
