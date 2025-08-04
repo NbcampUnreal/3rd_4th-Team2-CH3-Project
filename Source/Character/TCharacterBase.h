@@ -4,21 +4,24 @@
 #include "GameFramework/Character.h"
 #include "TCharacterBase.generated.h"
 
-class UAnimMontage;
-
 UCLASS()
 class TEAM02_API ATCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
-
-protected:
-	virtual void BeginPlay() override;
-
-#pragma region HP
+	
+#pragma region Override ACharacter
 	
 public:
 	ATCharacterBase();
-
+	
+protected:
+	virtual void BeginPlay() override;
+	
+#pragma endregion
+	
+#pragma region HP
+	
+public:
 	float GetMaxHP() const { return MaxHP; }
 
 	float GetCurrentHP() const { return CurrentHP; }
@@ -41,17 +44,28 @@ protected:
 	uint8 bIsDead : 1;
 
 #pragma endregion
-
+	
 #pragma region Attack
 
 public:
-	UFUNCTION()
-	void HandleOnCheckHit();
+	virtual void HandleOnCheckInputAttack();
 	
+	virtual void BeginAttack();
+
+	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AttackFireMontage;
+	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
+
+	int32 MaxComboCount = 3;
+
+	int32 CurrentComboCount = 0;
+
+	bool bIsNowAttacking = false;
+
+	bool bIsAttackKeyPressed = false;
+
+	FOnMontageEnded OnMeleeAttackMontageEndedDelegate;
 
 #pragma endregion
-	
 };
