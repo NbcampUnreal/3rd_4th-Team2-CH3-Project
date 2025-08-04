@@ -1,8 +1,10 @@
 ﻿#include "TPlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "TGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/TCharacterBase.h"
 #include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 ATPlayerController::ATPlayerController()
 {
@@ -18,6 +20,11 @@ void ATPlayerController::BeginPlay()
 		if (PlayerUIWidget)
 		{
 			PlayerUIWidget->AddToViewport();
+		}
+		//시간 델리게이트 관련함수
+		if (ATGameState* GS=GetWorld()->GetGameState<ATGameState>())
+		{
+			GS->OnGameTimeUpdate.AddDynamic(this,&ATPlayerController::OnGameTimeUpdate);
 		}
 	}
 }
@@ -43,4 +50,28 @@ void ATPlayerController::UpdateHPBar()
 void ATPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+}
+
+void ATPlayerController::OnGameTimeUpdate(float NewTime)
+{
+	if (!PlayerUIWidget) return;
+
+	if (ATGameState* GS = GetWorld()->GetGameState<ATGameState>())
+	{
+		// 웨이브 시간 업데이트
+		FString TimeString = GS->GetFormattedTime();
+		UTextBlock* WaveTimeText = Cast<UTextBlock>(PlayerUIWidget->GetWidgetFromName(TEXT("WaveTimeText")));
+		if (WaveTimeText)
+		{
+			WaveTimeText->SetText(FText::FromString(TimeString));
+		}
+
+		// 웨이브 레벨 업데이트
+		FString WaveLevelString = FString::Printf(TEXT("Wave %d/%d"), GS->CurrentWave, GS->MaxWave);
+		UTextBlock* WaveLevelText = Cast<UTextBlock>(PlayerUIWidget->GetWidgetFromName(TEXT("WaveLevelText")));
+		if (WaveLevelText)
+		{
+			WaveLevelText->SetText(FText::FromString(WaveLevelString));
+		}
+	}
 }
