@@ -5,7 +5,8 @@
 #include "Animation/TAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/EngineTypes.h"
-
+#include "Animation/TAnimInstance.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ATCharacterBase::ATCharacterBase()
 {
@@ -32,7 +33,12 @@ ATCharacterBase::ATCharacterBase()
 	bIsDead = false;
 }
 
-//테스트용 함수
+void ATCharacterBase::HandleOnCheckHit()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
+}
+
+// 테스트용 함수
 float ATCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -81,4 +87,3 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		OnNormalAttackMontageEndedDelegate.Unbind();
 	}
 }
-
