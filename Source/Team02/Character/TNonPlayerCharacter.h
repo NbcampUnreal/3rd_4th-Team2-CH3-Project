@@ -6,7 +6,7 @@
 #include "TNonPlayerCharacter.generated.h"
 
 class ATGunNPCWeapon;
-class UAnimMontage;
+
 
 DECLARE_DELEGATE_TwoParams(FOnAttackMontageEnded, UAnimMontage*, bool bInterruped)
 
@@ -35,15 +35,11 @@ public:
 	bool bIsNowAttacking;
 
 	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const;
-
-	UFUNCTION()
-	void HandleOnCheckHit();
 	
 protected:
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AttackFireMontage;
+	
 	
 	
 };

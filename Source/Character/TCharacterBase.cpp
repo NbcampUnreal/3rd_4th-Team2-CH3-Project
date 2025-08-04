@@ -3,6 +3,8 @@
 #include "Character/TCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/TAnimInstance.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ATCharacterBase::ATCharacterBase()
 {
@@ -25,6 +27,18 @@ ATCharacterBase::ATCharacterBase()
 
 	bIsDead = false;
 }
+
+void ATCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ATCharacterBase::HandleOnCheckHit()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
+}
+
 // 테스트용 함수
 void ATCharacterBase::TakeDamage(float Damage)
 {

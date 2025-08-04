@@ -4,10 +4,15 @@
 #include "GameFramework/Character.h"
 #include "TCharacterBase.generated.h"
 
+class UAnimMontage;
+
 UCLASS()
 class TEAM02_API ATCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
 
 #pragma region HP
 	
@@ -26,7 +31,6 @@ public:
 
 	// 테스트용 데미지 함수
 	virtual void TakeDamage(float Damage);
-	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -37,4 +41,17 @@ protected:
 	uint8 bIsDead : 1;
 
 #pragma endregion
+
+#pragma region Attack
+
+public:
+	UFUNCTION()
+	void HandleOnCheckHit();
+	
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackFireMontage;
+
+#pragma endregion
+	
 };

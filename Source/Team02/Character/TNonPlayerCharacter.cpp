@@ -98,8 +98,3 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool)
 		OnAttackMontageEndedDelegate.Unbind();
 	}
 }
-
-void ATNonPlayerCharacter::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit()"));
-}
