@@ -37,7 +37,7 @@ void ATNonPlayerCharacter::BeginPlay()
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 200.f, 0.f);
+		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 
@@ -45,7 +45,7 @@ void ATNonPlayerCharacter::BeginPlay()
 	}
 }
 
-void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
+void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const
 {
 	if (Weapon)
 	{
