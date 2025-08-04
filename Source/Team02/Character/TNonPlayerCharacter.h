@@ -36,8 +36,11 @@ public:
 
 	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const;
 
+	static int32 ShowGunAttackDebug;
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
-	
 	
 };

@@ -3,8 +3,18 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/TAnimInstance.h"
 #include "Item/TGunNPCWeapon.h"
-#include "Engine/SkeletalMeshSocket.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Engine/EngineTypes.h"
+#include "Kismet/GameplayStatics.h"
+
+
+int32 ATNonPlayerCharacter::ShowGunAttackDebug = 0;
+
+FAutoConsoleVariableRef CVarShowGunAttackDebug(
+	TEXT("TAI.ShowGunAttackDebug"),
+	ATNonPlayerCharacter::ShowGunAttackDebug,
+	TEXT(""),
+	ECVF_Cheat
+	);
 
 ATNonPlayerCharacter::ATNonPlayerCharacter()
 	: bIsNowAttacking(false)
@@ -25,7 +35,7 @@ void ATNonPlayerCharacter::BeginPlay()
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
+		GetCharacterMovement()->RotationRate = FRotator(0.f, 200.f, 0.f);
 		//NPC의 최고속도
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 
@@ -62,6 +72,19 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) cons
 
 void ATNonPlayerCharacter::BeginAttack()
 {
+
+	/*ATAIController* AIController = GetController<ATAIController>();
+	if (IsValid(AIController) == true)
+	{
+		APawn* PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (PlayerCharacter)
+		{
+			AIController->SetFocalPoint(PlayerCharacter->GetActorLocation());
+		}
+	}*/
+	
+	
+
 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
 	
@@ -82,6 +105,22 @@ void ATNonPlayerCharacter::BeginAttack()
 	}
 }
 
+float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		ATAIController* AIController = Cast<ATAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			AIController->EndAI();
+		}
+	}
+	
+	return FinalDamageAmount;
+}
+
 
 void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 {
@@ -93,3 +132,4 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		OnAttackMontageEndedDelegate.Unbind();
 	}
 }
+

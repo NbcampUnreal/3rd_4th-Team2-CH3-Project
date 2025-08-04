@@ -3,8 +3,7 @@
 #include "Character/TNonPlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-//공격범위를 전역변수로 지정
-const float UBTDecorator_IsInGunAttackRange::AttackRange(200.f);
+const float UBTDecorator_IsInGunAttackRange::AttackRange(1000.f);
 
 UBTDecorator_IsInGunAttackRange::UBTDecorator_IsInGunAttackRange()
 {
@@ -34,3 +33,4 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 
 	return false;
 }
+
