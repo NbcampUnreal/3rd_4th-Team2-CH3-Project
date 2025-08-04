@@ -26,11 +26,18 @@ ATAIController::ATAIController()
 {
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BrainComponent"));
+	
 }
 
 void ATAIController::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void ATAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
 
 	// 설정한 폰이 Ai의 컨트롤 폰이 된다
 	APawn* ControlledPawn = GetPawn();
@@ -47,6 +54,8 @@ void ATAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	Super::EndPlay(EndPlayReason);
 }
+
+
 
 void ATAIController::BeginAI(APawn* InPawn)
 {
