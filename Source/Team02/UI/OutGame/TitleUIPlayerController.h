@@ -18,6 +18,9 @@ protected:
 
 
 public:
+
+	ATitleUIPlayerController();
+	
 	// 메뉴 UI
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
@@ -29,7 +32,7 @@ public:
 	void ShowMainMenu(bool bIsRestart);
 
 	// 게임 시작
-	// UFUNCTION(BlueprintCallable, Category = "Menu")
-	// void StartGame();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void StartGame();
 	
 };
