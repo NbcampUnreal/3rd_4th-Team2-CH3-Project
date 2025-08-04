@@ -9,6 +9,7 @@
 ATPlayerController::ATPlayerController()
 {
 }
+
 void ATPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,7 +46,6 @@ void ATPlayerController::UpdateHPBar()
 		HPBar->SetPercent(HPPercent);
 	}
 }
-
 
 void ATPlayerController::SetupInputComponent()
 {

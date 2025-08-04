@@ -1,6 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Bullet/TBullet.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
@@ -30,7 +28,6 @@ ATBullet::ATBullet()
 
 	// [5] 충돌 시 OnHit 함수 바인딩
 	CollisionComp->OnComponentHit.AddDynamic(this, &ATBullet::OnHit);
-
 }
 
 void ATBullet::OnHit(

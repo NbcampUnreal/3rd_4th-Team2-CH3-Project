@@ -33,7 +33,6 @@ protected:
 	// [3] Projectile Movement
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UProjectileMovementComponent* ProjectileMovement;
-
 	
 	// [4] 충돌 시 호출되는 함수
 	UFUNCTION()
