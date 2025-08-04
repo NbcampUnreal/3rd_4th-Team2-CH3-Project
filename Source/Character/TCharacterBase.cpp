@@ -35,10 +35,11 @@ void ATCharacterBase::HandleOnCheckHit()
 }
 
 // 테스트용 함수
-void ATCharacterBase::TakeDamage(float Damage)
+float ATCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	SetCurrentHP(CurrentHP - Damage);
-	UE_LOG(LogTemp,Warning,TEXT("Current HP: %f"),CurrentHP);
+	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return FinalDamageAmount;
 }
 
 void ATCharacterBase::BeginPlay()

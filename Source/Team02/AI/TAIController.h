@@ -15,6 +15,8 @@ class TEAM02_API ATAIController : public AAIController
 {
 	GENERATED_BODY()
 
+	friend class ATNonPlayerCharacter;
+
 public:
 	ATAIController();
 

@@ -33,7 +33,7 @@ public:
 	bool IsDead() const { return bIsDead; }
 
 	// 테스트용 데미지 함수
-	virtual void TakeDamage(float Damage);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
