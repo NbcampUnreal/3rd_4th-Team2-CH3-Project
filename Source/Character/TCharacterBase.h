@@ -8,12 +8,20 @@ UCLASS()
 class TEAM02_API ATCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
-
-#pragma region HP
+	
+#pragma region Override ACharacter
 	
 public:
 	ATCharacterBase();
-
+	
+protected:
+	virtual void BeginPlay() override;
+	
+#pragma endregion
+	
+#pragma region HP
+	
+public:
 	float GetMaxHP() const { return MaxHP; }
 
 	float GetCurrentHP() const { return CurrentHP; }
@@ -26,7 +34,6 @@ public:
 
 	// 테스트용 데미지 함수
 	virtual void TakeDamage(float Damage);
-	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -35,6 +42,30 @@ protected:
 	float CurrentHP = 100.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsDead : 1;
+
+#pragma endregion
+	
+#pragma region Attack
+
+public:
+	virtual void HandleOnCheckInputAttack();
+	
+	virtual void BeginAttack();
+
+	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
+
+protected:
+	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
+
+	int32 MaxComboCount = 3;
+
+	int32 CurrentComboCount = 0;
+
+	bool bIsNowAttacking = false;
+
+	bool bIsAttackKeyPressed = false;
+
+	FOnMontageEnded OnMeleeAttackMontageEndedDelegate;
 
 #pragma endregion
 };

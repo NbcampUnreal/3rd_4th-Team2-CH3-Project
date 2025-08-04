@@ -2,6 +2,7 @@
 
 #include "Character/TCharacterBase.h"
 #include "Components/CapsuleComponent.h"
+#include "Animation/TAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ATCharacterBase::ATCharacterBase()
@@ -30,4 +31,27 @@ void ATCharacterBase::TakeDamage(float Damage)
 {
 	SetCurrentHP(CurrentHP - Damage);
 	UE_LOG(LogTemp,Warning,TEXT("Current HP: %f"),CurrentHP);
+}
+
+void ATCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+
+void ATCharacterBase::HandleOnCheckInputAttack()
+{
+	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
+
+}
+
+void ATCharacterBase::BeginAttack()
+{
+	
+}
+
+void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
+{
+	
 }
