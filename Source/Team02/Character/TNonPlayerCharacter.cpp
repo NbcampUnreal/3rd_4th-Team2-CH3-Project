@@ -62,34 +62,30 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) cons
 
 void ATNonPlayerCharacter::BeginAttack()
 {
-	if (GetCharacterMovement()->IsFalling() == true)
-	{
-		return;
-	}
-
 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
-
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	if (IsValid(AnimInstance) == true &&
-		IsValid(AttackFireMontage) == true &&
-		AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+	
+	if (IsValid(AnimInstance) == true&& IsValid(AttackFireMontage) == true && AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
 	{
 		AnimInstance->Montage_Play(AttackFireMontage);
 
 		bIsNowAttacking = true;
 
-		//몽타주 종료
-		OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
-		AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
+		if (OnAttackMontageEndedDelegate.IsBound() == false)
+		{
+			AnimInstance->Montage_Play(AttackFireMontage);
 		
+			//몽타주 종료
+			OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+			AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
+		
+		}
 	}
 }
 
-void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool)
-{
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
+void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
+{
 	bIsNowAttacking = false;
 
 	if (OnAttackMontageEndedDelegate.IsBound() == true)

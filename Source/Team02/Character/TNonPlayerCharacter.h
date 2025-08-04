@@ -7,15 +7,14 @@
 
 class ATGunNPCWeapon;
 
-
-DECLARE_DELEGATE_TwoParams(FOnAttackMontageEnded, UAnimMontage*, bool bInterruped)
+DECLARE_DELEGATE_TwoParams(FOnAttackMontageEnded, UAnimMontage*, bool bInterrupted)
 
 UCLASS()
 class TEAM02_API ATNonPlayerCharacter : public ATCharacterBase
 {
 	GENERATED_BODY()
 
-	friend class UBTTask_Attack;
+	friend class UBTTask_GunAttack;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Weapon", Meta = (AllowPrivateAccess))
@@ -25,21 +24,20 @@ public:
 	ATNonPlayerCharacter();
 
 	virtual void BeginPlay() override;
-	
+
+protected:
 	virtual void BeginAttack();
 
-	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
+	virtual void EndAttack(UAnimMontage* InMontage, bool bIbterruped);
 
 public: 
 	
 	bool bIsNowAttacking;
 
 	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const;
-	
+
 protected:
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
-	
-	
 	
 	
 };

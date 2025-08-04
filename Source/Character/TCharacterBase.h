@@ -48,10 +48,11 @@ protected:
 #pragma region Attack
 
 public:
-	virtual void HandleOnCheckInputAttack();
+	void HandleOnCheckInputAttack();
 	
 	virtual void BeginAttack();
 
+	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 
 	UFUNCTION()
@@ -68,10 +69,10 @@ protected:
 
 	bool bIsAttackKeyPressed = false;
 
-	FOnMontageEnded OnMeleeAttackMontageEndedDelegate;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackFireMontage;
+
+	FOnMontageEnded OnNormalAttackMontageEndedDelegate;
 
 #pragma endregion
 };
