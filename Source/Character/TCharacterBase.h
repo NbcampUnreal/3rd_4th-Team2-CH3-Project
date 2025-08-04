@@ -54,6 +54,9 @@ public:
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 
+	UFUNCTION()
+	void HandleOnCheckHit();
+
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
 
@@ -66,6 +69,9 @@ protected:
 	bool bIsAttackKeyPressed = false;
 
 	FOnMontageEnded OnMeleeAttackMontageEndedDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackFireMontage;
 
 #pragma endregion
 };

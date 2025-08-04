@@ -29,12 +29,6 @@ ATCharacterBase::ATCharacterBase()
 	bIsDead = false;
 }
 
-void ATCharacterBase::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 void ATCharacterBase::HandleOnCheckHit()
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
@@ -51,7 +45,6 @@ void ATCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 void ATCharacterBase::HandleOnCheckInputAttack()
 {
