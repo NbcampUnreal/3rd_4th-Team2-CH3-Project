@@ -55,9 +55,6 @@ public:
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 
-	UFUNCTION()
-	void HandleOnCheckHit();
-
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
 
@@ -69,6 +66,7 @@ protected:
 
 	bool bIsAttackKeyPressed = false;
 
+	//라이플 공격하는 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackFireMontage;
 
