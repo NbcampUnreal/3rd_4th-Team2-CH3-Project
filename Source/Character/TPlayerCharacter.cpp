@@ -122,8 +122,7 @@ void ATPlayerCharacter::InputMove(const FInputActionValue& InValue)
 
   const FRotator ControlRotation = GetController()->GetControlRotation();
   const FRotator ControlRotationYaw(0.f, ControlRotation.Yaw, 0.f);
-
-
+  
   const FVector ForwardVector = FRotationMatrix(ControlRotationYaw).GetUnitAxis(EAxis::X);
   const FVector RightVector = FRotationMatrix(ControlRotationYaw).GetUnitAxis(EAxis::Y);
 
