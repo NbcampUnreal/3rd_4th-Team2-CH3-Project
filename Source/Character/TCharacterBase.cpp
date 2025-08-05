@@ -79,11 +79,6 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 	}
 }
 
-void ATCharacterBase::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
-}
-
 float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);

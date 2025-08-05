@@ -96,7 +96,7 @@ void UTUIManager::UpdatePlayerAmmo()
 {
 	if (PlayerUIWidget && CurrentWeapon)
 	{
-		PlayerUIWidget->UpdateAmmoInfo(CurrentWeapon->CurrentAmmo,CurrentWeapon->MaxAmmo);
+		PlayerUIWidget->UpdateAmmoInfo(CurrentWeapon->GetCurrentAmmo(),CurrentWeapon->MaxAmmo);
 	}
 }
 
