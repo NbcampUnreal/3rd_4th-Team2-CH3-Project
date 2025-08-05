@@ -36,8 +36,10 @@ ATCharacterBase::ATCharacterBase()
 float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
+	
 	CurrentHP = FMath::Clamp(CurrentHP - FinalDamageAmount, 0.f, MaxHP);
+	
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Actual HP: %f"), CurrentHP));
 
 	if (CurrentHP < KINDA_SMALL_NUMBER)
 	{
