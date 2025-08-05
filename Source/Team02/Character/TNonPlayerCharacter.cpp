@@ -4,7 +4,9 @@
 #include "Animation/TAnimInstance.h"
 #include "Item/TGunNPCWeapon.h"
 #include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
+#include "Team02.h"
 
 
 int32 ATNonPlayerCharacter::ShowGunAttackDebug = 0;
@@ -43,24 +45,26 @@ void ATNonPlayerCharacter::BeginPlay()
 	}
 }
 
-void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const
+void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 {
 	if (Weapon)
 	{
-		//무기 스폰
-		AActor* SpawnWeapon = GetWorld()->SpawnActor<ATGunNPCWeapon>(Weapon);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+
+		CurrentRifle = GetWorld()->SpawnActor<ATGunNPCWeapon>(Weapon, SpawnParams);
 
 		//부착 규칙
 		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 		
-		if (SpawnWeapon)
+		if (CurrentRifle)
 		{
 			//소켓에 부착
-			SpawnWeapon->AttachToComponent(GetMesh(), AttachmentRules, FName("weapon_r_muzzle"));
-			SpawnWeapon->SetActorEnableCollision(false);
+			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("weapon_r_muzzle"));
+			CurrentRifle->SetActorEnableCollision(false);
 
 			//총의 물리 피직스 끄기
-			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(SpawnWeapon->GetRootComponent());
+			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(CurrentRifle->GetRootComponent());
 			if (WeaponRoot)
 			{
 				WeaponRoot->SetSimulatePhysics(false);
@@ -72,19 +76,7 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) cons
 
 void ATNonPlayerCharacter::BeginAttack()
 {
-
-	/*ATAIController* AIController = GetController<ATAIController>();
-	if (IsValid(AIController) == true)
-	{
-		APawn* PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-		if (PlayerCharacter)
-		{
-			AIController->SetFocalPoint(PlayerCharacter->GetActorLocation());
-		}
-	}*/
 	
-	
-
 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
 	
@@ -132,4 +124,94 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		OnAttackMontageEndedDelegate.Unbind();
 	}
 }
+
+void ATNonPlayerCharacter::HandleOnCheckHit()
+{
+	if (!IsValid(CurrentRifle))
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("Weapon is not valid."));
+		return;
+	}
+	
+	//무기 메시에서 MuzzleFlash 위치 가져오기
+	const FName MuzzleSocketName = TEXT("MuzzleFlash");
+	FVector StartLocation = CurrentRifle->GetMesh()->GetSocketLocation(MuzzleSocketName);
+	FVector EndLocation = GetActorLocation() + (GetActorForwardVector() * CurrentRifle->GetMaxAttackRange());
+	
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	Params.AddIgnoredActor(CurrentRifle);
+	Params.AddIgnoredActor(this);
+	
+	bool bResult = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_ATTACK,
+		Params
+	);
+
+	if (bResult == false)
+	{
+		HitResult.TraceStart = StartLocation;
+		HitResult.TraceEnd = EndLocation;
+	}
+
+	if (bResult == true)
+	{
+		ATCharacterBase* HittedCharacter = Cast<ATCharacterBase>(HitResult.GetActor());
+		if (IsValid(HittedCharacter) == true)
+		{
+			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Hit Actor Name: %s"), *HitResult.GetActor()->GetName()));
+			FDamageEvent DamageEvent;
+			HittedCharacter->TakeDamage(
+				10.f,
+				DamageEvent,
+				GetController(),
+				this
+				);
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (IsValid(AnimInstance) == true)
+	{
+		if (AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+		{
+			AnimInstance->Montage_Play(AttackFireMontage);
+		}
+	}
+
+	if (1 == ShowGunAttackDebug)
+	{
+		if (bResult == true)
+		{
+			DrawDebugLine(
+				GetWorld(),
+				StartLocation,
+				HitResult.ImpactPoint,
+				FColor::Blue,
+				false,
+				5.f,
+				0,
+				2.f
+				);
+		}
+		else
+		{
+			DrawDebugLine(
+				GetWorld(),
+				StartLocation,
+				EndLocation,
+				FColor::Blue,
+				false,
+				5.f,
+				0,
+				2.f
+			);
+		}
+	}
+}
+
+
 

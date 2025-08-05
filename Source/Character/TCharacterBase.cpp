@@ -4,8 +4,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Animation/TAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Animation/TAnimInstance.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Engine/EngineTypes.h"
+
 
 ATCharacterBase::ATCharacterBase()
 {
@@ -19,6 +19,9 @@ ATCharacterBase::ATCharacterBase()
 	FVector PivotPosition(0.f, 0.f, -CharacterHalfHeight);
 	FRotator PivotRotation(0.f, -90.f, 0.f);
 	GetMesh()->SetRelativeLocationAndRotation(PivotPosition, PivotRotation);
+	
+	//콜리전 프리셋을 SXCharacterMesh로 설정 - nam
+	GetMesh()->SetCollisionProfileName(TEXT("SXCharacterMesh"));
 
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
@@ -29,12 +32,7 @@ ATCharacterBase::ATCharacterBase()
 	bIsDead = false;
 }
 
-void ATCharacterBase::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
-}
-
-// 테스트용 함수
+//테스트용 함수
 float ATCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -83,3 +81,4 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		OnNormalAttackMontageEndedDelegate.Unbind();
 	}
 }
+
