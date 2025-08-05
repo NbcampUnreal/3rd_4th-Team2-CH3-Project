@@ -52,6 +52,8 @@ private:
 	void InputStartZoom(const FInputActionValue& InputActionValue);
 
 	void InputEndZoom(const FInputActionValue& InputActionValue);
+
+	void OnPause(const FInputActionValue& InValue);
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
@@ -70,6 +72,16 @@ protected:
 	float TargetFOV = 70.f;
 
 	float CurrentFOV = 70.f;
+
+	// 위젯 클래스 선언
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	// 위젯 인스턴스 캐싱용
+	UUserWidget* PauseMenuInstance;
+
+	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
+	void RestartGame();
 
 #pragma endregion
 

@@ -31,8 +31,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ShowMainMenu(bool bIsRestart);
 
-	// 게임 시작
-	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void StartGame();
-	
+	// // 게임 시작
+	// UFUNCTION(BlueprintCallable, Category = "Menu")
+	// void StartGame();
+	//
 };
