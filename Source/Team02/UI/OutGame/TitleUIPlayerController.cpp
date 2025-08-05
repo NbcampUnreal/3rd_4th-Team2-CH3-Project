@@ -5,13 +5,19 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 
+ATitleUIPlayerController::ATitleUIPlayerController()
+	: MainMenuWidgetInstance(nullptr),
+	  MainMenuWidgetClass(nullptr)
+{
+}
+
 void ATitleUIPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// 게임 실행 시 메뉴 레벨에서 메뉴 UI 먼저 표시
 	FString CurrentMapName = GetWorld()->GetMapName();
-	if (CurrentMapName.Contains("TitleLevel"))
+	if (CurrentMapName.Contains("MenuLevel"))
 	{
 		ShowMainMenu(false);
 	}
