@@ -28,5 +28,5 @@ public:
 	TObjectPtr<UInputAction> ReloadAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInputAction> AttackRanged;
+	TObjectPtr<UInputAction> Zoom;
 };

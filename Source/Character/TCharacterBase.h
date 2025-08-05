@@ -39,6 +39,9 @@ protected:
 	float CurrentHP = 100.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsDead : 1;
+	
+	UFUNCTION()
+	virtual void HandleOnPostCharacterDead();
 
 #pragma endregion
 	

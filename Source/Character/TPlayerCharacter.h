@@ -22,6 +22,8 @@ public:
 	ATPlayerCharacter();
 	
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 	
 	ATWeaponBase* CurrentWeapon;
 
@@ -46,6 +48,10 @@ private:
 	void OnFire(const FInputActionValue& InValue);
 
 	void OnReload(const FInputActionValue& InValue);
+
+	void InputStartZoom(const FInputActionValue& InputActionValue);
+
+	void InputEndZoom(const FInputActionValue& InputActionValue);
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
@@ -55,6 +61,15 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ATWeaponBase> DefaultWeaponClass;
+
+#pragma endregion
+
+#pragma region Zoom
+	
+protected:
+	float TargetFOV = 70.f;
+
+	float CurrentFOV = 70.f;
 
 #pragma endregion
 

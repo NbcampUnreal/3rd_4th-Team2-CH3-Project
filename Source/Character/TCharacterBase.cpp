@@ -33,6 +33,12 @@ ATCharacterBase::ATCharacterBase()
 void ATCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+	if (IsValid(AnimInstance) == true)
+	{
+		AnimInstance->OnPostDead.AddDynamic(this, &ThisClass::HandleOnPostCharacterDead);
+	}
 }
 
 void ATCharacterBase::BeginAttack()
@@ -85,3 +91,9 @@ float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	}
 	return FinalDamageAmount;
 }
+
+void ATCharacterBase::HandleOnPostCharacterDead()
+{
+	SetLifeSpan(0.1f);
+}
+
