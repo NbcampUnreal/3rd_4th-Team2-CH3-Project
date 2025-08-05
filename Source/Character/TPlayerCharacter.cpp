@@ -153,11 +153,34 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 {
   if (CurrentWeapon)
   {
-    CurrentWeapon->Fire();
+    // (1) 카메라 위치/회전 얻기
+    FVector CameraLoc;
+    FRotator CameraRot;
+    GetActorEyesViewPoint(CameraLoc, CameraRot); // 이 함수가 SpringArm, 카메라 위치 사용
 
-    // 무기 타입 문자열 출력
-    FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
-    UKismetSystemLibrary::PrintString(this, Msg);
+    // (2) 카메라에서 크로스헤어 방향으로 트레이스 (먼 거리)
+    float MaxTraceDist = 10000.f;
+    FVector TraceEnd = CameraLoc + (CameraRot.Vector() * MaxTraceDist);
+
+    FHitResult Hit;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+    Params.AddIgnoredActor(CurrentWeapon);
+
+    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLoc, TraceEnd, ECC_Visibility, Params);
+
+    FVector AimTarget = bHit ? Hit.ImpactPoint : TraceEnd;
+
+    // (3) 총구 위치 얻기
+    FVector MuzzleLoc = CurrentWeapon->MuzzlePoint->GetComponentLocation();
+
+    // (4) 총구 → AimTarget 방향 구하기
+    FVector FireDir = (AimTarget - MuzzleLoc).GetSafeNormal();
+
+    // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
+    CurrentWeapon->FireFrom(MuzzleLoc, FireDir); // <<--- 새 함수 필요!
+
+    // 기존 문자열 출력 등 유지
   }
 }
 

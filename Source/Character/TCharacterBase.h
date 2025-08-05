@@ -57,7 +57,8 @@ public:
 
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
-
+	
+	virtual void HandleOnCheckHit(); 
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
 

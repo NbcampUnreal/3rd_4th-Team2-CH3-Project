@@ -19,6 +19,7 @@ UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
 	GENERATED_BODY()
+	
 protected:
 	int32 TotalAmmo = 180;
 	int32 CurrentAmmo = 30;   // 탄창에 남은 탄약 (기본값)
