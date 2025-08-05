@@ -14,6 +14,7 @@ class TEAM02_API ATGameMode : public AGameMode
 public:
 	ATGameMode();
 
+	virtual void BeginPlay() override;
 	// 웨이브 관련
 	UPROPERTY(BlueprintReadOnly, Category="Wave")
 	int32 CurrentWave = 0;
@@ -21,21 +22,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Wave")
 	int32 MaxWave = 2;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Spawner")
-	TArray<class ATEnemySpawner*> EnemySpawners;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawner")
+	TArray<ATEnemySpawner*> EnemySpawners;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Wave")
 	bool bIsWaveActive = false;
 
-	UFUNCTION(BlueprintCallable, Category="Wave")
-	void StartWave(int32 WaveIndex);
+	
+	UPROPERTY()
+	int32 WaveIndex = 0;
 
-	UFUNCTION(BlueprintCallable, Category="Wave")
+	UFUNCTION()
+	void StartWave(int32 InWaveIndex);
+
+	UFUNCTION()
 	void EndWave();
 
-	// (선택) 웨이브 시작을 외부에서 호출할 수 있도록 함수
-	UFUNCTION(BlueprintCallable, Category="Wave")
-	bool CanStartNextWave() const;
+	UFUNCTION()
+	void OnCapturePointCompleted(); // 거점 점령 완료 시 호출 (100% 달성)
+
+	UFUNCTION()
+	void OnZoneOverlap(int32 ZoneIndex);
+
+
 	
-	
+
+	TArray<AActor*> FoundActors;
 };

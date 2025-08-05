@@ -3,7 +3,8 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
-#include  "TGameMode.h"
+#include "TGameMode.h"
+
 
 ATCapturePoint::ATCapturePoint()
 {
@@ -19,6 +20,7 @@ ATCapturePoint::ATCapturePoint()
 	CaptureAreaCollider->OnComponentBeginOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapBegin);
 	CaptureAreaCollider->OnComponentEndOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapEnd);
 
+	
 	CapturePercent = 0.0f;
 	bPlayerInArea = false;
 }
@@ -26,6 +28,7 @@ ATCapturePoint::ATCapturePoint()
 void ATCapturePoint::BeginPlay()
 {
 	Super::BeginPlay();
+	GM = GetWorld()->GetAuthGameMode<ATGameMode>();
 }
 
 void ATCapturePoint::Tick(float DeltaTime)
@@ -40,6 +43,8 @@ void ATCapturePoint::Tick(float DeltaTime)
 		
 		if (CapturePercent >= 100.f)
 		{
+			
+			GM->OnCapturePointCompleted();
 			CapturePercent = 100.f;
 			NotifyWall();
 		}
@@ -71,14 +76,9 @@ void ATCapturePoint::OnOverlapBegin(
 		bPlayerInArea = true;
 
 		// 웨이브 시작 (최초 진입 때만, 혹은 조건에 따라 한 번만)
-		ATGameMode* GM = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
-		if (GM)
+		if (GM && !GM->bIsWaveActive)   // 이미 웨이브 중이면 패스
 		{
-			// 예시: 한 번만 시작하도록 체크(중복 방지)
-			if (!GM->bIsWaveActive)
-			{
-				GM->StartWave(WaveIndex);
-			}
+			GM->OnZoneOverlap(ZoneIndex);   // 여기서만 최초 1회!
 		}
 	}
 }

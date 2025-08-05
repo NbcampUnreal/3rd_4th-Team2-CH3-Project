@@ -6,6 +6,7 @@
 class UBoxComponent;
 class UStaticMeshComponent;
 class ATMovingWall;
+class ATGameMode;
 UCLASS()
 class TEAM02_API ATCapturePoint : public AActor
 {
@@ -45,10 +46,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bPlayerInArea;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 WaveIndex;
-	
+	int32 ZoneIndex;
+
+	ATGameMode* GM;
 	// 오버랩 이벤트
 	UFUNCTION()
 	virtual void OnOverlapBegin(

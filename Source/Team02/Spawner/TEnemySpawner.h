@@ -18,7 +18,7 @@ public:
 	// Sets default values for this actor's properties
 	ATEnemySpawner();
 
-	// 몇 초 간격으로 몇 마리 소환할지 등
+	// 스폰 설정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawner")
 	TSubclassOf<ATNonPlayerCharacter> EnemyClass;
 
@@ -28,27 +28,39 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawner")
 	int32 MaxSpawnCount = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
-	USceneComponent* SceneRootComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
-	UStaticMeshComponent* StaticMeshcomp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+	// 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USceneComponent* RootComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UBoxComponent* SpawnArea;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Spawner")
 	void ActivateSpawner();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Spawner")
 	void DeactivateSpawner();
 
+	// (선택) 현재 소환된 적 개수 조회
+	UFUNCTION(BlueprintCallable, Category="Spawner")
+	int32 GetCurrentSpawned() const { return CurrentSpawned; }
+
+	UFUNCTION(BlueprintCallable, Category="Spawner")
+	void SetSpawnerActive(bool bEnable);
+
+	
 
 protected:
 	virtual void BeginPlay() override;
 	void SpawnEnemy();
+	FVector GetRandomPointInBox() const;
 
 	bool bIsActive = false;
-	int32 CurrentSpawned = 0;
 
-	FVector GetRandomPointInBox() const;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Spawner")
+	int32 CurrentSpawned = 0;
 	FTimerHandle SpawnTimerHandle;
 };

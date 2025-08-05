@@ -16,18 +16,3 @@ ATRifle:: ATRifle()
 }
 
 
-
-void ATRifle::Fire()
-{
-	WeaponType = EWeaponType::Rifle;
-	ATWeaponBase::Fire();
-	
-}
-
-
-void ATRifle::Reload()
-{
-	WeaponType = EWeaponType::Rifle;
-	ATWeaponBase::Reload();
-	
-}

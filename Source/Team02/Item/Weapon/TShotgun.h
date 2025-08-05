@@ -14,10 +14,6 @@ class TEAM02_API ATShotgun : public ATWeaponBase
 public:
 	ATShotgun();
 
-	
-	virtual void Fire() override;
-
-	virtual void Reload() override;
 
 	
 
