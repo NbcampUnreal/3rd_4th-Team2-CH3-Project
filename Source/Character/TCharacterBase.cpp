@@ -6,6 +6,7 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/TAnimInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 ATCharacterBase::ATCharacterBase()
@@ -39,6 +40,13 @@ void ATCharacterBase::BeginPlay()
 	{
 		AnimInstance->OnPostDead.AddDynamic(this, &ThisClass::HandleOnPostCharacterDead);
 	}
+}
+
+void ATCharacterBase::HandleOnCheckInputAttack()
+{
+	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
+
 }
 
 void ATCharacterBase::BeginAttack()

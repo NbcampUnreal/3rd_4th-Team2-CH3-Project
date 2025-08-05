@@ -48,31 +48,30 @@ protected:
 #pragma region Attack
 
 public:
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
-	virtual void BeginAttack();
+	void HandleOnCheckInputAttack();
 	
+	virtual void BeginAttack();
+
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 
-	UFUNCTION()
-	void HandleOnCheckHit();
-
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
+
+	int32 MaxComboCount = 3;
+
+	int32 CurrentComboCount = 0;
 
 	bool bIsNowAttacking = false;
 
 	bool bIsAttackKeyPressed = false;
 
+	//라이플 공격하는 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackFireMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackMeleeRange = 50.f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackMeleeRadius = 20.f;
 
 	FOnMontageEnded OnNormalAttackMontageEndedDelegate;
 

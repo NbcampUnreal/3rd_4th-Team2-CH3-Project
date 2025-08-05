@@ -30,14 +30,23 @@ protected:
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bIbterruped);
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TObjectPtr<ATGunNPCWeapon> CurrentRifle;
+
 public: 
 	
 	bool bIsNowAttacking;
 
-	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const;
+	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon);
 
+	static int32 ShowGunAttackDebug;
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION()
+	void HandleOnCheckHit();
+	
 protected:
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
-	
 	
 };
