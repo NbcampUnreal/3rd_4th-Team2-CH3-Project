@@ -33,11 +33,6 @@ ATCharacterBase::ATCharacterBase()
 	bIsDead = false;
 }
 
-void ATCharacterBase::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
-}
-
 // 테스트용 함수
 float ATCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {

@@ -45,7 +45,7 @@ void ATNonPlayerCharacter::BeginPlay()
 	}
 }
 
-void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const
+void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 {
 	if (Weapon)
 	{
