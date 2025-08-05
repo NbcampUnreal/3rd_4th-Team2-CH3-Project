@@ -92,7 +92,7 @@ void UTMonsterHealthBarComponent::InitializeHealthBar()
 		HealthBarWidgetComponent->SetDrawSize(FVector2D(500.0f, 200.0f));  // 사이즈 설정
 		HealthBarWidgetComponent->SetWorldScale3D(FVector(0.2f, 0.2f, 0.2f)); // 스케일 조정
 		HealthBarWidgetComponent->SetDrawAtDesiredSize(false);
-		HealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 205.0f)); // UI위치
+		HealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f)); // UI위치
 		
 
 		// 항상 카메라를 바라보도록

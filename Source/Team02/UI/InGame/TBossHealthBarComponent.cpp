@@ -85,7 +85,7 @@ void UTBossHealthBarComponent::InitializeBossHealthBar()
 		BossHealthBarWidgetComponent->SetWidgetClass(BossHealthBarWidgetClass);
 		BossHealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 
-		BossHealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f,0.0f,225.0f));
+		BossHealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f,0.0f,190.0f));
 
 		// 보스 체력바 월드 배치크기
 		BossHealthBarWidgetComponent->SetDrawSize(FVector2D(800.0f,300.0f));
