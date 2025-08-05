@@ -17,18 +17,3 @@ ATShotgun::ATShotgun()
 	
 }
 
-
-void ATShotgun::Fire()
-{
-	WeaponType = EWeaponType::Shotgun;
-	ATWeaponBase::Fire();
-	
-}
-
-
-void ATShotgun::Reload()
-{
-	WeaponType = EWeaponType::Shotgun;
-	ATWeaponBase::Reload();
-	
-}

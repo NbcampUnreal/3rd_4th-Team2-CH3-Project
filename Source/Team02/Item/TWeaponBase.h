@@ -32,15 +32,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float Damage;
 
+	// 총 총알 최대치 가져오기
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	int32 GetTotalAmmo() const { return TotalAmmo; }
 
+	// 총 총알 최대치 세팅
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void SetTotalAmmo(int32 NewAmmo) { TotalAmmo = FMath::Clamp(NewAmmo, 0, MaxTotalAmmo); }
 
+	// 총 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	int32 MaxTotalAmmo = 180;
-	
+
+	//장전할 수 있는 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int32 MaxAmmo;
 
@@ -69,6 +73,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Fire();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void FireFrom(FVector Start, FVector FireDir);
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Reload();
 

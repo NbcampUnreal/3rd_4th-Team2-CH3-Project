@@ -25,7 +25,7 @@ void ATPlayerController::BeginPlay()
 		//시간 델리게이트 관련함수
 		if (ATGameState* GS=GetWorld()->GetGameState<ATGameState>())
 		{
-			GS->OnGameTimeUpdate.AddDynamic(this,&ATPlayerController::OnGameTimeUpdate);
+			//GS->OnGameTimeUpdate.AddDynamic(this,&ATPlayerController::OnGameTimeUpdate);
 		}
 	}
 }
@@ -59,19 +59,19 @@ void ATPlayerController::OnGameTimeUpdate(float NewTime)
 	if (ATGameState* GS = GetWorld()->GetGameState<ATGameState>())
 	{
 		// 웨이브 시간 업데이트
-		FString TimeString = GS->GetFormattedTime();
+		//FString TimeString = GS->GetFormattedTime();
 		UTextBlock* WaveTimeText = Cast<UTextBlock>(PlayerUIWidget->GetWidgetFromName(TEXT("WaveTimeText")));
 		if (WaveTimeText)
 		{
-			WaveTimeText->SetText(FText::FromString(TimeString));
+			//WaveTimeText->SetText(FText::FromString(TimeString));
 		}
 
 		// 웨이브 레벨 업데이트
-		FString WaveLevelString = FString::Printf(TEXT("Wave %d/%d"), GS->CurrentWave, GS->MaxWave);
+		//FString WaveLevelString = FString::Printf(TEXT("Wave %d/%d"), GS->CurrentWave, GS->MaxWave);
 		UTextBlock* WaveLevelText = Cast<UTextBlock>(PlayerUIWidget->GetWidgetFromName(TEXT("WaveLevelText")));
 		if (WaveLevelText)
 		{
-			WaveLevelText->SetText(FText::FromString(WaveLevelString));
+			//WaveLevelText->SetText(FText::FromString(WaveLevelString));
 		}
 	}
 }
