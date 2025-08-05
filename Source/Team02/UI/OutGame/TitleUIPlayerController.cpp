@@ -66,10 +66,10 @@ void ATitleUIPlayerController::ShowMainMenu(bool bIsRestart)
 	}
 }
 
-// 게임 시작 - PlayGround 오픈
-void ATitleUIPlayerController::StartGame()
-{
-	UGameplayStatics::OpenLevel(GetWorld(), FName("TitleLevel"));
-}
+// // 게임 시작 - PlayGround 오픈
+// void ATitleUIPlayerController::StartGame()
+// {
+// 	UGameplayStatics::OpenLevel(GetWorld(), FName("TitleLevel"));
+// }
 
 

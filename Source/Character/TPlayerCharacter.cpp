@@ -3,11 +3,13 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
 #include "Input/TInputConfig.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Item/TWeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ATPlayerCharacter::ATPlayerCharacter()
 {
@@ -96,6 +98,7 @@ void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump);
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->FireAction, ETriggerEvent::Triggered, this, &ThisClass::OnFire);
                 EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->ReloadAction, ETriggerEvent::Triggered, this, &ThisClass::OnReload);
+                EnhancedInputComponent->BindAction(PlayerCharacterInputConfig->Pause, ETriggerEvent::Triggered, this, &ThisClass::OnPause);
         }
 }
 
@@ -142,5 +145,47 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
                 // 무기 타입 문자열 출력
                 FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
                 UKismetSystemLibrary::PrintString(this, Msg);
+        }
+}
+void ATPlayerCharacter::OnPause(const FInputActionValue& InValue)
+{
+        if (APlayerController* PC = Cast<APlayerController>(GetController()))
+        {
+                if (!PauseMenuInstance && PauseMenuClass)
+                {
+                        PauseMenuInstance = CreateWidget<UUserWidget>(PC, PauseMenuClass);
+                }
+
+                if (PauseMenuInstance && !PauseMenuInstance->IsInViewport())
+                {
+                        PauseMenuInstance->AddToViewport();
+
+                        UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+                        FInputModeUIOnly InputMode;
+                        InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
+                        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+                        PC->SetInputMode(InputMode);
+                        PC->bShowMouseCursor = true;
+                }
+        }
+}
+
+// 게임 재개 함수 (C++에서 호출용)
+void ATPlayerCharacter::RestartGame()
+{
+        if (APlayerController* PC = Cast<APlayerController>(GetController()))
+        {
+                if (PauseMenuInstance)
+                {
+                        PauseMenuInstance->RemoveFromParent();
+                        PauseMenuInstance = nullptr;
+                }
+
+                UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+                FInputModeGameOnly InputMode;
+                PC->SetInputMode(InputMode);
+                PC->bShowMouseCursor = false;
         }
 }

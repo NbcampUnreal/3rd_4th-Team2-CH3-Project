@@ -46,6 +46,8 @@ private:
 	void OnFire(const FInputActionValue& InValue);
 
 	void OnReload(const FInputActionValue& InValue);
+
+	void OnPause(const FInputActionValue& InValue);
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
@@ -55,6 +57,16 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ATWeaponBase> DefaultWeaponClass;
+
+	// 위젯 클래스 선언
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	// 위젯 인스턴스 캐싱용
+	UUserWidget* PauseMenuInstance;
+
+	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
+	void RestartGame();
 
 #pragma endregion
 
