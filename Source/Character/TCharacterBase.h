@@ -32,9 +32,6 @@ public:
 
 	bool IsDead() const { return bIsDead; }
 
-	// 테스트용 데미지 함수
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float MaxHP = 100.f;
@@ -48,6 +45,9 @@ protected:
 #pragma region Attack
 
 public:
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
 	void HandleOnCheckInputAttack();
 	
 	virtual void BeginAttack();
