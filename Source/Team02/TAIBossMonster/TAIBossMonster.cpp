@@ -1,4 +1,5 @@
 #include "Team02/TAIBossMonster/TAIBossMonster.h"
+#include "Animation/TAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ATAIBossMonster::ATAIBossMonster()
@@ -23,4 +24,16 @@ void ATAIBossMonster::BeginPlay()
 		
 	}
 }
+
+// void ATAIBossMonster::BeginAttack()
+// {
+// 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+// 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
+//
+// 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+// 	if (IsValid(AnimInstance) == true && IsValid(AttackMelee) == true && AnimInstance->Montage_IsPlaying(AttackMeleeMontage) == false)
+// 	{
+//
+// 	}
+//}
 
