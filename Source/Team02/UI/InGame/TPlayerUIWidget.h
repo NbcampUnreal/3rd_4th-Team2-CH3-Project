@@ -21,6 +21,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateWaveTime(const FString& TimeString);
 
+	//거점 점령 관련 함수
+
+	UFUNCTION(BlueprintCallable)
+	void ShowCaptureUI(const FString& AreaName);
+	
+	UFUNCTION(BlueprintCallable)
+	void HideCaptureUI();
+	
+	UFUNCTION(BlueprintCallable)
+	void UpdateCaptureProgress(float Progress);
+
+	//거점 UI 표시 상태 확인 함수 추가
+	UFUNCTION(BlueprintCallable)
+	bool IsCaptureUIVisible() const;
+
+	// 임무 관련 함수 추가
+	UFUNCTION(BlueprintCallable)
+	void UpdateMissionObjective(const FString& ObjectiveText);
+
+	
+
 protected:
 	// ⭐ 각 이름이 한 번씩만 나와야 함
 	UPROPERTY(meta = (BindWidget))
@@ -36,7 +57,7 @@ protected:
 	TObjectPtr<UTextBlock> WaveTimeText;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> WaveComeText;
+	TObjectPtr<UTextBlock> WaveAlarmText;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ObjectText;
