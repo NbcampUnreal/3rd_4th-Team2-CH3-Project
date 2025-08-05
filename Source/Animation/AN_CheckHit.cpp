@@ -1,5 +1,5 @@
 #include "Animation/AN_CheckHit.h"
-#include "Character/TCharacterBase.h"
+#include "Character/TNonPlayerCharacter.h"
 
 //일반 공격하는 노티파이 함수
 
@@ -9,7 +9,7 @@ void UAN_CheckHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* A
 
 	if (IsValid(MeshComp) == true)
 	{
-		ATCharacterBase* AttackingCharacter = Cast<ATCharacterBase>(MeshComp->GetOwner());
+		ATNonPlayerCharacter* AttackingCharacter = Cast<ATNonPlayerCharacter>(MeshComp->GetOwner());
 		if (IsValid(AttackingCharacter) ==true)
 		{
 			AttackingCharacter->HandleOnCheckHit();
