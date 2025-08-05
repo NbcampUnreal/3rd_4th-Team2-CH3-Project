@@ -33,16 +33,19 @@ ATCharacterBase::ATCharacterBase()
 	bIsDead = false;
 }
 
-void ATCharacterBase::HandleOnCheckHit()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckHit())"));
-}
-
-// 테스트용 함수
-float ATCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	CurrentHP = FMath::Clamp(CurrentHP - FinalDamageAmount, 0.f, MaxHP);
+
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		bIsDead = true;
+		CurrentHP = 0.f;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	}
 	return FinalDamageAmount;
 }
 
