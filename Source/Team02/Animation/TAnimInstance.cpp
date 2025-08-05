@@ -35,6 +35,8 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		
 		bIsFalling = OwnerCharacterMovement ->IsFalling();
+
+		bIsDead = OwnerCharacter->IsDead();
 	}
 }
 

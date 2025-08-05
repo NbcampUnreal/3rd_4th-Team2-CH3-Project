@@ -39,6 +39,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	uint8 bShouldMove : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsDead : 1;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
