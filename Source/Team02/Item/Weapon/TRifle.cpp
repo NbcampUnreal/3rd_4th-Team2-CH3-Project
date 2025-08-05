@@ -8,6 +8,7 @@ ATRifle:: ATRifle()
 {
 	Damage = 15;
 	MaxAmmo = 30;
+	TotalAmmo = 50;
 	CurrentAmmo = 30;
 	FireRate = 0.2f;
 	ReloadTime = 1.5f;
@@ -15,18 +16,3 @@ ATRifle:: ATRifle()
 }
 
 
-
-void ATRifle::Fire()
-{
-	WeaponType = EWeaponType::Rifle;
-	ATWeaponBase::Fire();
-	
-}
-
-
-void ATRifle::Reload()
-{
-	WeaponType = EWeaponType::Rifle;
-	ATWeaponBase::Reload();
-	
-}

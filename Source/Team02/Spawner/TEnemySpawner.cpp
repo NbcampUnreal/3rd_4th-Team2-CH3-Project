@@ -1,75 +1,98 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #include "Team02/Spawner/TEnemySpawner.h"
 #include "TimerManager.h"
 #include "Character/TNonPlayerCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
 
-// Sets default values
+// 생성자
 ATEnemySpawner::ATEnemySpawner()
 {
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = false;
 
-	SceneRootComponent= CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	RootComponent = SceneRootComponent;
-	StaticMeshcomp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	StaticMeshcomp -> SetupAttachment(RootComponent);
-	SpawnArea = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnArea"));
-	SpawnArea->SetupAttachment(StaticMeshcomp);
+    RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+    RootComponent = RootComp;
+
+    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+    MeshComp->SetupAttachment(RootComponent);
+
+    SpawnArea = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnArea"));
+    SpawnArea->SetupAttachment(MeshComp);
 }
 
-// Called when the game starts or when spawned
 void ATEnemySpawner::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
+    // 스포너는 기본적으로 비활성 상태(원하면 여기서 Activate 가능)
+}
 
-	if (EnemyClass)
-	{
-		// 주기적으로 SpawnEnemy 호출
-		GetWorld()->GetTimerManager().SetTimer(
-			SpawnTimerHandle, this,
-			&ATEnemySpawner::SpawnEnemy,
-			SpawnInterval, true // 반복
-		);
-	}
+void ATEnemySpawner::ActivateSpawner()
+{
+    if (bIsActive || !EnemyClass) return;
+
+    bIsActive = true;
+    CurrentSpawned = 0;
+
+    GetWorld()->GetTimerManager().SetTimer(
+        SpawnTimerHandle,
+        this,
+        &ATEnemySpawner::SpawnEnemy,
+        SpawnInterval,
+        true
+    );
+}
+
+void ATEnemySpawner::DeactivateSpawner()
+{
+    if (!bIsActive) return;
+
+    bIsActive = false;
+    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 }
 
 void ATEnemySpawner::SpawnEnemy()
 {
-	if (!EnemyClass) return;
-	
-	
-	if (CurrentSpawned >= MaxSpawnCount)
-	{
-		// 더 이상 소환하지 않음
-		GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
-		return;
-	}
+    if (!bIsActive || !EnemyClass) return;
+    if (CurrentSpawned >= MaxSpawnCount)
+    {
+        DeactivateSpawner();
+        return;
+    }
 
-	FVector SpawnLoc = GetRandomPointInBox();
-	FRotator SpawnRot = GetActorRotation();
+    FVector SpawnLoc = GetRandomPointInBox();
+    FRotator SpawnRot = GetActorRotation();
 
-	ATNonPlayerCharacter* Enemy = GetWorld()->SpawnActor<ATNonPlayerCharacter>(EnemyClass, SpawnLoc, SpawnRot);
+    ATNonPlayerCharacter* Enemy = GetWorld()->SpawnActor<ATNonPlayerCharacter>(EnemyClass, SpawnLoc, SpawnRot);
 
-	if (Enemy)
-	{
-		++CurrentSpawned;
-	}
+    if (Enemy)
+    {
+        ++CurrentSpawned;
+    }
 }
 
 FVector ATEnemySpawner::GetRandomPointInBox() const
 {
-	FVector Origin = SpawnArea->Bounds.Origin;
-	FVector Extent = SpawnArea->GetScaledBoxExtent();
+    FVector Origin = SpawnArea->Bounds.Origin;
+    FVector Extent = SpawnArea->GetScaledBoxExtent();
 
-	// -Extent~+Extent 범위에서 랜덤	
-	FVector RandomLocal = FVector(
-		FMath::FRandRange(-Extent.X, Extent.X),
-		FMath::FRandRange(-Extent.Y, Extent.Y),
-		FMath::FRandRange(-Extent.Z, Extent.Z)
-	);
+    FVector RandomLocal(
+        FMath::FRandRange(-Extent.X, Extent.X),
+        FMath::FRandRange(-Extent.Y, Extent.Y),
+        FMath::FRandRange(-Extent.Z, Extent.Z)
+    );
 
-	return Origin + RandomLocal;
+    return Origin + RandomLocal;
+}
+
+void ATEnemySpawner::SetSpawnerActive(bool bEnable)
+{
+    if (bEnable)
+        ActivateSpawner();
+    else
+        DeactivateSpawner();
 }

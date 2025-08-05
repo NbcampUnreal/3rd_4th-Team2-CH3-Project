@@ -6,6 +6,7 @@
 class UBoxComponent;
 class UStaticMeshComponent;
 class ATMovingWall;
+class ATGameMode;
 UCLASS()
 class TEAM02_API ATCapturePoint : public AActor
 {
@@ -23,6 +24,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* Root;
+
+
 	
 	// 캡처 영역을 표시할 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -43,6 +46,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bPlayerInArea;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ZoneIndex;
+
+	ATGameMode* GM;
 	// 오버랩 이벤트
 	UFUNCTION()
 	virtual void OnOverlapBegin(

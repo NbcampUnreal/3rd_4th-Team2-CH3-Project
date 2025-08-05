@@ -1,9 +1,10 @@
 #include "TCapturePoint.h"
-
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
+#include "TGameMode.h"
+
 
 ATCapturePoint::ATCapturePoint()
 {
@@ -19,6 +20,7 @@ ATCapturePoint::ATCapturePoint()
 	CaptureAreaCollider->OnComponentBeginOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapBegin);
 	CaptureAreaCollider->OnComponentEndOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapEnd);
 
+	
 	CapturePercent = 0.0f;
 	bPlayerInArea = false;
 }
@@ -26,6 +28,7 @@ ATCapturePoint::ATCapturePoint()
 void ATCapturePoint::BeginPlay()
 {
 	Super::BeginPlay();
+	GM = GetWorld()->GetAuthGameMode<ATGameMode>();
 }
 
 void ATCapturePoint::Tick(float DeltaTime)
@@ -40,6 +43,8 @@ void ATCapturePoint::Tick(float DeltaTime)
 		
 		if (CapturePercent >= 100.f)
 		{
+			
+			GM->OnCapturePointCompleted();
 			CapturePercent = 100.f;
 			NotifyWall();
 		}
@@ -69,6 +74,12 @@ void ATCapturePoint::OnOverlapBegin(
 	if (OtherActor && OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		bPlayerInArea = true;
+
+		// 웨이브 시작 (최초 진입 때만, 혹은 조건에 따라 한 번만)
+		if (GM && !GM->bIsWaveActive)   // 이미 웨이브 중이면 패스
+		{
+			GM->OnZoneOverlap(ZoneIndex);   // 여기서만 최초 1회!
+		}
 	}
 }
 

@@ -8,6 +8,7 @@ ATShotgun::ATShotgun()
 {
 	Damage = 60;
 	MaxAmmo = 7;
+	TotalAmmo = 30;
 	CurrentAmmo = 7;
 	FireRate = 1.2f;
 	ReloadTime = 1.5f;
@@ -16,18 +17,3 @@ ATShotgun::ATShotgun()
 	
 }
 
-
-void ATShotgun::Fire()
-{
-	WeaponType = EWeaponType::Shotgun;
-	ATWeaponBase::Fire();
-	
-}
-
-
-void ATShotgun::Reload()
-{
-	WeaponType = EWeaponType::Shotgun;
-	ATWeaponBase::Reload();
-	
-}

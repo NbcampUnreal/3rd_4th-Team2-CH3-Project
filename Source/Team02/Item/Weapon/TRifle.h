@@ -15,9 +15,5 @@ class TEAM02_API ATRifle : public ATWeaponBase
 public:
 	ATRifle();
 	
-	virtual void Fire() override;
 
-	virtual void Reload() override;
-
-	
 };

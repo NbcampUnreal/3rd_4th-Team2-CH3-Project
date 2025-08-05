@@ -7,8 +7,10 @@
 ATPistol::ATPistol()
 {
 	Damage = 15;
+	SetTotalAmmo(100);
 	MaxAmmo = 7;
 	CurrentAmmo = 7;
+	
 	FireRate = 1.2f;
 	ReloadTime = 1.5f;
 	Range = 200.0f;
@@ -17,17 +19,4 @@ ATPistol::ATPistol()
 }
 
 
-void ATPistol::Fire()
-{
-	WeaponType = EWeaponType::Pistol;
-	ATWeaponBase::Fire();
-	
-}
 
-
-void ATPistol::Reload()
-{
-	WeaponType = EWeaponType::Pistol;
-	ATWeaponBase::Reload();
-	
-}

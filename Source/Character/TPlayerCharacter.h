@@ -36,6 +36,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UCameraComponent> CameraComponent;
 
+	
 #pragma endregion
 
 #pragma region Input
