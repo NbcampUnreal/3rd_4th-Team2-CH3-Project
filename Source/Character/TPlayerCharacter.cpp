@@ -178,14 +178,16 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 
     // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
     CurrentWeapon->FireFrom(MuzzleLoc, FireDir); // <<--- 새 함수 필요!
-  }
 
-  UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-  if (IsValid(AnimInstance) == true)
-  {
-    if (AnimInstance->Montage_IsPlaying(GetCurrentWeaponAttackAnimMontage()) == false)
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (IsValid(AnimInstance) == true)
     {
-      AnimInstance->Montage_Play(GetCurrentWeaponAttackAnimMontage());
+      if (AnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()) == false)
+      {
+        UE_LOG(LogTemp, Log, TEXT("Play AnimMontage"))
+        float temp = AnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
+        UE_LOG(LogTemp, Warning, TEXT("%f"), temp);
+      }
     }
   }
 }

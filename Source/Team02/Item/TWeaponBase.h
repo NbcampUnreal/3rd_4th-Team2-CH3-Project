@@ -109,8 +109,7 @@ public:
 	);
 	virtual void ResetCanFire();
 
-	UAnimMontage* GetAttackMontage() const { return AttackMontage; } // 주석처리
-	
+	UAnimMontage* GetAttackMontage();
 protected:
 	FTimerHandle FireRateTimerHandle;
 	bool bCanFire = true;

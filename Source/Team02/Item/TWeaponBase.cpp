@@ -264,3 +264,8 @@ void ATWeaponBase::ResetCanFire()
 {
 	bCanFire = true;
 }
+
+UAnimMontage* ATWeaponBase::GetAttackMontage()
+{
+	return AttackMontage;
+}
