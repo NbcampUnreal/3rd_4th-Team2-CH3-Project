@@ -13,6 +13,10 @@ void ATPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 플레이어 입력을 게임 전용 모드로 설정 (UI 입력 차단, 마우스 커서 숨김)
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	
 	//점검용 로그
 	UE_LOG(LogTemp, Warning, TEXT("PlayerController BeginPlay called"));
 
