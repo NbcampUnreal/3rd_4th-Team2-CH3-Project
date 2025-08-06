@@ -14,6 +14,7 @@ enum class EWeaponType : uint8
 };
 
 class ATItemBase;
+class UAnimMontage;
 
 UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
@@ -107,10 +108,15 @@ public:
 		const FHitResult& SweepResult
 	);
 	virtual void ResetCanFire();
+
+	UAnimMontage* GetAttackMontage() const { return AttackMontage; } // 주석처리
 	
 protected:
 	FTimerHandle FireRateTimerHandle;
 	bool bCanFire = true;
 	
 	FTimerHandle ReloadTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) // 주석처리
+	TObjectPtr<UAnimMontage> AttackMontage;
 };

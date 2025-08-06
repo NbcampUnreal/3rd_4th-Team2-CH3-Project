@@ -178,8 +178,15 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 
     // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
     CurrentWeapon->FireFrom(MuzzleLoc, FireDir); // <<--- 새 함수 필요!
+  }
 
-    // 기존 문자열 출력 등 유지
+  UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+  if (IsValid(AnimInstance) == true)
+  {
+    if (AnimInstance->Montage_IsPlaying(GetCurrentWeaponAttackAnimMontage()) == false)
+    {
+      AnimInstance->Montage_Play(GetCurrentWeaponAttackAnimMontage());
+    }
   }
 }
 
