@@ -7,6 +7,7 @@
 #include "Character/TCharacterBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Team02.h"
 
 ATWeaponBase::ATWeaponBase()
@@ -54,7 +55,7 @@ void ATWeaponBase::OnOverlapBegin(
 				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 				TEXT("Hand_R_Socket")
 			);
-			SetActorHiddenInGame(false); // <<<<<<<<<< 꼭 해줘야 함!
+			SetActorHiddenInGame(false); 
 			SetActorEnableCollision(false);
 		}
 		// 추가: 효과음, UI 표시, 인벤토리 추가 등
@@ -144,52 +145,55 @@ void ATWeaponBase::Fire()
 
 void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
 {
-	if (!CanFire()) return;
+    if (!CanFire()) return;
+	FVector MuzzleLoc = MuzzlePoint->GetComponentLocation();
+	FRotator MuzzleRot = MuzzlePoint->GetComponentRotation();
+	
+    FVector TraceEnd = Start + (FireDir * Range);
+	FireEffect(Start, FireDir );
+	FireSounds(FireDir);
+    FHitResult HitResult;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+    if (GetOwner())
+        Params.AddIgnoredActor(GetOwner());
 
-	FVector TraceEnd = Start + (FireDir * Range);
+    bool bHit = GetWorld()->LineTraceSingleByChannel(
+        HitResult, Start, TraceEnd, ECC_ATTACK, Params);
+	
+    
 
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	if (GetOwner())
-		Params.AddIgnoredActor(GetOwner());
+    if (bHit && HitResult.GetActor())
+    {
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult, Start, TraceEnd, ECC_ATTACK, Params);
+        // 데미지 전달 (TakeDamage로 자동 호출)
+        UGameplayStatics::ApplyPointDamage(
+            HitResult.GetActor(),
+            Damage,                     // float: 데미지량
+            FireDir,                    // FVector: 방향
+            HitResult,                  // FHitResult: 피격 정보
+            GetOwner() ? GetOwner()->GetInstigatorController() : nullptr,
+            this,                       // DamageCauser: 누가 쐈는지
+            nullptr                     // DamageTypeClass(기본 null)
+        );
 
-	// (옵션) 디버그 선
-	DrawDebugLine(GetWorld(), Start, TraceEnd, FColor::Red, false, 1.0f, 0, 2.0f);
-
-	if (bHit && HitResult.GetActor())
-	{
-		// 데미지 전달 (TakeDamage로 자동 호출)
-		UGameplayStatics::ApplyPointDamage(
-			HitResult.GetActor(),
-			Damage, // float: 데미지량
-			FireDir, // FVector: 방향
-			HitResult, // FHitResult: 피격 정보
-			GetOwner() ? GetOwner()->GetInstigatorController() : nullptr,
-			this, // DamageCauser: 누가 쐈는지
-			nullptr // DamageTypeClass(기본 null)
-		);
-
-		// (옵션) 디버그 출력
-		if (ATCharacterBase* HitChar = Cast<ATCharacterBase>(HitResult.GetActor()))
-		{
-			UKismetSystemLibrary::PrintString(
-				this, FString::Printf(TEXT("Hit: %s / HP: %.1f"),
-				                      *HitChar->GetName(), HitChar->GetCurrentHP()));
-		}
-		else
-		{
-			UKismetSystemLibrary::PrintString(
-				this, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
-		}
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(this, TEXT("Miss!"));
-	}
+        //  디버그 출력
+        if (ATCharacterBase* HitChar = Cast<ATCharacterBase>(HitResult.GetActor()))
+        {
+            UKismetSystemLibrary::PrintString(
+                this, FString::Printf(TEXT("Hit: %s / HP: %.1f"),
+                *HitChar->GetName(), HitChar->GetCurrentHP()));
+        }
+        else
+        {
+            UKismetSystemLibrary::PrintString(
+                this, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
+        }
+    }
+    else
+    {
+        UKismetSystemLibrary::PrintString(this, TEXT("Miss!"));
+    }
 
 	bCanFire = false;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -267,4 +271,24 @@ void ATWeaponBase::ResetCanFire()
 UAnimMontage* ATWeaponBase::GetAttackMontage()
 {
 	return AttackMontage;
+}
+
+
+void ATWeaponBase::FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot) const
+{
+	// === 1. 총구 이펙트(파티클) 실행 ===
+	if (MuzzleFlashFX)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(), MuzzleFlashFX, MuzzleLoc,  MuzzleRot.Rotation()
+		);
+	}
+}
+
+void ATWeaponBase::FireSounds(FVector& MuzzleLoc)
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, MuzzleLoc);
+	}
 }
