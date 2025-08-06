@@ -44,6 +44,7 @@ void UTAIBossBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 					FCollisionShape::MakeSphere(DetectRadius),
 					CollisionQueryParams
 				);
+				
 				UBlackboardComponent* BlackboardComp=OwnerComp.GetBlackboardComponent();
 				BlackboardComp->SetValueAsObject(ATBossAIController::TargetCharacterKey,nullptr);
 				
