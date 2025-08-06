@@ -107,6 +107,7 @@ float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 		if (IsValid(AIController) == true)
 		{
 			AIController->EndAI();
+			CurrentRifle->SetLifeSpan(0.7f);
 		}
 	}
 	
@@ -182,6 +183,7 @@ void ATNonPlayerCharacter::HandleOnCheckHit()
 		}
 	}
 
+	//디버그용
 	if (1 == ShowGunAttackDebug)
 	{
 		if (bResult == true)

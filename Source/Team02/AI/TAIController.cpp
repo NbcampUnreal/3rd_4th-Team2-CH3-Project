@@ -4,6 +4,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Item/TGunNPCWeapon.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 //순찰 범위
@@ -83,11 +84,10 @@ void ATAIController::BeginAI(APawn* InPawn)
 void ATAIController::EndAI()
 {
 	UBehaviorTreeComponent* BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
-
+	
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
 		BehaviorTreeComponent->StopTree();
-		
 
 		if (ShowAIDebug == 1)
 		{
