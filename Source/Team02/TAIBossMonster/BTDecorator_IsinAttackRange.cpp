@@ -3,11 +3,13 @@
 #include "TBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-const float UBTDecorator_IsinAttackRange::AttackRange(200.f);
+
+ 
 
 UBTDecorator_IsinAttackRange::UBTDecorator_IsinAttackRange()
 {
 	NodeName=TEXT("IsInAttackRange");
+	
 }
 
 bool UBTDecorator_IsinAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
