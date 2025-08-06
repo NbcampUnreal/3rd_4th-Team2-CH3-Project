@@ -184,9 +184,7 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
     {
       if (AnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()) == false)
       {
-        UE_LOG(LogTemp, Log, TEXT("Play AnimMontage"))
-        float temp = AnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
-        UE_LOG(LogTemp, Warning, TEXT("%f"), temp);
+        AnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
       }
     }
   }
@@ -203,46 +201,47 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
     UKismetSystemLibrary::PrintString(this, Msg);
   }
 }
+
 void ATPlayerCharacter::OnPause(const FInputActionValue& InValue)
 {
-        if (APlayerController* PC = Cast<APlayerController>(GetController()))
-        {
-                if (!PauseMenuInstance && PauseMenuClass)
-                {
-                        PauseMenuInstance = CreateWidget<UUserWidget>(PC, PauseMenuClass);
-                }
+  if (APlayerController* PC = Cast<APlayerController>(GetController()))
+  {
+    if (!PauseMenuInstance && PauseMenuClass)
+    {
+      PauseMenuInstance = CreateWidget<UUserWidget>(PC, PauseMenuClass);
+    }
 
-                if (PauseMenuInstance && !PauseMenuInstance->IsInViewport())
-                {
-                        PauseMenuInstance->AddToViewport();
+    if (PauseMenuInstance && !PauseMenuInstance->IsInViewport())
+    {
+      PauseMenuInstance->AddToViewport();
 
-                        UGameplayStatics::SetGamePaused(GetWorld(), true);
+      UGameplayStatics::SetGamePaused(GetWorld(), true);
 
-                        FInputModeUIOnly InputMode;
-                        InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
-                        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-                        PC->SetInputMode(InputMode);
-                        PC->bShowMouseCursor = true;
-                }
-        }
+      FInputModeUIOnly InputMode;
+      InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
+      InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+      PC->SetInputMode(InputMode);
+      PC->bShowMouseCursor = true;
+    }
+  }
 }
 
 // 게임 재개 함수 (C++에서 호출용)
 void ATPlayerCharacter::RestartGame()
 {
-        if (APlayerController* PC = Cast<APlayerController>(GetController()))
-        {
-                if (PauseMenuInstance)
-                {
-                        PauseMenuInstance->RemoveFromParent();
-                        PauseMenuInstance = nullptr;
-                }
+  if (APlayerController* PC = Cast<APlayerController>(GetController()))
+  {
+    if (PauseMenuInstance)
+    {
+      PauseMenuInstance->RemoveFromParent();
+      PauseMenuInstance = nullptr;
+    }
 
-                UGameplayStatics::SetGamePaused(GetWorld(), false);
+    UGameplayStatics::SetGamePaused(GetWorld(), false);
 
-                FInputModeGameOnly InputMode;
-                PC->SetInputMode(InputMode);
-                PC->bShowMouseCursor = false;
-        }
+    FInputModeGameOnly InputMode;
+    PC->SetInputMode(InputMode);
+    PC->bShowMouseCursor = false;
+  }
 }
 
