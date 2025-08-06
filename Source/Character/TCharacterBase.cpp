@@ -4,10 +4,11 @@
 #include "Components/CapsuleComponent.h"
 #include "Animation/TAnimInstance.h"
 #include "Engine/EngineTypes.h"
+#include "Item/TWeaponBase.h"
 #include "Engine/DamageEvents.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/TAnimInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ATCharacterBase::ATCharacterBase()
 {
@@ -46,7 +47,6 @@ void ATCharacterBase::HandleOnCheckInputAttack()
 {
 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
-
 }
 
 void ATCharacterBase::BeginAttack()
@@ -55,15 +55,15 @@ void ATCharacterBase::BeginAttack()
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
 	
 	bIsNowAttacking = true;
-	if (IsValid(AnimInstance) == true&& IsValid(AttackFireMontage) == true && AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+	if (IsValid(AnimInstance) == true&& IsValid(GetCurrentWeaponAttackAnimMontage()) == true && AnimInstance->Montage_IsPlaying(GetCurrentWeaponAttackAnimMontage()) == false)
 	{
-		AnimInstance->Montage_Play(AttackFireMontage);
+		AnimInstance->Montage_Play(GetCurrentWeaponAttackAnimMontage());
 	}
 
 	if (OnNormalAttackMontageEndedDelegate.IsBound() == false)
 	{
 		OnNormalAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
-		AnimInstance->Montage_SetEndDelegate(OnNormalAttackMontageEndedDelegate, AttackFireMontage);
+		AnimInstance->Montage_SetEndDelegate(OnNormalAttackMontageEndedDelegate, GetCurrentWeaponAttackAnimMontage());
 	}
 }
 
@@ -77,6 +77,15 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		//바인딩 했던 함수 해재
 		OnNormalAttackMontageEndedDelegate.Unbind();
 	}
+}
+
+UAnimMontage* ATCharacterBase::GetCurrentWeaponAttackAnimMontage() const
+{
+	if (IsValid(CurrentWeapon) == true)
+	{
+		return CurrentWeapon->GetAttackMontage();
+	}
+	return nullptr;
 }
 
 float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -99,4 +108,5 @@ void ATCharacterBase::HandleOnPostCharacterDead()
 {
 	SetLifeSpan(0.1f);
 }
+
 

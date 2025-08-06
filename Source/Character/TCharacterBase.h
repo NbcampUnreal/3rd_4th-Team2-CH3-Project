@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "TCharacterBase.generated.h"
 
+class ATWeaponBase;
+
 UCLASS()
 class TEAM02_API ATCharacterBase : public ACharacter
 {
@@ -55,8 +57,13 @@ public:
 	
 	virtual void BeginAttack();
 
+	UAnimMontage* GetCurrentWeaponAttackAnimMontage() const;
+
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
+
+	UPROPERTY()
+	TObjectPtr<ATWeaponBase> CurrentWeapon;
 
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));

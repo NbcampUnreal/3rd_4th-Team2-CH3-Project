@@ -4,7 +4,7 @@
 #include "Item/TWeaponBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Character/TPlayerCharacter.h"
-#include "Character/TCharacterBase.h" 
+#include "Character/TCharacterBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Team02.h"
@@ -54,11 +54,10 @@ void ATWeaponBase::OnOverlapBegin(
 				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 				TEXT("Hand_R_Socket")
 			);
-			SetActorHiddenInGame(false);          // <<<<<<<<<< 꼭 해줘야 함!
+			SetActorHiddenInGame(false); // <<<<<<<<<< 꼭 해줘야 함!
 			SetActorEnableCollision(false);
 		}
 		// 추가: 효과음, UI 표시, 인벤토리 추가 등
-		
 	}
 }
 
@@ -89,14 +88,14 @@ void ATWeaponBase::Fire()
 		);
 
 		DrawDebugLine(
-		GetWorld(),
-		TraceStart,
-		TraceEnd,
-		FColor::Red,   // 선 색상 (빨간색)
-		false,         // true면 계속, false면 잠깐
-		1.0f,          // 지속시간(초)
-		0,             // 두께 그룹
-		2.0f           // 선 두께
+			GetWorld(),
+			TraceStart,
+			TraceEnd,
+			FColor::Red, // 선 색상 (빨간색)
+			false, // true면 계속, false면 잠깐
+			1.0f, // 지속시간(초)
+			0, // 두께 그룹
+			2.0f // 선 두께
 		);
 		// 피격 처리
 		if (bHit)
@@ -145,61 +144,60 @@ void ATWeaponBase::Fire()
 
 void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
 {
-    if (!CanFire()) return;
+	if (!CanFire()) return;
 
-    FVector TraceEnd = Start + (FireDir * Range);
+	FVector TraceEnd = Start + (FireDir * Range);
 
-    FHitResult HitResult;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this);
-    if (GetOwner())
-        Params.AddIgnoredActor(GetOwner());
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	if (GetOwner())
+		Params.AddIgnoredActor(GetOwner());
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(
-        HitResult, Start, TraceEnd, ECC_ATTACK, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult, Start, TraceEnd, ECC_ATTACK, Params);
 
-    // (옵션) 디버그 선
-    DrawDebugLine(GetWorld(), Start, TraceEnd, FColor::Red, false, 1.0f, 0, 2.0f);
+	// (옵션) 디버그 선
+	DrawDebugLine(GetWorld(), Start, TraceEnd, FColor::Red, false, 1.0f, 0, 2.0f);
 
-    if (bHit && HitResult.GetActor())
-    {
+	if (bHit && HitResult.GetActor())
+	{
+		// 데미지 전달 (TakeDamage로 자동 호출)
+		UGameplayStatics::ApplyPointDamage(
+			HitResult.GetActor(),
+			Damage, // float: 데미지량
+			FireDir, // FVector: 방향
+			HitResult, // FHitResult: 피격 정보
+			GetOwner() ? GetOwner()->GetInstigatorController() : nullptr,
+			this, // DamageCauser: 누가 쐈는지
+			nullptr // DamageTypeClass(기본 null)
+		);
 
-        // 데미지 전달 (TakeDamage로 자동 호출)
-        UGameplayStatics::ApplyPointDamage(
-            HitResult.GetActor(),
-            Damage,                     // float: 데미지량
-            FireDir,                    // FVector: 방향
-            HitResult,                  // FHitResult: 피격 정보
-            GetOwner() ? GetOwner()->GetInstigatorController() : nullptr,
-            this,                       // DamageCauser: 누가 쐈는지
-            nullptr                     // DamageTypeClass(기본 null)
-        );
+		// (옵션) 디버그 출력
+		if (ATCharacterBase* HitChar = Cast<ATCharacterBase>(HitResult.GetActor()))
+		{
+			UKismetSystemLibrary::PrintString(
+				this, FString::Printf(TEXT("Hit: %s / HP: %.1f"),
+				                      *HitChar->GetName(), HitChar->GetCurrentHP()));
+		}
+		else
+		{
+			UKismetSystemLibrary::PrintString(
+				this, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
+		}
+	}
+	else
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("Miss!"));
+	}
 
-        // (옵션) 디버그 출력
-        if (ATCharacterBase* HitChar = Cast<ATCharacterBase>(HitResult.GetActor()))
-        {
-            UKismetSystemLibrary::PrintString(
-                this, FString::Printf(TEXT("Hit: %s / HP: %.1f"),
-                *HitChar->GetName(), HitChar->GetCurrentHP()));
-        }
-        else
-        {
-            UKismetSystemLibrary::PrintString(
-                this, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
-        }
-    }
-    else
-    {
-        UKismetSystemLibrary::PrintString(this, TEXT("Miss!"));
-    }
-
-    bCanFire = false;
-    GetWorld()->GetTimerManager().SetTimer(
-        FireRateTimerHandle,
-        this, &ATWeaponBase::ResetCanFire,
-        FireRate, false
-    );
-    SetCurrentAmmo(GetCurrentAmmo() - 1);
+	bCanFire = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		FireRateTimerHandle,
+		this, &ATWeaponBase::ResetCanFire,
+		FireRate, false
+	);
+	SetCurrentAmmo(GetCurrentAmmo() - 1);
 }
 
 void ATWeaponBase::Reload()
@@ -222,9 +220,9 @@ void ATWeaponBase::Reload()
 	SetCurrentAmmo(GetCurrentAmmo() + AmmoToReload);
 	SetTotalAmmo(GetTotalAmmo() - AmmoToReload);
 
-	FString Msg = FString::Printf(TEXT("Reloaded: %d | Current: %d | Remain: %d"), AmmoToReload, GetCurrentAmmo(), GetTotalAmmo());
+	FString Msg = FString::Printf(
+		TEXT("Reloaded: %d | Current: %d | Remain: %d"), AmmoToReload, GetCurrentAmmo(), GetTotalAmmo());
 	UKismetSystemLibrary::PrintString(this, Msg);
-
 }
 
 bool ATWeaponBase::CanFire() const
@@ -236,6 +234,7 @@ bool ATWeaponBase::CanReload() const
 {
 	return (GetCurrentAmmo() < MaxAmmo) && (GetTotalAmmo() > 0);
 }
+
 void ATWeaponBase::Equip()
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("Equip() called!"));
@@ -253,14 +252,19 @@ FString ATWeaponBase::GetWeaponTypeString() const
 	switch (WeaponType)
 	{
 	case EWeaponType::Shotgun: return TEXT("Shotgun");
-	case EWeaponType::Rifle:   return TEXT("Rifle");
-	case EWeaponType::Pistol:  return TEXT("Pistol");
-		// 필요에 따라 추가
-	default:                   return TEXT("Unknown");
+	case EWeaponType::Rifle: return TEXT("Rifle");
+	case EWeaponType::Pistol: return TEXT("Pistol");
+	// 필요에 따라 추가
+	default: return TEXT("Unknown");
 	}
 }
 
 void ATWeaponBase::ResetCanFire()
 {
 	bCanFire = true;
+}
+
+UAnimMontage* ATWeaponBase::GetAttackMontage()
+{
+	return AttackMontage;
 }
