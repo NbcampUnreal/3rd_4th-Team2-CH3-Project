@@ -15,7 +15,8 @@ enum class EWeaponType : uint8
 
 class ATItemBase;
 class UAnimMontage;
-
+class UNiagaraSystem;
+class USoundBase;
 UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
@@ -110,6 +111,17 @@ public:
 	virtual void ResetCanFire();
 
 	UAnimMontage* GetAttackMontage();
+	
+	// === 파티클/사운드 ===
+	UFUNCTION()
+	void FireSounds(FVector& MuzzleLoc);
+	UFUNCTION()
+	void FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot) const;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
+	UNiagaraSystem* MuzzleFlashFX; // 총구 이펙트
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
+	USoundBase* FireSound;
 protected:
 	FTimerHandle FireRateTimerHandle;
 	bool bCanFire = true;

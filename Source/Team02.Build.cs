@@ -21,7 +21,7 @@ public class Team02 : ModuleRules
 			"GameplayTasks",
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Niagara" });
 		
 		PublicIncludePaths.AddRange(new string[] {"Team02"});
 		
