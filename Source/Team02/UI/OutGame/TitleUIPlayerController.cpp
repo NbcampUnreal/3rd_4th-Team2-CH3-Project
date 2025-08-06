@@ -1,46 +1,47 @@
-// TiTleUIPlayerController.cpp
+// TitleUIPlayerController.cpp
 
 #include "TitleUIPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
-ATitleUIPlayerController::ATitleUIPlayerController()
-	: MainMenuWidgetInstance(nullptr),
-	  MainMenuWidgetClass(nullptr)
-{
-}
+
+// ATitleUIPlayerController::ATitleUIPlayerController()
+// 	: MainMenuWidgetInstance(nullptr),
+// 	  MainMenuWidgetClass(nullptr)
+// {
+// }
 
 void ATitleUIPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 게임 실행 시 메뉴 레벨에서 메뉴 UI 먼저 표시
 	FString CurrentMapName = GetWorld()->GetMapName();
+	CurrentMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+
 	if (CurrentMapName.Contains("MenuLevel"))
 	{
 		ShowMainMenu(false);
 	}
+	else
+	{
+		// 게임 입력 모드 복원
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+	}
 }
 
-// 메뉴 UI 표시
 void ATitleUIPlayerController::ShowMainMenu(bool bIsRestart)
 {
-	// HUD가 켜져 있다면 닫기
-	// if (HUDWidgetInstance)
-	// {
-	// 	HUDWidgetInstance->RemoveFromParent();
-	// 	HUDWidgetInstance = nullptr;
-	// }
-
-	// 이미 메뉴가 떠 있으면 제거
+	// 기존 UI 제거
 	if (MainMenuWidgetInstance)
 	{
 		MainMenuWidgetInstance->RemoveFromParent();
 		MainMenuWidgetInstance = nullptr;
 	}
 
-	// 메뉴 UI 생성
+	// 새 UI 생성
 	if (MainMenuWidgetClass)
 	{
 		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
@@ -48,28 +49,19 @@ void ATitleUIPlayerController::ShowMainMenu(bool bIsRestart)
 		{
 			MainMenuWidgetInstance->AddToViewport();
 
-			bShowMouseCursor = true;
+			// UI 입력 모드 활성화
 			SetInputMode(FInputModeUIOnly());
+			bShowMouseCursor = true;
 		}
 
-		if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName("StartButton")))
-		{
-			if (bIsRestart)
-			{
-				ButtonText->SetText(FText::FromString("Restart"));
-			}
-			else
-			{
-				ButtonText->SetText(FText::FromString("Start"));
-			}
-		}
 	}
 }
 
-// // 게임 시작 - PlayGround 오픈
-// void ATitleUIPlayerController::StartGame()
-// {
-// 	UGameplayStatics::OpenLevel(GetWorld(), FName("TitleLevel"));
-// }
+void ATitleUIPlayerController::StartGame()
+{
+	// 게임 전환 전 입력 모드 정리
+	SetInputMode(FInputModeGameOnly());
+	bShowMouseCursor = false;
 
-
+	UGameplayStatics::OpenLevel(GetWorld(), FName("TitleLevel"));
+}

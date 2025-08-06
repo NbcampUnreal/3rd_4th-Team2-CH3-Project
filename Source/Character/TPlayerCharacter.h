@@ -74,7 +74,7 @@ protected:
 
 	float CurrentFOV = 70.f;
 
-	// 위젯 클래스 선언
+	// 위젯 클래스 선언	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
 	TSubclassOf<UUserWidget> PauseMenuClass;
 
@@ -82,7 +82,7 @@ protected:
 	UUserWidget* PauseMenuInstance;
 
 	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
-	void RestartGame();
+	void ResumeGame();
 
 #pragma endregion
 

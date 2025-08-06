@@ -202,8 +202,11 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
   }
 }
 
+// 게임 일시정지 함수
 void ATPlayerCharacter::OnPause(const FInputActionValue& InValue)
 {
+  if (UGameplayStatics::IsGamePaused(GetWorld())) return;
+
   if (APlayerController* PC = Cast<APlayerController>(GetController()))
   {
     if (!PauseMenuInstance && PauseMenuClass)
@@ -214,11 +217,13 @@ void ATPlayerCharacter::OnPause(const FInputActionValue& InValue)
     if (PauseMenuInstance && !PauseMenuInstance->IsInViewport())
     {
       PauseMenuInstance->AddToViewport();
-
       UGameplayStatics::SetGamePaused(GetWorld(), true);
 
       FInputModeUIOnly InputMode;
-      InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
+      if (TSharedPtr<SWidget> FocusWidget = PauseMenuInstance->TakeWidget())
+      {
+        InputMode.SetWidgetToFocus(FocusWidget.ToSharedRef());
+      }
       InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
       PC->SetInputMode(InputMode);
       PC->bShowMouseCursor = true;
@@ -226,16 +231,16 @@ void ATPlayerCharacter::OnPause(const FInputActionValue& InValue)
   }
 }
 
-// 게임 재개 함수 (C++에서 호출용)
-void ATPlayerCharacter::RestartGame()
+// 게임 재개 함수
+void ATPlayerCharacter::ResumeGame()
 {
   if (APlayerController* PC = Cast<APlayerController>(GetController()))
   {
-    if (PauseMenuInstance)
+    if (PauseMenuInstance && PauseMenuInstance->IsInViewport())
     {
       PauseMenuInstance->RemoveFromParent();
-      PauseMenuInstance = nullptr;
     }
+    PauseMenuInstance = nullptr;
 
     UGameplayStatics::SetGamePaused(GetWorld(), false);
 
@@ -244,4 +249,5 @@ void ATPlayerCharacter::RestartGame()
     PC->bShowMouseCursor = false;
   }
 }
+
 
