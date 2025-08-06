@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "Area/TCapturePoint.h"
 #include "EngineUtils.h"
+#include "Character/TNonPlayerCharacter.h"
+#include "Spawner/TEnemySpawner.h"
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -41,16 +43,7 @@ void UTUIManager::CreatePlayerUI()
 		{
 			PlayerUIWidget->AddToViewport();
 			UE_LOG(LogTemp, Warning, TEXT("Player UI Created Successfully!"));
-
-			// 웨이브 시스템 시작
-			bWaveActive = true;
-			GetWorld()->GetTimerManager().SetTimer(
-				WaveTimerHandle,
-				this,
-				&UTUIManager::UpdateWaveTime,
-				1.0f,
-				true);
-
+			
 			// UI 업데이트 타이머
 			GetWorld()->GetTimerManager().SetTimer(
 				UIUpdateTimerHandle,
@@ -61,6 +54,10 @@ void UTUIManager::CreatePlayerUI()
 			
 			// 거점 자동 검색 및 등록(UI 생성 이후)
 			FindAndRegisterCapturePoints();
+
+			// 스포너 및 몬스터 모너터링 시작
+			FindAndRegisterEnemySpawners();
+			StartMonitoringMonsters();
 
 			// 임무 상태 초기화
 			UpdateMissionState();
@@ -100,32 +97,6 @@ void UTUIManager::UpdatePlayerAmmo()
 	}
 }
 
-void UTUIManager::UpdateWaveInfo(const FString& TimeString,int32 InCurrentWave,int32 InMaxWave)
-{
-	if (PlayerUIWidget)
-	{
-		PlayerUIWidget->UpdateWaveTime(TimeString);
-	}
-}
-
-void UTUIManager::UpdateWaveTime()
-{
-	if (!bWaveActive) return;
-
-	WaveTime-=1.0f;
-	
-	if (WaveTime<=0.0f)
-	{
-		bWaveActive=false;
-	}
-}
-
-FString UTUIManager::GetFormattedTime() const
-{
-	int32 Minutes = FMath::FloorToInt(WaveTime / 60.0f);
-	int32 Seconds = FMath::FloorToInt(WaveTime) % 60;
-	return FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
-}
 
 void UTUIManager::ShowCaptureUI(const FString& AreaName)
 {
@@ -201,25 +172,6 @@ void UTUIManager::SetMissionObjective(const FString& NewObjective)
 		
 	}
 }
-void UTUIManager::IncrementMonsterKill()
-{
-	MonsterKillCount++; //UI용 킬카운트
-	RemainingMonsters--; // 웨이브 완료조건
-	
-	UE_LOG(LogTemp, Warning, TEXT("Monster killed! Total: %d, Remaining: %d"), MonsterKillCount, RemainingMonsters);
-
-	//웨이브 완료 확인
-	if (RemainingMonsters<=0 && !bWaveCompleted)
-	{
-		bWaveCompleted=true;
-		bWaveActive=false;
-		UE_LOG(LogTemp, Warning, TEXT("Wave completed! All enemies eliminated."));
-	}
-
-	UpdateMissionProgress();
-}
-
-	
 
 void UTUIManager::UpdateMissionProgress()
 {
@@ -266,10 +218,190 @@ void UTUIManager::UpdateMissionState()
 	{
 		SetMissionObjective(NewObjective);
 	}
-	
 }
 
+void UTUIManager::FindAndRegisterEnemySpawners()
+{
+	if (UWorld* World=GetWorld())
+	{
+		RegisteredSpawners.Empty();
 
+		UE_LOG(LogTemp,Warning,TEXT("Searching for enemy spawners..."));
+		// 월드에서 모든 스포너 찾기
+		for (TActorIterator<ATEnemySpawner> ActorItr(World); ActorItr; ++ActorItr)
+		{
+			ATEnemySpawner* Spawner= *ActorItr;
+			if (Spawner)
+			{
+				RegisteredSpawners.Add(Spawner);
+				UE_LOG(LogTemp,Warning,TEXT("Found spawner: %s (MaxSpawn:%d)"),
+					*Spawner->GetName(),Spawner->MaxSpawnCount);
+			}
+		}
+		if (RegisteredSpawners.Num()>0)
+		{
+			UE_LOG(LogTemp,Warning,TEXT("Total %d spawners registered"),RegisteredSpawners.Num());
+			UpdateWaveInfoFromSpawners();
+		}
+		else
+		{
+			UE_LOG(LogTemp,Warning,TEXT("No enemy spawners found!"));
+		}
+	}
+}
+
+void UTUIManager::StartMonitoringMonsters()
+{
+	if (GetWorld())
+	{
+		//0.5초마다 몬스터 상태 체크
+		GetWorld()->GetTimerManager().SetTimer(
+			MonsterMonitorTimer,
+			this,
+			&UTUIManager::UpdateMonsterStatus,
+			0.5f,
+			true);
+
+		UE_LOG(LogTemp,Warning,TEXT("Monster monitering startered!"));
+	}
+}
+
+void UTUIManager::StopMonitoringMonsters()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
+		UE_LOG(LogTemp, Warning, TEXT("Monster monitoring stopped"));
+	}
+}
+
+void UTUIManager::UpdateMonsterStatus()
+{
+	FindAllMonstersInWorld();
+
+	int32 CurrentMonsterCount=TrackedMonsters.Num();
+
+	// 몬스터 수가 감소했다면 처치된 것으로 간주
+	if (CurrentMonsterCount< LastFrameMonsterCount)
+	{
+		int32 KilledCount=LastFrameMonsterCount-CurrentMonsterCount;
+
+		for (int32 i=0; i<KilledCount; i++)
+		{
+			MonsterKillCount++;
+			RemainingMonsters--;
+
+			UE_LOG(LogTemp,Warning,TEXT("Monster detected as killed!! Total: %d, Remaining: %d"),
+				MonsterKillCount,RemainingMonsters);
+		}
+
+		// UI 업데이트
+		if (PlayerUIWidget)
+		{
+			int32 TotalMonsters=MonsterKillCount + RemainingMonsters;
+			PlayerUIWidget->UpdateKillCount(MonsterKillCount,TotalMonsters);
+		}
+		
+		// wave 완료 체크
+		if (RemainingMonsters<=0 && !bWaveCompleted)
+		{
+			bWaveCompleted=true;
+			bWaveActive=false;
+			UE_LOG(LogTemp,Warning,TEXT("Wave completed! All enemies elminated.!"));
+		}
+		
+		UpdateMissionProgress();
+	}
+	// 스포너 상태 체크로 웨이브 활성화 감지
+	bool bAnySpawnerActive=false;
+	for (ATEnemySpawner* Spawner: RegisteredSpawners)
+	{
+		if (Spawner && Spawner->GetCurrentSpawned()>0)
+		{
+			bAnySpawnerActive=true;
+			break;
+		}
+	}
+
+	// 웨이브 시작 감지
+	if (bAnySpawnerActive && !bWaveActive && !bWaveCompleted)
+	{
+		// 새 웨이브 시작
+		bWaveActive=true;
+		bWaveCompleted=false;
+		UpdateWaveInfoFromSpawners();
+		UE_LOG(LogTemp,Warning,TEXT("New wave started!"));
+
+		//웨이브 시작 알림 부분
+		if (PlayerUIWidget)
+		{
+			PlayerUIWidget->ShoWEnemyIncomingAlarm();
+
+			//3초후 알람 숨김
+			FTimerHandle AlarmTimer;
+			GetWorld()->GetTimerManager().SetTimer(
+				AlarmTimer,
+				[this]()
+				{
+					if (PlayerUIWidget)
+					{
+						PlayerUIWidget->HideEnemyIncomingAlarm();
+					}
+				},
+				3.0f,
+				false);
+		}
+		UE_LOG(LogTemp,Warning,TEXT("New Wave started!"));
+	}
+
+	LastFrameMonsterCount=CurrentMonsterCount;
+}
+
+void UTUIManager::FindAllMonstersInWorld()
+{
+	if (UWorld* World=GetWorld())
+	{
+		TrackedMonsters.Empty();
+
+		//  월드에서 살아있는 모든 NPC 찾기
+		for (TActorIterator<ATNonPlayerCharacter> ActorItr(World); ActorItr; ++ActorItr)
+		{
+			ATNonPlayerCharacter* Monster= *ActorItr;
+			if (Monster && Monster->GetCurrentHP()>0)
+			{
+				TrackedMonsters.Add(Monster);
+			}
+		}
+	}
+}
+
+void UTUIManager::UpdateWaveInfoFromSpawners()
+{
+	// 모든 스포너의 최대 스폰 수 합계 계산
+	int32 TotalMaxMonsters = 0;
+	for (ATEnemySpawner* Spawner : RegisteredSpawners)
+	{
+		if (Spawner)
+		{
+			TotalMaxMonsters += Spawner->MaxSpawnCount;
+		}
+	}
+	
+	if (TotalMaxMonsters > 0)
+	{
+		RemainingMonsters = TotalMaxMonsters;
+		MonsterKillCount = 0;
+		bWaveCompleted = false;
+
+		// 초기 UI 업데이트
+		if (PlayerUIWidget)
+		{
+			PlayerUIWidget->UpdateKillCount(0,TotalMaxMonsters);
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("Wave info updated: %d total monsters expected"), TotalMaxMonsters);
+	}
+}
 
 
 void UTUIManager::UpdateAllUI()
@@ -282,21 +414,14 @@ void UTUIManager::UpdateAllUI()
 	
 	UpdatePlayerHP();
 	UpdatePlayerAmmo();
-
-	// 자체 웨이브 정보 업데이트
-	if (PlayerUIWidget)
-	{
-		FString TimeString = GetFormattedTime();
-		PlayerUIWidget->UpdateWaveTime(TimeString);
-	}
 	
-	// ⭐ 거점 상태 감시 및 UI 업데이트 (디버깅 로그 추가)
+	// 거점 상태 감시 및 UI 업데이트 (디버깅 로그 추가)
 	if (CurrentCapturePoint && PlayerUIWidget)
 	{
-		// ⭐ 디버깅 로그 추가
+		// 디버깅 로그 추가
 		if (CurrentCapturePoint->bPlayerInArea)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Player is in capture area! Progress: %.1f%%"), CurrentCapturePoint->CapturePercent);
+			UE_LOG(LogTemp, Warning, TEXT("Player is in capture area! Progress: %.1f%%"),CurrentCapturePoint->CapturePercent);
 		}
         
 		// 플레이어가 거점 안에 있는지 확인
@@ -312,7 +437,17 @@ void UTUIManager::UpdateAllUI()
 			// 점령률 업데이트 (0-100 → 0.0-1.0 변환)
 			float ProgressPercent = CurrentCapturePoint->CapturePercent / 100.0f;
 			UpdateCaptureProgress(ProgressPercent);
+
+			// 점령 완료 감지 추가
+			if (CurrentCapturePoint->CapturePercent>=100.0f && !bCaptureCompleted)
+			{
+				bCaptureCompleted=true;
+				bBossPhase=true;
+				UE_LOG(LogTemp,Warning,TEXT("Capture completed! Boss phase activated!"));
+				UpdateMissionState();
+			}
 		}
+		
 		else
 		{
 			// 플레이어가 거점 밖에 있으면 UI 숨김
@@ -344,7 +479,7 @@ void UTUIManager::Deinitialize()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
-		GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
 	}
 	Super::Deinitialize();
 }
