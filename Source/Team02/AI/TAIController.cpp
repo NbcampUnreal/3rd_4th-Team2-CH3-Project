@@ -24,8 +24,8 @@ const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 
 ATAIController::ATAIController()
 {
-	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
-	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BrainComponent"));
+	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("GunNPCBlackboard"));
+	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("GunNPCBrainComponent"));
 	
 }
 
@@ -46,6 +46,8 @@ void ATAIController::OnPossess(APawn* InPawn)
 		BeginAI(ControlledPawn);
 	}
 }
+
+
 
 //플레이를 종료할때 출력되는 함수
 void ATAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -85,6 +87,7 @@ void ATAIController::EndAI()
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
 		BehaviorTreeComponent->StopTree();
+		
 
 		if (ShowAIDebug == 1)
 		{
