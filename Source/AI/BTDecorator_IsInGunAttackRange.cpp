@@ -5,7 +5,7 @@
 #include "TAIBossMonster/TBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-const float UBTDecorator_IsInGunAttackRange::AttackRange(1000.f);
+const float UBTDecorator_IsInGunAttackRange::AttackRange(1500.f);
 
 UBTDecorator_IsInGunAttackRange::UBTDecorator_IsInGunAttackRange()
 {
@@ -50,7 +50,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		ATCharacterBase* TargetPlayerCharacter = Cast<ATCharacterBase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ATBossAIController::TargetCharacterKey));
 		if (IsValid(TargetPlayerCharacter)==true && TargetPlayerCharacter->IsPlayerControlled()==true)
 		{
-			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 800);
+			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1800);
 		}
 	}
 
