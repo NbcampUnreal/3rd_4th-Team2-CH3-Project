@@ -4,11 +4,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 
 
+ 
 
 UBTDecorator_IsinAttackRange::UBTDecorator_IsinAttackRange()
 {
 	NodeName=TEXT("IsInAttackRange");
-	const float UBTDecorator_IsinAttackRange::AttackRange(200.f);
+	
 }
 
 bool UBTDecorator_IsinAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
