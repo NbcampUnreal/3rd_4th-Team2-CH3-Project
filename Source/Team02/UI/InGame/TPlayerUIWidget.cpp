@@ -26,6 +26,14 @@ void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 MaxAmmo)
 	}
 }
 
+void UTPlayerUIWidget::UpdateWaveTime(const FString& TimeString)
+{
+	if (WaveTimeText)
+	{
+		WaveTimeText->SetText(FText::FromString(TimeString));
+	}
+}
+
 void UTPlayerUIWidget::ShowCaptureUI(const FString& AreaName)
 {
 	// 거점 UI 요소들 표시
@@ -52,6 +60,7 @@ void UTPlayerUIWidget::ShowCaptureUI(const FString& AreaName)
 		//테스트 로그
 		UE_LOG(LogTemp,Warning,TEXT("CaptureLabel set to Visible!!"));
 	}
+	
 	
 }
 
@@ -115,35 +124,5 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 	{
 		ObjectText->SetText(FText::FromString(ObjectiveText));
 		UE_LOG(LogTemp,Warning,TEXT("Mission updated: %s"), *ObjectiveText);
-	}
-}
-
-void UTPlayerUIWidget::UpdateKillCount(int32 CurrentKills,int32 TotalMonsters)
-{
-	if (KillCountText)
-	{
-		FString KillString=FString::Printf(TEXT("Monster: %d/%d"),CurrentKills,TotalMonsters);
-		KillCountText->SetText(FText::FromString(KillString));
-
-		UE_LOG(LogTemp,Warning,TEXT("Kill count updated: %s"), *KillString);
-	}
-}
-
-void UTPlayerUIWidget::ShoWEnemyIncomingAlarm()
-{
-	if (WaveAlarmText)
-	{
-		WaveAlarmText->SetText(FText::FromString(TEXT("Enemy Incoming!!")));
-		WaveAlarmText->SetVisibility(ESlateVisibility::Visible);
-		UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alram shown!!"));
-	}
-}
-
-void UTPlayerUIWidget::HideEnemyIncomingAlarm()
-{
-	if (WaveAlarmText)
-	{
-		WaveAlarmText->SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alarm hidden!!"));
 	}
 }
