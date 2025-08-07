@@ -301,6 +301,11 @@ void ATPlayerCharacter::RequestRespawn()
     }
   }
 
+  if (CurrentWeapon)
+  {
+    CurrentWeapon -> Destroy();
+  }
+  
   // 2. 본인은 제거
   Destroy();
 }

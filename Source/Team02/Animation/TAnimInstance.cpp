@@ -18,6 +18,7 @@ void UTAnimInstance::NativeInitializeAnimation()
 			OwnerCharacterMovement = OwnerCharacter->GetCharacterMovement();
 		}
 	}
+	bIsUnarmed = true;
 }
 
 void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -30,7 +31,13 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		float GroundAcceleration = UKismetMathLibrary::VSizeXY(OwnerCharacterMovement->GetCurrentAcceleration());
 		bool bIsAccelerated = FMath::IsNearlyZero(GroundAcceleration) == false;
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
+		bIsUnarmed = OwnerCharacter->GetCurrentWeaponAttackAnimMontage() == nullptr ? true : false;
 
+		if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerCharacter->GetController()))
+		{
+			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
+		}
+		
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;

@@ -94,5 +94,4 @@ protected:
 	void ResumeGame();
 
 #pragma endregion
-
 };

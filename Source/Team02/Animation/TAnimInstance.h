@@ -42,14 +42,19 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 bIsDead : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsUnarmed : 1;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	uint8 bIsFalling : 1;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float GroundSpeed;
-	
-	//점프중인지 확인
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	uint8 bIsFalling : 1;
+
+	UPROPERTY(BlueprintReadOnly)
+	float NormalizedCurrentPitch;
 };

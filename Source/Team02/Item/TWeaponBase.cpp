@@ -227,6 +227,18 @@ void ATWeaponBase::Reload()
 	FString Msg = FString::Printf(
 		TEXT("Reloaded: %d | Current: %d | Remain: %d"), AmmoToReload, GetCurrentAmmo(), GetTotalAmmo());
 	UKismetSystemLibrary::PrintString(this, Msg);
+
+	if (ReloadMontage) // Reload시에 재생하는 몽타주 구현
+	{
+		if (ATPlayerCharacter* PlayerCharacter = Cast<ATPlayerCharacter>(GetOwner()))
+		{
+			UAnimInstance* AnimInstance = PlayerCharacter->GetMesh()->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(ReloadMontage);
+			}
+		}
+	}
 }
 
 bool ATWeaponBase::CanFire() const

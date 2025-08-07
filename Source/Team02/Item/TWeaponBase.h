@@ -17,6 +17,7 @@ class ATItemBase;
 class UAnimMontage;
 class UNiagaraSystem;
 class USoundBase;
+
 UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
@@ -128,6 +129,14 @@ protected:
 	
 	FTimerHandle ReloadTimerHandle;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) // 주석처리
+#pragma region Montage
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+#pragma endregion
 };
