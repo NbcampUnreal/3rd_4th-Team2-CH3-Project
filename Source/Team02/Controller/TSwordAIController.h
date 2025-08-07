@@ -42,6 +42,8 @@ public:
 	static const FName SwordNPCStartPatrolLocationKey;
 	//경계 종료 지점
 	static const FName SwordNPCEndPatrolLocationKey;
+	//타겟 캐릭터
+	static const FName SwordNPCTargetCharacterKey;
 
 
 

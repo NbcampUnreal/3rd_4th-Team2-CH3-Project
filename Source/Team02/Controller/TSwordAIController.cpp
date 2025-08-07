@@ -14,6 +14,7 @@ FAutoConsoleVariableRef CVarShowSwordAIDebug(
 
 const FName ATSwordAIController::SwordNPCStartPatrolLocationKey(TEXT("SwordNPCStartPatrolLocation"));
 const FName ATSwordAIController::SwordNPCEndPatrolLocationKey(TEXT("SwordNPCEndPatrolLocation"));
+const FName ATSwordAIController::SwordNPCTargetCharacterKey(TEXT("TargetCharacter"));
 
 ATSwordAIController::ATSwordAIController()
 {
