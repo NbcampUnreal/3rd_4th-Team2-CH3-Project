@@ -16,8 +16,9 @@ ATSwordAIController::ATSwordAIController()
 {
 	SwordNPCPatrolRadius = 800.f;
 	
-	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("SwordNPCBlackboard"));
+	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("SwordNPCBrainComponent"));
+	
 	
 }
 
@@ -57,8 +58,8 @@ void ATSwordAIController::BeginAI(APawn* InPawn)
 			bool bRunSucceeded = RunBehaviorTree(SwordNPCBehaviorTree);
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
 
-			/*//경계 시작위치를 AI 액터의 현제 위치로 지정
-			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());*/
+			//경계 시작위치를 AI 액터의 현제 위치로 지정
+			BlackboardComponent->SetValueAsVector(SwordNPCStartPatrolLocationKey, InPawn->GetActorLocation());
 
 			if (ShowSwordAIDebug == 1)
 			{

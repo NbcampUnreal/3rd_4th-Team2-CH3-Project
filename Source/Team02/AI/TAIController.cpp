@@ -21,7 +21,7 @@ const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 
 ATAIController::ATAIController()
 {
-	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("GunNPCBlackboard"));
+	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("GunNPCBrainComponent"));
 	
 }
