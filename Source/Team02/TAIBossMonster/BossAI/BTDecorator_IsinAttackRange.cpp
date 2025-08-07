@@ -1,6 +1,6 @@
 #include "BTDecorator_IsinAttackRange.h"
-#include "TAIBossMonster.h"
-#include "TBossAIController.h"
+#include "TAIBossMonster/TAIBossMonster.h"
+#include "TAIBossMonster/TBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 

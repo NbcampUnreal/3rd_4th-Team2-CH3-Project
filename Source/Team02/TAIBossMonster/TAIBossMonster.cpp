@@ -25,8 +25,8 @@ void ATAIBossMonster::BeginPlay()
 	}
 }
 
-// void ATAIBossMonster::BeginAttack()
-// {
+ void ATAIBossMonster::BeginAttack()
+ {
 // 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 // 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance"));
 //
@@ -35,5 +35,9 @@ void ATAIBossMonster::BeginPlay()
 // 	{
 //
 // 	}
-//}
+}
 
+void ATAIBossMonster::EndAttack(class UAnimMontage* InMontage,bool bInterruped)
+{
+	
+}
