@@ -9,7 +9,7 @@
 
 int32 ATNonPlayerCharacterSword::SwordAttackDebug = 0;
 
-FAutoConsoleVariableRef CVarShowGunAttackDebug(
+FAutoConsoleVariableRef CVarSwordAttackDebug(
 	TEXT("TAI.SwordAttackDebug"),
 	ATNonPlayerCharacterSword::SwordAttackDebug,
 	TEXT(""),
