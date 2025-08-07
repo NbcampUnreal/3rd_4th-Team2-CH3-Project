@@ -1,6 +1,8 @@
 #include "AI/BTTask_GetEndPatrolPosition.h"
 #include "AI/TAIController.h"
+#include "Team02/Controller/TSwordAIController.h"
 #include "Character/TNonPlayerCharacter.h"
+#include "Team02/Character/TNonPlayerCharacterSword.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -20,22 +22,45 @@ EBTNodeResult::Type UBTTask_GetEndPatrolPosition::ExecuteTask(UBehaviorTreeCompo
 		return Result;
 	}
 
-	ATAIController* AIController = Cast<ATAIController>(OwnerComp.GetAIOwner());
-	checkf(IsValid(AIController) == true, TEXT("Invalid AIController"));
+	ATAIController* GunAIController = Cast<ATAIController>(OwnerComp.GetAIOwner());
+	ATSwordAIController* SwordAIController = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
 
-	ATNonPlayerCharacter* NPC = Cast<ATNonPlayerCharacter>(AIController->GetPawn());
-	checkf(IsValid(NPC) == true, TEXT("Invalid NPC"));
-
-	UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetNavigationSystem(NPC->GetWorld());
-	checkf(IsValid(NavigationSystem) == true, TEXT("Invalid NavigationSystem"));
-
-	//StartPatrolPosition의 키를 컨트롤과 연결한다.
-	FVector StartPatrolPosition = OwnerComp.GetBlackboardComponent()->GetValueAsVector(ATAIController::StarPatrolPositionKey);
-	FNavLocation EndPatrolLocation;
-	if (true == NavigationSystem->GetRandomPointInNavigableRadius(StartPatrolPosition, AIController->PatrolRadius,EndPatrolLocation))
+	//Gun NPC 용
+	if (IsValid(GunAIController) == true)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(ATAIController::EndPatrolPositionKey, EndPatrolLocation.Location);
-		return Result = EBTNodeResult::Succeeded;
+		ATNonPlayerCharacter* NPC = Cast<ATNonPlayerCharacter>(GunAIController->GetPawn());
+		checkf(IsValid(NPC) == true, TEXT("Invalid NPC"));
+
+		UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetNavigationSystem(NPC->GetWorld());
+		checkf(IsValid(NavigationSystem) == true, TEXT("Invalid NavigationSystem"));
+
+		//StartPatrolPosition의 키를 컨트롤과 연결한다.
+		FVector StartPatrolPosition = OwnerComp.GetBlackboardComponent()->GetValueAsVector(ATAIController::StarPatrolPositionKey);
+		FNavLocation EndPatrolLocation;
+		if (true == NavigationSystem->GetRandomPointInNavigableRadius(StartPatrolPosition, GunAIController->PatrolRadius,EndPatrolLocation))
+		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsVector(ATAIController::EndPatrolPositionKey, EndPatrolLocation.Location);
+			return Result = EBTNodeResult::Succeeded;
+		}
+	}
+
+	//Sword NPC 용 
+	if (IsValid(SwordAIController) == true)
+	{
+		ATNonPlayerCharacterSword* NPC = Cast<ATNonPlayerCharacterSword>(SwordAIController->GetPawn());
+		checkf(IsValid(NPC) == true, TEXT("Invalid NPC"));
+
+		UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetNavigationSystem(NPC->GetWorld());
+		checkf(IsValid(NavigationSystem) == true, TEXT("Invalid NavigationSystem"));
+
+		//StartPatrolPosition의 키를 컨트롤과 연결한다.
+		FVector StartPatrolLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(ATSwordAIController::SwordNPCStartPatrolLocationKey);
+		FNavLocation EndPatrolLocation;
+		if (true == NavigationSystem->GetRandomPointInNavigableRadius(StartPatrolLocation, SwordAIController->SwordNPCPatrolRadius,EndPatrolLocation))
+		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsVector(ATSwordAIController::SwordNPCEndPatrolLocationKey, EndPatrolLocation.Location);
+			return Result = EBTNodeResult::Succeeded;
+		}
 	}
 
 	return Result;
