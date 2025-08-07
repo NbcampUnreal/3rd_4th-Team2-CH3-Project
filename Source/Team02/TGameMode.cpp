@@ -6,6 +6,7 @@
 #include "Character/TCharacterBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Spawner/TEnemySpawner.h"
+#include "Area/TCapturePoint.h"
 
 ATGameMode::ATGameMode()
 {
@@ -72,4 +73,30 @@ void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 		StartWave(WaveIndex);
 	}
 	
+}
+
+void ATGameMode::RespawnPlayer(AController* DeadController)
+{
+	if (LastCapturedPoint)
+	{
+		// 1. 현재 Pawn 제거
+		if (APawn* Pawn = DeadController->GetPawn())
+		{
+			Pawn->Destroy();
+		}
+
+		// 2. Respawn 위치 세팅
+		FTransform RespawnTransform = LastCapturedPoint->RespawnTransform;
+
+		// 3. 새로운 Pawn(캐릭터) 스폰
+		APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
+
+		// 4. 컨트롤러가 새 Pawn을 Possess
+		DeadController->Possess(NewPawn);
+	}
+	else
+	{
+		// 디폴트 리스폰 (예: 맵 시작 위치)
+		RestartPlayer(DeadController);
+	}
 }

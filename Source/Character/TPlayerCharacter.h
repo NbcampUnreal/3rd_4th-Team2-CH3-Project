@@ -27,6 +27,11 @@ public:
 	
 	ATWeaponBase* CurrentWeapon;
 
+	virtual void HandleOnPostCharacterDead() override;
+
+	UFUNCTION()
+	void RequestRespawn();
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 

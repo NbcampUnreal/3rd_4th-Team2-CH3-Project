@@ -5,9 +5,6 @@
 #include "Animation/TAnimInstance.h"
 #include "Engine/EngineTypes.h"
 #include "Item/TWeaponBase.h"
-#include "Engine/DamageEvents.h"
-#include "Animation/TAnimInstance.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ATCharacterBase::ATCharacterBase()

@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "TGameMode.generated.h"
 class ATEnemySpawner;
+class ATCapturePoint;
 UCLASS()
 class TEAM02_API ATGameMode : public AGameMode
 {
@@ -28,6 +29,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Wave")
 	bool bIsWaveActive = false;
 
+	UPROPERTY(BlueprintReadWrite)
+	ATCapturePoint* LastCapturedPoint;
 	
 	UPROPERTY()
 	int32 WaveIndex = 0;
@@ -43,9 +46,8 @@ public:
 
 	UFUNCTION()
 	void OnZoneOverlap(int32 ZoneIndex);
+	void RespawnPlayer(AController* DeadController);
 
-
-	
 
 	TArray<AActor*> FoundActors;
 };

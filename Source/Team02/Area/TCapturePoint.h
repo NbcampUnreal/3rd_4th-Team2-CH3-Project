@@ -24,8 +24,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USceneComponent* Root;
-
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Capture")
+	float CaptureSpeed = 20.0f; // 기본값 20, BP에서 자유롭게 조정
 	
 	// 캡처 영역을 표시할 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -50,6 +51,14 @@ public:
 	int32 ZoneIndex;
 
 	ATGameMode* GM;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bEnemyInArea;  // << 추가: 적이 구역에 있는지
+
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Respawn")
+	FTransform RespawnTransform;
 	// 오버랩 이벤트
 	UFUNCTION()
 	virtual void OnOverlapBegin(
