@@ -8,8 +8,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Item/TWeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TGameMode.h"
 
 ATPlayerCharacter::ATPlayerCharacter()
 
@@ -35,6 +35,7 @@ ATPlayerCharacter::ATPlayerCharacter()
   SpringArmComponent->bDoCollisionTest = true;
   SpringArmComponent->SetRelativeLocation(FVector(0.f, 25.f, 25.f));
 
+  
   CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
   CameraComponent->SetupAttachment(SpringArmComponent);
   CameraComponent->bUsePawnControlRotation = false;
@@ -250,4 +251,41 @@ void ATPlayerCharacter::ResumeGame()
   }
 }
 
+void ATPlayerCharacter::HandleOnPostCharacterDead()
+{
+  // 1. 죽은 직후, 입력/이동 등 완전히 비활성화
+  DisableInput(Cast<APlayerController>(GetController()));
+  GetCharacterMovement()->DisableMovement();
+
+  // 2. 이펙트/애니메이션 등 사망 연출 (선택)
+  // ex) 죽는 애니메이션, 이펙트
+
+  // 3. 일정 시간 뒤에 Respawn 트리거 (ex: 2초 후)
+  FTimerHandle RespawnTimerHandle;
+  GetWorld()->GetTimerManager().SetTimer(
+      RespawnTimerHandle,
+      this, &ATPlayerCharacter::RequestRespawn,
+      2.0f, false
+  );
+}
+
+
+void ATPlayerCharacter::RequestRespawn()
+{
+  // 컨트롤러 소유자 구하기
+  AController* PlayerController = GetController();
+
+  // 1. 게임모드에 RespawnPlayer 요청 (LastCapturedPoint 위치)
+  if (GetWorld())
+  {
+    ATGameMode* GM = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+    if (GM && PlayerController)
+    {
+      GM->RespawnPlayer(PlayerController);
+    }
+  }
+
+  // 2. 본인은 제거
+  Destroy();
+}
 

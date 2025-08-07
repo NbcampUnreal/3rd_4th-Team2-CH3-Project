@@ -23,6 +23,7 @@ ATCapturePoint::ATCapturePoint()
 	
 	CapturePercent = 0.0f;
 	bPlayerInArea = false;
+	bEnemyInArea = false;
 }
 
 void ATCapturePoint::BeginPlay()
@@ -35,21 +36,26 @@ void ATCapturePoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bPlayerInArea && CapturePercent < 100.f)
+	if (bPlayerInArea && !bEnemyInArea && CapturePercent < 100.f)
 	{
-		CapturePercent += DeltaTime * 20.f; // 초당 20% 증가 (조절 가능)
+		CapturePercent += DeltaTime * CaptureSpeed; 
+		CapturePercent = FMath::Clamp(CapturePercent, 0.f, 100.f);
+
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
-		  FString::Printf(TEXT("점령률: %.1f%%"), CapturePercent));
-		
+			FString::Printf(TEXT("점령률: %.1f%%"), CapturePercent));
+
 		if (CapturePercent >= 100.f)
 		{
-			
-			GM->OnCapturePointCompleted();
+			if (GM)
+			{
+				GM->OnCapturePointCompleted();
+				GM->LastCapturedPoint = this; 
+			}
 			CapturePercent = 100.f;
 			NotifyWall();
 		}
 	}
-	// 필요하다면 감소 등도 구현 가능
+	
 }
 
 void ATCapturePoint::NotifyWall()
@@ -81,6 +87,10 @@ void ATCapturePoint::OnOverlapBegin(
 			GM->OnZoneOverlap(ZoneIndex);   // 여기서만 최초 1회!
 		}
 	}
+	else if (OtherActor->ActorHasTag(TEXT("Enemy")))
+	{
+		bEnemyInArea = true; // << 적이 들어오면 true
+	}
 }
 
 void ATCapturePoint::OnOverlapEnd(
@@ -89,8 +99,12 @@ void ATCapturePoint::OnOverlapEnd(
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherActor->ActorHasTag(TEXT("Player")))
+	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		bPlayerInArea = false;
+	}
+	else if (OtherActor->ActorHasTag(TEXT("Enemy")))
+	{
+		bEnemyInArea = false; // << 적이 나가면 false
 	}
 }
