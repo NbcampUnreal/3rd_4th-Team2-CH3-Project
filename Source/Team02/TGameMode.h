@@ -36,6 +36,9 @@ public:
 	UPROPERTY()
 	int32 WaveIndex = 0;
 
+	UPROPERTY()
+	TObjectPtr<UWorld> World;
+
 	UFUNCTION()
 	void StartWave(int32 InWaveIndex);
 
