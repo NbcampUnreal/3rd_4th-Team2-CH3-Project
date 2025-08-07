@@ -7,6 +7,9 @@
 #include "Area/TCapturePoint.h"
 #include "TUIManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
+
 class ATCharacterBase;
 class ATWeaponBase;
 class ATAIBossMonster;
@@ -17,6 +20,14 @@ class TEAM02_API UTUIManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	// OutGameUI 개발자와 협업 델리게이트 코드
+	UPROPERTY(BLueprintAssignable)
+	FOnVictoryDelegate OnVictoryEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGameOverDelegate OnGameOverEvent;
+	
+	
 	// initializce Subsystem
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;

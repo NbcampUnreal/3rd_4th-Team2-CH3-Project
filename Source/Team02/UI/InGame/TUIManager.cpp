@@ -340,6 +340,13 @@ void UTUIManager::UpdateMonsterStatus()
 		//게임 완료 처리
 		bBossPhase=false;
 		SetMissionObjective(TEXT("Victory! Boss Defeated!"));
+
+		// 승리 이벤트 발생!
+		OnVictoryEvent.Broadcast();
+		UE_LOG(LogTemp,Warning,TEXT("Victory event broadcasted!!"));
+
+
+		
 	}
 
 	
