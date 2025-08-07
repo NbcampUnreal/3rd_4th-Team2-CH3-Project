@@ -34,7 +34,9 @@ protected:
 	
 	
 protected:
-	
+	//패트롤
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boss|Movement")
+	bool bIsPatrolling;
 	//상태 반환
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boss")
 	bool bIsAttacking;
@@ -42,6 +44,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boss|Montage")
 	UAnimMontage* AttackMontage;
 	
+
 
 	
 	
