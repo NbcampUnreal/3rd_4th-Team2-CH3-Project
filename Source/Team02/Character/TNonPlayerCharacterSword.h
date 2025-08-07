@@ -20,9 +20,9 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void BeginAttack() override;
+	/*virtual void BeginAttack() override;
 
-	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;
+	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;*/
 
 public: 
 	static int32 SwordAttackDebug;
