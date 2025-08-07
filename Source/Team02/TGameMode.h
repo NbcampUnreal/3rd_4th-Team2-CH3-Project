@@ -60,8 +60,6 @@ public:
 
 	TArray<AActor*> FoundActors;
 
-private:
-
 	UPROPERTY()
 	TArray<TObjectPtr<ATAIController>> AIControllers;
 };
