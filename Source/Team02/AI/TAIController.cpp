@@ -18,6 +18,7 @@ FAutoConsoleVariableRef CVarShowAIDebug(
 const FName ATAIController::StarPatrolPositionKey(TEXT("StartPatrolPosition"));
 const FName ATAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
+const FName ATAIController::IsInWaveKey(TEXT("IsInWave"));
 
 ATAIController::ATAIController()
 {
@@ -65,7 +66,7 @@ void ATAIController::BeginAI(APawn* InPawn)
 		{
 			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
-
+			
 			//경계 시작위치를 AI 액터의 현제 위치로 지정
 			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
 
