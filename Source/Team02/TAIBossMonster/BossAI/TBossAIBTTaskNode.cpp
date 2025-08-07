@@ -1,7 +1,7 @@
-#include "Team02/TAIBossMonster/TBossAIBTTaskNode.h"
+#include "TBossAIBTTaskNode.h"
 #include "NavigationSystem.h"
-#include "TAIBossMonster.h"
-#include "TBossAIController.h"
+#include "TAIBossMonster/TAIBossMonster.h"
+#include "TAIBossMonster/TBossAIController.h"
 #include "AI/TAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 

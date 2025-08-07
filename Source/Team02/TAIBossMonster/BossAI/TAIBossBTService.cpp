@@ -1,6 +1,6 @@
 #include "TAIBossBTService.h"
-#include "TAIBossMonster.h"
-#include "TBossAIController.h"
+#include "TAIBossMonster/TAIBossMonster.h"
+#include "TAIBossMonster/TBossAIController.h"
 #include "Character/TPlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"

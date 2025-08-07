@@ -6,6 +6,8 @@
 
 DECLARE_DELEGATE_TwoParams(FOnAttackMontageEnded,UAnimMontage*,bool)
 
+
+
 UCLASS()
 class TEAM02_API ATAIBossMonster : public ATCharacterBase
 {
@@ -19,8 +21,8 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-	//virtual void BeginAttack();
-	//virtual void EndAttack(UAnimMontage* InMontage,bool bInterruped);
+	virtual void BeginAttack();
+	virtual void EndAttack( UAnimMontage* InMontage,bool bInterruped);
 
 public:
 	bool bIsNowAttacking;
