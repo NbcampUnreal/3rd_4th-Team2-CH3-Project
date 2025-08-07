@@ -1,4 +1,5 @@
 #include "Team02/TAIBossMonster/TAIBossAnimInstance.h"
+#include "TAIBossMonster.h"
 
 UTAIBossAnimInstance::UTAIBossAnimInstance()
 	:bIsAttacking(false)
@@ -8,7 +9,17 @@ UTAIBossAnimInstance::UTAIBossAnimInstance()
 void UTAIBossAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-	
+	BossMonster = Cast<ATAIBossMonster>(TryGetPawnOwner());
+	if (BossMonster)
+	{
+		MovementComponent = BossMonster->GetCharacterMovement();
+
+		// 몽타주 종료 콜백 델리게이트 바인딩
+		if (AttackMontage)
+		{
+			
+		}
+	}
 }
 
 void UTAIBossAnimInstance::StartAttack()

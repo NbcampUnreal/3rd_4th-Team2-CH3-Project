@@ -26,13 +26,22 @@ protected:
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
+	// Transient 저장 복원 충돌방지
+	UPROPERTY(BlueprintReadOnly,Transient)
+	TObjectPtr<class ATAIBossMonster> BossMonster;
+	UPROPERTY(BlueprintReadOnly,Transient)
+	TObjectPtr<class UCharacterMovementComponent> MovementComponent;
+	
+	
+protected:
+	
 	//상태 반환
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boss")
 	bool bIsAttacking;
 	//공격 몽타주 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boss|Montage")
 	UAnimMontage* AttackMontage;
-
+	
 
 	
 	
