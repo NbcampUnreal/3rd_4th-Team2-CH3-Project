@@ -22,6 +22,7 @@ const FName ATAIController::StarPatrolPositionKey(TEXT("StartPatrolPosition"));
 const FName ATAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 const FName ATAIController::IsInWaveKey(TEXT("IsInWave"));
+const FName ATAIController::CapturePointKey(TEXT("CapturePoint"));
 
 ATAIController::ATAIController()
 {
