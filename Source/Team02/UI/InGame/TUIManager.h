@@ -7,7 +7,6 @@
 #include "Area/TCapturePoint.h"
 #include "TUIManager.generated.h"
 
-
 class ATCharacterBase;
 class ATWeaponBase;
 
@@ -31,10 +30,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerAmmo();
-
-	UFUNCTION(BlueprintCallable)
-	void UpdateWaveInfo(const FString& TimeString,int32 InCurrentWave,int32 InMaxWave);
-
+	
 	// Player references
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerCharacter(ATCharacterBase* PlayerChar);
@@ -64,8 +60,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateMissionProgress();
 
+	
+	// 몬스터 감지 및 추적
 	UFUNCTION(BlueprintCallable)
-	void IncrementMonsterKill();
+	void StartMonitoringMonsters();
+
+	UFUNCTION(BlueprintCallable)
+	void StopMonitoringMonsters();
+
+	// spawner 연동(읽기 전용)
+	UFUNCTION(BlueprintCallable)
+	void FindAndRegisterEnemySpawners();
 	
 
 protected:
@@ -87,21 +92,11 @@ protected:
 
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
-
-	// Wave Functions
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	float WaveTime=300.0f;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	int32 CurrentWave=1;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	int32 MaxWave=2;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	bool bWaveActive=false;
-
+	
 	// 게임 플로우 반영 변수 ( 웨이브 시작> 몬스터 처치 (웨이브클리어) >거점 점령 >보스전 순서 )
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool bWaveActive=false; // 웨이브 활성화 여부
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bWaveCompleted = false;  // 웨이브 완료 여부
 
@@ -118,16 +113,7 @@ protected:
 	bool bBossPhase=false; // 보스전 페이즈
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 RemainingMonsters = 5;  // 남은 몬스터 수 (가상)
-
-	//Wave Timer
-	FTimerHandle WaveTimerHandle; 
-
-	// update Wavetime
-	void UpdateWaveTime();
-
-	//시간 분초 포맷
-	FString GetFormattedTime() const;
+	int32 RemainingMonsters = 0;  // 남은 몬스터 수 (가상)
 
 	// 현재 활성 거점
 	UPROPERTY()
@@ -149,7 +135,20 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool bNearCapturePoint=false; 
 
+	// 몬스터 감시 타이머
+	FTimerHandle MonsterMonitorTimer;
 
+	// 등록된 스포너들
+	UPROPERTY()
+	TArray<class ATEnemySpawner*> RegisteredSpawners;
+
+	//현재 추적 중인 몬스터들
+	UPROPERTY()
+	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
+
+	// 이전 프레임 몬스터 수 (변화 감지용)
+	UPROPERTY()
+	int32 LastFrameMonsterCount=0;
 	
 	// regularly ui update
 	void UpdateAllUI();
@@ -157,6 +156,15 @@ protected:
 private:
 	// 임무 상태 업데이트
 	void UpdateMissionState();
+
+	// 몬스터 상태 모니터링
+	void UpdateMonsterStatus();
+
+	// 월드에서 몬스터 찾기
+	void FindAllMonstersInWorld();
+
+	//스포너에서 웨이브 정보 가져오기
+	void UpdateWaveInfoFromSpawners();
 	
 };
 
