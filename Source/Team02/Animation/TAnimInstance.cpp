@@ -2,8 +2,10 @@
 #include "Character/TCharacterBase.h"
 #include "Character/TPlayerCharacter.h"
 #include "Character/TNonPlayerCharacter.h"
+#include "Team02/Character/TNonPlayerCharacterSword.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+
 
 void UTAnimInstance::NativeInitializeAnimation()
 {
@@ -30,6 +32,11 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
 
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
+		{
+			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
+		}
+
+		if (ATNonPlayerCharacterSword* OwnerNPC = Cast<ATNonPlayerCharacterSword>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}

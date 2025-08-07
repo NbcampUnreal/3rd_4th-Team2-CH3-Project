@@ -14,17 +14,18 @@ class TEAM02_API ATNonPlayerCharacterSword : public ATCharacterBase
 {
 	GENERATED_BODY()
 
-/*public:
+public:
 	ATNonPlayerCharacterSword();
 
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void BeginAttack() override;
+	/*virtual void BeginAttack() override;
 
-	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;
+	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;*/
 
 public: 
+	static int32 SwordAttackDebug;
 	
-	bool bIsNowAttacking;*/
+	bool bIsNowAttacking;
 };

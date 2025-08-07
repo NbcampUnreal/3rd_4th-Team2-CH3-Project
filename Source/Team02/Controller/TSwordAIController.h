@@ -15,6 +15,8 @@ class TEAM02_API ATSwordAIController : public AAIController
 {
 	GENERATED_BODY()
 
+	friend class ATNonPlayerCharacterSword;
+
 public:
 	ATSwordAIController();
 
@@ -30,9 +32,20 @@ protected:
 	void EndAI();
 
 public:
-	float PatrolRadius;
+	//경계 반원 크기
+	float SwordNPCPatrolRadius;
 
+	//AI디버깅 용
 	static int32 ShowSwordAIDebug;
+
+	//경계 시작 지점
+	static const FName SwordNPCStartPatrolLocationKey;
+	//경계 종료 지점
+	static const FName SwordNPCEndPatrolLocationKey;
+	//타겟 캐릭터
+	static const FName SwordNPCTargetCharacterKey;
+
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
