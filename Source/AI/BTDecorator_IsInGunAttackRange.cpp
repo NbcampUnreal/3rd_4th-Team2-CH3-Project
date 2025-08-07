@@ -50,7 +50,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		ATCharacterBase* TargetPlayerCharacter = Cast<ATCharacterBase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ATBossAIController::TargetCharacterKey));
 		if (IsValid(TargetPlayerCharacter)==true && TargetPlayerCharacter->IsPlayerControlled()==true)
 		{
-			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1800);
+			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1200);
 		}
 	}
 
