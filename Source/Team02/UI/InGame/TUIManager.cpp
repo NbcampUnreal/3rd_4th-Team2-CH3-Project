@@ -9,6 +9,7 @@
 #include "EngineUtils.h"
 #include "Character/TNonPlayerCharacter.h"
 #include "Spawner/TEnemySpawner.h"
+#include "TAIBossMonster/TAIBossMonster.h"
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -59,8 +60,17 @@ void UTUIManager::CreatePlayerUI()
 			FindAndRegisterEnemySpawners();
 			StartMonitoringMonsters();
 
-			// 임무 상태 초기화
-			UpdateMissionState();
+			// 첫 임무 시작시 0.5초 지연
+			FTimerHandle InitMissionTimer;
+			GetWorld()->GetTimerManager().SetTimer(
+				InitMissionTimer,
+				[this]()
+				{
+					UpdateMissionState();
+				},
+				0.5f,
+				false
+				);
 			
 		}
 		else
@@ -278,11 +288,20 @@ void UTUIManager::StopMonitoringMonsters()
 void UTUIManager::UpdateMonsterStatus()
 {
 	FindAllMonstersInWorld();
+	FindAllBossesInWorld();
 
 	int32 CurrentMonsterCount=TrackedMonsters.Num();
+	int32 CurrentBossCount=TrackedBosses.Num();
 
-	// 몬스터 수가 감소했다면 처치된 것으로 간주
-	if (CurrentMonsterCount< LastFrameMonsterCount)
+	//디버깅 로그
+	if (bBossPhase)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Boss Phase Active! Boss Count: %d, Last Count: %d"),
+			CurrentBossCount,LastFrameBossCount);
+	}
+	
+	// 웨이브가 활성화 되어있을때만 처치 카운트 
+	if (CurrentMonsterCount< LastFrameMonsterCount && bWaveActive && !bWaveCompleted)
 	{
 		int32 KilledCount=LastFrameMonsterCount-CurrentMonsterCount;
 
@@ -294,7 +313,7 @@ void UTUIManager::UpdateMonsterStatus()
 			UE_LOG(LogTemp,Warning,TEXT("Monster detected as killed!! Total: %d, Remaining: %d"),
 				MonsterKillCount,RemainingMonsters);
 		}
-
+		
 		// UI 업데이트
 		if (PlayerUIWidget)
 		{
@@ -312,6 +331,18 @@ void UTUIManager::UpdateMonsterStatus()
 		
 		UpdateMissionProgress();
 	}
+
+	// 보스 처치 감지 (별도 분리, 보스페이즈에서만)
+	if (bBossPhase && CurrentBossCount<LastFrameBossCount)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Boss DEFEATED!! Game Complete!"));
+
+		//게임 완료 처리
+		bBossPhase=false;
+		SetMissionObjective(TEXT("Victory! Boss Defeated!"));
+	}
+
+	
 	// 스포너 상태 체크로 웨이브 활성화 감지
 	bool bAnySpawnerActive=false;
 	for (ATEnemySpawner* Spawner: RegisteredSpawners)
@@ -355,6 +386,7 @@ void UTUIManager::UpdateMonsterStatus()
 	}
 
 	LastFrameMonsterCount=CurrentMonsterCount;
+	LastFrameBossCount=CurrentBossCount;
 }
 
 void UTUIManager::FindAllMonstersInWorld()
@@ -372,6 +404,41 @@ void UTUIManager::FindAllMonstersInWorld()
 				TrackedMonsters.Add(Monster);
 			}
 		}
+	}
+}
+
+void UTUIManager::FindAllBossesInWorld()
+{
+	if (UWorld* World = GetWorld())
+	{
+		TrackedBosses.Empty();
+        
+		for (TActorIterator<ATAIBossMonster> ActorItr(World); ActorItr; ++ActorItr)
+		{
+			ATAIBossMonster* Character = *ActorItr;
+			if (Character)
+			{
+				//보스 블루프린트인지 확인(이름으로)
+				FString ActorName= Character->GetClass()->GetName();
+				if (ActorName.Contains(TEXT("BP_TAIBossMonster")) ||
+					ActorName.Contains(TEXT("BossMonster")))
+				{
+					UE_LOG(LogTemp,Warning,TEXT("Found boss by name: %s, HP: %.1f"),
+						*ActorName,Character->GetCurrentHP());
+
+					if (Character->GetCurrentHP()>0)
+					{
+						//ATAIBossMonster* 로 캐스팅해서 저장
+						if (ATAIBossMonster* Boss=Cast<ATAIBossMonster>(Character))
+						{
+							TrackedBosses.Add(Boss);
+						}
+					}
+				}
+			}
+		}
+        
+		UE_LOG(LogTemp, Warning, TEXT("Total alive bosses: %d"), TrackedBosses.Num());
 	}
 }
 
@@ -402,6 +469,10 @@ void UTUIManager::UpdateWaveInfoFromSpawners()
 		UE_LOG(LogTemp, Warning, TEXT("Wave info updated: %d total monsters expected"), TotalMaxMonsters);
 	}
 }
+
+
+
+
 
 
 void UTUIManager::UpdateAllUI()

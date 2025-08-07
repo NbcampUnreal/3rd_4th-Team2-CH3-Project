@@ -9,6 +9,7 @@
 
 class ATCharacterBase;
 class ATWeaponBase;
+class ATAIBossMonster;
 
 UCLASS()
 class TEAM02_API UTUIManager : public UGameInstanceSubsystem
@@ -146,9 +147,17 @@ protected:
 	UPROPERTY()
 	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
 
-	// 이전 프레임 몬스터 수 (변화 감지용)
+	// 이전 프레임 몬스터,보스 수(변화 감지용)
 	UPROPERTY()
 	int32 LastFrameMonsterCount=0;
+
+	UPROPERTY()
+	int32 LastFrameBossCount=0;
+	
+
+	// 보스 추적용
+	UPROPERTY()
+	TArray<class ATAIBossMonster*> TrackedBosses;
 	
 	// regularly ui update
 	void UpdateAllUI();
@@ -165,7 +174,9 @@ private:
 
 	//스포너에서 웨이브 정보 가져오기
 	void UpdateWaveInfoFromSpawners();
-	
+
+	//보스 찾기 함수
+	void FindAllBossesInWorld();
 };
 
 //TCapturePoint의 Tick() 함수에서 이미 점령률이 계산되고 있으니
