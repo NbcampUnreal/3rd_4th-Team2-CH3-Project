@@ -47,6 +47,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HideEnemyIncomingAlarm();
+
+	//타이핑 애니메이션 함수
+	UFUNCTION(BLueprintCallable)
+	void StartTypingAnimation(const FString& FullText);
+
+	UFUNCTION(BlueprintCallable)
+	void StartFlashingAndChangeText(const FString& NewText);
 	
 
 
@@ -78,4 +85,30 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> CaptureLabel;
+
+	//타이밍 애니메이션 변수
+	UPROPERTY()
+	FString TargetText; // 최종 표시 텍스트
+
+	UPROPERTY()
+	FString CurrentDisplayText; // 현재 표시중인 텍스트
+
+	UPROPERTY()
+	int32 CurrentCharIndex; // 현재 글자 인덱스
+
+	UPROPERTY()
+	bool bIsTyping; // 타이핑 중인지 확인
+
+	FTimerHandle TypingTimerHandle; // 타이핑 타이머
+	FTimerHandle FlashTimerHandle; 
+
+private:
+	// 타이핑 애니메이션 함수
+	void UpdateTypingText();
+	void FlashText();
+	void StopFlashing();
+
+	// 진짜 미션인지 확인 하는 함수
+	bool IsRealMissionChange(const FString& OldText,const FString& NewText);
+	
 };

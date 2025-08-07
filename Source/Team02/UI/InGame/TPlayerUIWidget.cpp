@@ -113,8 +113,32 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 {
 	if (ObjectText)
 	{
-		ObjectText->SetText(FText::FromString(ObjectiveText));
-		UE_LOG(LogTemp,Warning,TEXT("Mission updated: %s"), *ObjectiveText);
+		// 현재 텍스트가 비어있으면 처음 미션
+		FString CurrentText=ObjectText->GetText().ToString();
+
+		// 진짜 미션 변경 인지 확인
+		bool bIsRealMissionChange=IsRealMissionChange(CurrentText,ObjectiveText);
+		
+
+		if (CurrentText.IsEmpty() || CurrentText==TEXT("Kill Monsters"))
+		{
+			//처음 미션 바로 타이밍
+			StartTypingAnimation(ObjectiveText);
+			UE_LOG(LogTemp,Warning,TEXT("First mission typing: %s"),*ObjectiveText);
+		}
+		else if (bIsRealMissionChange)
+		{
+			// 진짜 미션 변경: 깜빡임 + 타이핑
+			StartFlashingAndChangeText(ObjectiveText);
+			UE_LOG(LogTemp, Warning, TEXT("Real mission change with effects: %s"), *ObjectiveText);
+		}
+		else
+		{
+			// 숫자만 변경: 즉시 업데이트 (깜빡임 없음)
+			ObjectText->SetText(FText::FromString(ObjectiveText));
+			UE_LOG(LogTemp, Warning, TEXT("Number only update: %s"), *ObjectiveText);
+		}
+		
 	}
 }
 
@@ -146,4 +170,140 @@ void UTPlayerUIWidget::HideEnemyIncomingAlarm()
 		WaveAlarmText->SetVisibility(ESlateVisibility::Hidden);
 		UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alarm hidden!!"));
 	}
+}
+
+void UTPlayerUIWidget::StartTypingAnimation(const FString& FullText)
+{
+	if (!ObjectText) return;
+
+	// 기존 타이핑 중이면 중단
+	GetWorld()->GetTimerManager().ClearTimer(TypingTimerHandle);
+
+	TargetText=FullText;
+	CurrentDisplayText=TEXT("");
+	CurrentCharIndex=0;
+	bIsTyping=true;
+	
+	//0.05초마다 글자 하나씩 추가
+	GetWorld()->GetTimerManager().SetTimer(
+		TypingTimerHandle,
+		this,
+		&UTPlayerUIWidget::UpdateTypingText,
+		0.05f,
+		true
+		);
+
+	UE_LOG(LogTemp,Warning,TEXT("Started typing animation for: %s"), *FullText);
+	
+}
+
+void UTPlayerUIWidget::UpdateTypingText()
+{
+	if (!bIsTyping || CurrentCharIndex>=TargetText.Len())
+	{
+		//타이핑 완료
+		bIsTyping=false;
+		GetWorld()->GetTimerManager().ClearTimer(TypingTimerHandle);
+		CurrentDisplayText=TargetText;
+		ObjectText->SetText(FText::FromString(CurrentDisplayText));
+		UE_LOG(LogTemp,Warning,TEXT("Typing animation completed"));
+		return;
+	}
+	// 한 글자씩 추가
+	CurrentDisplayText=TargetText.Left(CurrentCharIndex+1);
+	ObjectText->SetText(FText::FromString(CurrentDisplayText));
+	CurrentCharIndex++;
+}
+
+void UTPlayerUIWidget::StartFlashingAndChangeText(const FString& NewText)
+{
+	if (!ObjectText) return;
+
+	UE_LOG(LogTemp,Warning,TEXT("Starting flash effect for mission change"));
+
+	// 깜빡임 시작
+	GetWorld()->GetTimerManager().SetTimer(
+		FlashTimerHandle,
+		this,
+		&UTPlayerUIWidget::FlashText,
+		0.1f,
+		true
+		);
+
+	// 1초후 깜빡임 중단하고 새 텍스트 타이핑 시작
+	FTimerHandle StopFlashTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		StopFlashTimer,
+		[this,NewText]()
+		{
+			StopFlashing();
+			StartTypingAnimation(NewText);
+		},
+		1.0f,
+		false
+		);
+}
+
+void UTPlayerUIWidget::FlashText()
+{
+	if (!ObjectText) return;
+
+	static bool bVisible=false;
+	bVisible=!bVisible;
+
+	FLinearColor TextColor=bVisible ? FLinearColor::White : FLinearColor::Transparent;
+	ObjectText->SetColorAndOpacity(FSlateColor(TextColor));
+
+	
+}
+
+void UTPlayerUIWidget::StopFlashing()
+{
+	GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
+
+	if (ObjectText)
+	{
+		ObjectText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	}
+
+	UE_LOG(LogTemp,Warning,TEXT("Flash effect stopped"));
+}
+
+bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString& NewText)
+{
+	// 진짜 미션 변경 패턴
+	TArray<FString> MissionTypes={
+	TEXT("Eliminate enemies"),
+	TEXT("Move to control point"),
+	TEXT("Capture the control"),
+	TEXT("Defeat the boss"),
+	TEXT("Victory")
+	};
+
+	// 이전 텍스트와 새 텍스트 유형 찾기
+	FString OldType=TEXT("");
+	FString NewType=TEXT("");
+
+	for (const FString& Type : MissionTypes)
+	{
+		if (OldText.Contains(Type))
+		{
+			OldType=Type;
+		}
+		if (NewText.Contains(Type))
+		{
+			NewType=Type;
+		}
+	}
+
+	// 미션 유형이 다르면 진짜 변경
+	bool bIsRealChange=(OldType != NewType) && !NewType.IsEmpty();
+
+	UE_LOG(LogTemp, Warning, TEXT("Mission change check: '%s' -> '%s' = %s"), 
+		  *OldType, *NewType, bIsRealChange ? TEXT("REAL CHANGE") : TEXT("NUMBER UPDATE"));
+
+	return bIsRealChange;
+
+
+	
 }

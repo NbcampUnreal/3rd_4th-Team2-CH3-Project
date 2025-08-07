@@ -7,8 +7,12 @@
 #include "Area/TCapturePoint.h"
 #include "TUIManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
+
 class ATCharacterBase;
 class ATWeaponBase;
+class ATAIBossMonster;
 
 UCLASS()
 class TEAM02_API UTUIManager : public UGameInstanceSubsystem
@@ -16,6 +20,14 @@ class TEAM02_API UTUIManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	// OutGameUI 개발자와 협업 델리게이트 코드
+	UPROPERTY(BLueprintAssignable)
+	FOnVictoryDelegate OnVictoryEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGameOverDelegate OnGameOverEvent;
+	
+	
 	// initializce Subsystem
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -146,9 +158,17 @@ protected:
 	UPROPERTY()
 	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
 
-	// 이전 프레임 몬스터 수 (변화 감지용)
+	// 이전 프레임 몬스터,보스 수(변화 감지용)
 	UPROPERTY()
 	int32 LastFrameMonsterCount=0;
+
+	UPROPERTY()
+	int32 LastFrameBossCount=0;
+	
+
+	// 보스 추적용
+	UPROPERTY()
+	TArray<class ATAIBossMonster*> TrackedBosses;
 	
 	// regularly ui update
 	void UpdateAllUI();
@@ -165,7 +185,9 @@ private:
 
 	//스포너에서 웨이브 정보 가져오기
 	void UpdateWaveInfoFromSpawners();
-	
+
+	//보스 찾기 함수
+	void FindAllBossesInWorld();
 };
 
 //TCapturePoint의 Tick() 함수에서 이미 점령률이 계산되고 있으니
