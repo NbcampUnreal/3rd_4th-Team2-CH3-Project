@@ -12,6 +12,9 @@ FAutoConsoleVariableRef CVarShowSwordAIDebug(
 	ECVF_Cheat
 );
 
+const FName ATSwordAIController::SwordNPCStartPatrolLocationKey(TEXT("SwordNPCStartPatrolLocation"));
+const FName ATSwordAIController::SwordNPCEndPatrolLocationKey(TEXT("SwordNPCEndPatrolLocation"));
+
 ATSwordAIController::ATSwordAIController()
 {
 	SwordNPCPatrolRadius = 800.f;

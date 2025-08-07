@@ -39,9 +39,9 @@ public:
 	static int32 ShowSwordAIDebug;
 
 	//경계 시작 지점
-	const FName SwordNPCStartPatrolLocationKey = TEXT("SwordNPCStartPatrolLocation");
+	static const FName SwordNPCStartPatrolLocationKey;
 	//경계 종료 지점
-	const FName SwordNPCEndPatrolLocationKey = TEXT("SwordNPCEndPatrolLocation");
+	static const FName SwordNPCEndPatrolLocationKey;
 
 
 
