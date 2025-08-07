@@ -66,7 +66,9 @@ void ATAIController::BeginAI(APawn* InPawn)
 		{
 			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
-			
+
+			//시작할때 웨이브용 키는 false로 시작
+			BlackboardComponent->SetValueAsBool(IsInWaveKey,false);
 			//경계 시작위치를 AI 액터의 현제 위치로 지정
 			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
 
