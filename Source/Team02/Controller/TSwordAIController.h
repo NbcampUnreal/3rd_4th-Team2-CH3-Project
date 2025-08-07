@@ -30,8 +30,10 @@ protected:
 	void EndAI();
 
 public:
-	float PatrolRadius;
+	//경계 반원 크기
+	float SwordNPCPatrolRadius;
 
+	//AI디버깅 용
 	static int32 ShowSwordAIDebug;
 
 private:

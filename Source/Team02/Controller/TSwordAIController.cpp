@@ -14,7 +14,7 @@ FAutoConsoleVariableRef CVarShowSwordAIDebug(
 
 ATSwordAIController::ATSwordAIController()
 {
-	PatrolRadius = 800.f;
+	SwordNPCPatrolRadius = 800.f;
 	
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("SwordNPCBlackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("SwordNPCBrainComponent"));
@@ -58,12 +58,12 @@ void ATSwordAIController::BeginAI(APawn* InPawn)
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
 
 			/*//경계 시작위치를 AI 액터의 현제 위치로 지정
-			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
+			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());*/
 
-			if (ShowAIDebug == 1)
+			if (ShowSwordAIDebug == 1)
 			{
 				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
-			}*/
+			}
 		}
 	}
 }
