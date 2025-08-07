@@ -20,7 +20,6 @@ protected:
 	virtual void EndAttack();
 	UFUNCTION(BlueprintCallable, Category = "Boss")
 	bool IsAttacking() const;
-
 	
 	virtual void NativeInitializeAnimation() override;
 	// 몽타주 종료 콜백 바인딩
@@ -44,9 +43,6 @@ protected:
 	//공격 몽타주 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boss|Montage")
 	UAnimMontage* AttackMontage;
-	//패트롤 몽타주 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boss|Montage")
-	UAnimMontage* PatrolMontage;
 	
 
 
