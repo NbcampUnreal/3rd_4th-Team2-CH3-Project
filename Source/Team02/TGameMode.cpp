@@ -30,6 +30,7 @@ ATGameMode::ATGameMode()
 void ATGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	EnemySpawners.Empty();
 	for (AActor* Actor : FoundActors)
 	{
@@ -53,25 +54,42 @@ void ATGameMode::BeginPlay()
 	}
 }
 
+void ATGameMode::RegisterAIController(ATAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		AIControllers.Add(AIController);
+	}
+}
+
+void ATGameMode::UnregisterAIController(ATAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		AIControllers.Remove(AIController);
+	}
+}
+
 void ATGameMode::StartWave(int32 InWaveIndex)
 {
 	if (bIsWaveActive) return;  // 이미 웨이브 중
 
-	bIsWaveActive = true;
+	UWorld* World = GetWorld();
 
 	//AI블랙보드의 키를 true로 전환
-	for (TActorIterator<ATAIController> It(World); It; ++It)
+	for (ATAIController* AIC : AIControllers)
 	{
-		ATAIController* FoundAIController = *It;
-		if (IsValid(FoundAIController) == true)
+		if (IsValid(AIC) == true)
 		{
-			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(FoundAIController->GetBlackboardComponent());
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIC->GetBlackboardComponent());
 			if (IsValid(BlackboardComponent) == true)
 			{
-				BlackboardComponent->SetValueAsBool(FoundAIController->IsInWaveKey, true);
+				BlackboardComponent->SetValueAsBool(AIC->IsInWaveKey, true);
 			}
 		}
 	}
+
+	bIsWaveActive = true;
 	
 	if (EnemySpawners.IsValidIndex(InWaveIndex))
 	{
@@ -98,16 +116,17 @@ void ATGameMode::EndWave()
 		BossSpawner -> SpawnBoss();
 	}
 
+	UWorld* World = GetWorld();
+	
 	//AI블랙보드의 키를 false로 전환
-	for (TActorIterator<ATAIController> It(World); It; ++It)
+	for (ATAIController* AIC : AIControllers)
 	{
-		ATAIController* FoundAIController = *It;
-		if (IsValid(FoundAIController) == true)
+		if (IsValid(AIC) == true)
 		{
-			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(FoundAIController->GetBlackboardComponent());
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIC->GetBlackboardComponent());
 			if (IsValid(BlackboardComponent) == true)
 			{
-				BlackboardComponent->SetValueAsBool(FoundAIController->IsInWaveKey, false);
+				BlackboardComponent->SetValueAsBool(AIC->IsInWaveKey, false);
 			}
 		}
 	}

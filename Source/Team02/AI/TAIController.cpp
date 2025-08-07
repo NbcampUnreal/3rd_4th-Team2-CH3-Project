@@ -2,6 +2,9 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "TGameMode.h"
+
 
 //순찰 범위
 const float ATAIController::PatrolRadius(500.f);
@@ -30,6 +33,13 @@ ATAIController::ATAIController()
 void ATAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//게임 모드 배열에 객체의 컨트롤러 등록
+	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (IsValid(GameMode) == true)
+	{
+		GameMode->RegisterAIController(this);
+	}
 	
 }
 
@@ -86,7 +96,14 @@ void ATAIController::EndAI()
 	
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
-		BehaviorTreeComponent->StopTree();
+		BehaviorTreeComponent->StopTree();\
+
+		//게임모드의 배열에서 자기 빼기
+		ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (IsValid(GameMode) == true)
+		{
+			GameMode->UnregisterAIController(this);
+		}
 
 		if (ShowAIDebug == 1)
 		{

@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "TGameMode.generated.h"
+
 class ATEnemySpawner;
 class ATCapturePoint;
 class ATBossSpawner;
+class ATAIController;
+
 UCLASS()
 class TEAM02_API ATGameMode : public AGameMode
 {
@@ -36,9 +39,6 @@ public:
 	UPROPERTY()
 	int32 WaveIndex = 0;
 
-	UPROPERTY()
-	TObjectPtr<UWorld> World;
-
 	UFUNCTION()
 	void StartWave(int32 InWaveIndex);
 
@@ -53,5 +53,15 @@ public:
 	void RespawnPlayer(AController* DeadController);
 
 	ATBossSpawner* BossSpawner;
+	//AI 컨트롤러를 베열에 추가하는 함수
+	void RegisterAIController(ATAIController* AIController);
+
+	void UnregisterAIController(ATAIController* AIController);
+
 	TArray<AActor*> FoundActors;
+
+private:
+
+	UPROPERTY()
+	TArray<TObjectPtr<ATAIController>> AIControllers;
 };
