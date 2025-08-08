@@ -260,13 +260,29 @@ void ATPlayerCharacter::HandleOnPostCharacterDead()
   // 2. 이펙트/애니메이션 등 사망 연출 (선택)
   // ex) 죽는 애니메이션, 이펙트
 
-  // 3. 일정 시간 뒤에 Respawn 트리거 (ex: 2초 후)
-  FTimerHandle RespawnTimerHandle;
-  GetWorld()->GetTimerManager().SetTimer(
-      RespawnTimerHandle,
-      this, &ATPlayerCharacter::RequestRespawn,
-      2.0f, false
-  );
+  // // 3. 일정 시간 뒤에 Respawn 트리거 (ex: 2초 후)
+  // FTimerHandle RespawnTimerHandle;
+  // GetWorld()->GetTimerManager().SetTimer(
+  //     RespawnTimerHandle,
+  //     this, &ATPlayerCharacter::RequestRespawn,
+  //     2.0f, false
+  // );
+
+  // 4. UI 띄우기
+  if (APlayerController* PC = Cast<APlayerController>(GetController()))
+  {
+    
+    if (GameOverWidgetClass)
+    {
+      UUserWidget* GameOverUI = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
+      if (GameOverUI)
+      {
+        GameOverUI->AddToViewport();
+        PC->bShowMouseCursor = true;
+        PC->SetInputMode(FInputModeUIOnly());
+      }
+    }
+  }
 }
 
 

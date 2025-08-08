@@ -1,6 +1,7 @@
 ﻿#include "TPlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "TGameState.h"
+#include "TGameMode.h"
 #include "Character/TCharacterBase.h"
 #include "UI/InGame/TUIManager.h"
 
@@ -42,4 +43,13 @@ void ATPlayerController::BeginPlay()
 void ATPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+}
+
+// // 게임 오버 UI로부터 리스폰 요청하는 코드
+void ATPlayerController::RequestRespawnFromUI()
+{
+	if (ATGameMode* GM = Cast<ATGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GM->RespawnPlayer(this);
+	}
 }
