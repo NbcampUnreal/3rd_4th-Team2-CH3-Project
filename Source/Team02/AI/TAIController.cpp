@@ -3,6 +3,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Area/TCapturePoint.h"
 #include "TGameMode.h"
 
 
@@ -34,13 +35,6 @@ ATAIController::ATAIController()
 void ATAIController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//게임 모드 배열에 객체의 컨트롤러 등록
-	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (IsValid(GameMode) == true)
-	{
-		GameMode->RegisterAIController(this);
-	}
 	
 }
 
@@ -53,6 +47,13 @@ void ATAIController::OnPossess(APawn* InPawn)
 	if (IsValid(ControlledPawn) == true)
 	{
 		BeginAI(ControlledPawn);
+	}
+
+	//게임 모드 배열에 객체의 컨트롤러 등록
+	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (IsValid(GameMode) == true)
+	{
+		GameMode->RegisterAIController(this);
 	}
 }
 
@@ -77,12 +78,25 @@ void ATAIController::BeginAI(APawn* InPawn)
 		{
 			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
-
-			//시작할때 웨이브용 키는 false로 시작
-			BlackboardComponent->SetValueAsBool(IsInWaveKey,false);
+		
 			//경계 시작위치를 AI 액터의 현제 위치로 지정
 			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
 
+			ATGameMode* GameMode = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+			if (IsValid(GameMode) == true)
+			{
+				BlackboardComponent->SetValueAsBool(IsInWaveKey, GameMode->bIsWaveActive);
+			}
+
+			TArray<AActor*> FoundCapturePoints;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
+
+			if (FoundCapturePoints.Num() > 0)
+			{
+				AActor* TargetCapturePoint = FoundCapturePoints[0];
+				BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+			}
+			
 			if (ShowAIDebug == 1)
 			{
 				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));

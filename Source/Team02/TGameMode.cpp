@@ -73,6 +73,8 @@ void ATGameMode::UnregisterAIController(ATAIController* AIController)
 void ATGameMode::StartWave(int32 InWaveIndex)
 {
 	if (bIsWaveActive) return;  // 이미 웨이브 중
+	
+	bIsWaveActive = true;
 
 	//AI블랙보드의 키를 true로 전환
 	for (ATAIController* AIC : AIControllers)
@@ -86,8 +88,6 @@ void ATGameMode::StartWave(int32 InWaveIndex)
 			}
 		}
 	}
-
-	bIsWaveActive = true;
 	
 	if (EnemySpawners.IsValidIndex(InWaveIndex))
 	{

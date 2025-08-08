@@ -29,12 +29,14 @@ ATCapturePoint::ATCapturePoint()
 	CapturePercent = 0.0f;
 	bPlayerInArea = false;
 	bEnemyInArea = false;
+
 }
 
 void ATCapturePoint::BeginPlay()
 {
 	Super::BeginPlay();
 	GM = GetWorld()->GetAuthGameMode<ATGameMode>();
+	
 }
 
 void ATCapturePoint::Tick(float DeltaTime)
