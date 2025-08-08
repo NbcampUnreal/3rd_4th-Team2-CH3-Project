@@ -47,6 +47,8 @@ public:
 	static const FName IsInWaveKey;
 	//점령지 위치
 	static const FName CapturePointKey;
+	//보스 점령지 위치
+	static const FName BossCapturePointKey;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))

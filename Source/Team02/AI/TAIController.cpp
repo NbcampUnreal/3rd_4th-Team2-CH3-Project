@@ -24,6 +24,7 @@ const FName ATAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
 const FName ATAIController::IsInWaveKey(TEXT("IsInWave"));
 const FName ATAIController::CapturePointKey(TEXT("CapturePoint"));
+const FName ATAIController::BossCapturePointKey(TEXT("BossCapturePoint"));
 
 ATAIController::ATAIController()
 {
@@ -86,15 +87,24 @@ void ATAIController::BeginAI(APawn* InPawn)
 			if (IsValid(GameMode) == true)
 			{
 				BlackboardComponent->SetValueAsBool(IsInWaveKey, GameMode->bIsWaveActive);
-			}
+			
 
-			TArray<AActor*> FoundCapturePoints;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
+				TArray<AActor*> FoundCapturePoints;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
 
-			if (FoundCapturePoints.Num() > 0)
-			{
-				AActor* TargetCapturePoint = FoundCapturePoints[0];
-				BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+				if (FoundCapturePoints.Num() > 0)
+				{
+					if (GameMode->WaveIndex == 0)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[0];
+						BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+					else if (GameMode->WaveIndex == 1)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[1];
+						BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+				}
 			}
 			
 			if (ShowAIDebug == 1)
