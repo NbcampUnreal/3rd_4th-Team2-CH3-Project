@@ -11,6 +11,7 @@
 #include "AI/TAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EngineUtils.h"
+#include "Blueprint/UserWidget.h"
 
 ATGameMode::ATGameMode()
 {
@@ -147,28 +148,92 @@ void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 	
 }
 
+// void ATGameMode::RespawnPlayer(AController* DeadController)
+// {
+// 	if (LastCapturedPoint)
+// 	{
+// 		// 1. 현재 Pawn 제거
+// 		if (APawn* Pawn = DeadController->GetPawn())
+// 		{
+// 			Pawn->Destroy();
+// 		}
+//
+// 		// 2. Respawn 위치 세팅
+// 		FTransform RespawnTransform = LastCapturedPoint->RespawnTransform;
+//
+// 		// 3. 새로운 Pawn(캐릭터) 스폰
+// 		APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
+//
+// 		// 4. 컨트롤러가 새 Pawn을 Possess
+// 		DeadController->Possess(NewPawn);
+// 	}
+// 	else
+// 	{
+// 		// 디폴트 리스폰 (예: 맵 시작 위치)
+// 		RestartPlayer(DeadController);
+// 	}
+// }
+
+// 플레이어 리스폰
 void ATGameMode::RespawnPlayer(AController* DeadController)
 {
+	if (!DeadController) return;
+
+	// PlayerController로 캐스팅
+	if (APlayerController* PC = Cast<APlayerController>(DeadController))
+	{
+		// 플레이어 입력을 게임 전용 모드로 설정 (UI 입력 차단, 마우스 커서 숨김)
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false; // 커서 숨기기
+	}
+
+	// 기존 Pawn 제거
+	if (APawn* Pawn = DeadController->GetPawn())
+	{
+		DeadController->UnPossess();
+		Pawn->Destroy();
+	}
+
+	// 리스폰 위치 결정
+	FTransform RespawnTransform;
 	if (LastCapturedPoint)
 	{
-		// 1. 현재 Pawn 제거
-		if (APawn* Pawn = DeadController->GetPawn())
-		{
-			Pawn->Destroy();
-		}
-
-		// 2. Respawn 위치 세팅
-		FTransform RespawnTransform = LastCapturedPoint->RespawnTransform;
-
-		// 3. 새로운 Pawn(캐릭터) 스폰
-		APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
-
-		// 4. 컨트롤러가 새 Pawn을 Possess
-		DeadController->Possess(NewPawn);
+		RespawnTransform = LastCapturedPoint->RespawnTransform;
+	}
+	else if (AActor* PlayerStart = FindPlayerStart(DeadController))
+	{
+		RespawnTransform = PlayerStart->GetActorTransform();
 	}
 	else
 	{
-		// 디폴트 리스폰 (예: 맵 시작 위치)
-		RestartPlayer(DeadController);
+		return;
+	}
+
+	// 새 Pawn 스폰 후 Possess
+	APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
+	if (!NewPawn) return;
+
+	DeadController->Possess(NewPawn);
+}
+
+
+// 플레이어 사망
+void ATGameMode::OnPlayerDied(AController* DeadController)
+{
+	if (!DeadController || !GameOverWidgetClass) return;
+
+	APlayerController* PC = Cast<APlayerController>(DeadController);
+	if (!PC) return;
+
+	UUserWidget* GameOverUI = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
+	if (GameOverUI)
+	{
+		GameOverUI->AddToViewport();
+		PC->SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(GameOverUI->TakeWidget());
+		PC->SetInputMode(InputMode);
 	}
 }
+
