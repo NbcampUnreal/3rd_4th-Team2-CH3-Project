@@ -40,25 +40,8 @@ void ATWeaponBase::OnOverlapBegin(
 		ATPlayerCharacter* PC = Cast<ATPlayerCharacter>(OtherActor);
 		if (PC)
 		{
-			// 기존 무기 파괴
-			if (PC->CurrentWeapon)
-			{
-				PC->CurrentWeapon->Destroy();
-			}
-
-			// 새 무기 등록
-			PC->CurrentWeapon = this;
-
-			// 손에 붙이기
-			AttachToComponent(
-				PC->GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				TEXT("Hand_R_Socket")
-			);
-			SetActorHiddenInGame(false); 
-			SetActorEnableCollision(false);
+			PC->EquipWeapon(this);
 		}
-		// 추가: 효과음, UI 표시, 인벤토리 추가 등
 	}
 }
 

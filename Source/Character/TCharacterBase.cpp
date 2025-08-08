@@ -25,6 +25,8 @@ ATCharacterBase::ATCharacterBase()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.1f;
+
+	CurrentWeaponType = EWeaponType::Unarmed;
 	
 	bIsDead = false;
 }
@@ -39,6 +41,29 @@ void ATCharacterBase::BeginPlay()
 		AnimInstance->OnPostDead.AddDynamic(this, &ThisClass::HandleOnPostCharacterDead);
 	}
 }
+
+void ATCharacterBase::EquipWeapon(ATWeaponBase* NewWeapon)
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->Destroy();
+	}
+	CurrentWeapon = NewWeapon;
+
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_R_Socket"));
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->SetActorEnableCollision(false);
+
+		CurrentWeaponType = CurrentWeapon->WeaponType;
+	}
+	else
+	{
+		CurrentWeaponType = EWeaponType::Unarmed;
+	}
+}
+
 
 void ATCharacterBase::HandleOnCheckInputAttack()
 {

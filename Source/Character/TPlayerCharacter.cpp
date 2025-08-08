@@ -58,7 +58,7 @@ void ATPlayerCharacter::BeginPlay()
       }
     }
   }
-
+  
   if (DefaultWeaponClass)
   {
     FActorSpawnParameters SpawnParams;
@@ -69,18 +69,8 @@ void ATPlayerCharacter::BeginPlay()
     FVector SpawnLoc = GetMesh()->GetSocketLocation(TEXT("Hand_R_Socket"));
     FRotator SpawnRot = GetMesh()->GetSocketRotation(TEXT("Hand_R_Socket"));
 
-    // 무기 액터 스폰
-    CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(
-      DefaultWeaponClass, SpawnLoc, SpawnRot, SpawnParams);
-
-    if (CurrentWeapon)
-    {
-      // 손에 Attach
-      CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-                                       TEXT("Hand_R_Socket"));
-      CurrentWeapon->SetActorHiddenInGame(false);
-      CurrentWeapon->SetActorEnableCollision(false);
-    }
+    ATWeaponBase* SpawnedWeapon = GetWorld()->SpawnActor<ATWeaponBase>(DefaultWeaponClass, SpawnLoc, SpawnRot, SpawnParams);
+    EquipWeapon(SpawnedWeapon);
   }
 }
 

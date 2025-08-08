@@ -25,7 +25,7 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	
-	ATWeaponBase* CurrentWeapon;
+	//ATWeaponBase* CurrentWeapon;
 
 	virtual void HandleOnPostCharacterDead() override;
 

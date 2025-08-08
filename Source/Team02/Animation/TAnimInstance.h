@@ -4,6 +4,8 @@
 #include "Animation/AnimInstance.h"
 #include "TAnimInstance.generated.h"
 
+enum class EWeaponType : uint8;
+
 class ATCharacterBase;
 class UCharacterMovementComponent;
 
@@ -42,9 +44,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 bIsDead : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 bIsUnarmed : 1;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	uint8 bIsFalling : 1;
@@ -57,4 +56,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float NormalizedCurrentPitch;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	EWeaponType WeaponType;
 };

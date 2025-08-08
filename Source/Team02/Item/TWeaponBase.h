@@ -8,6 +8,7 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
+	Unarmed, // 비무장 상태를 추가함 
 	Shotgun,
 	Rifle,
 	Pistol,

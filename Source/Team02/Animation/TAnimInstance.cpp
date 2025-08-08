@@ -1,4 +1,5 @@
 #include "Animation/TAnimInstance.h"
+#include "Item/TWeaponBase.h"
 #include "Character/TCharacterBase.h"
 #include "Character/TPlayerCharacter.h"
 #include "Character/TNonPlayerCharacter.h"
@@ -18,7 +19,6 @@ void UTAnimInstance::NativeInitializeAnimation()
 			OwnerCharacterMovement = OwnerCharacter->GetCharacterMovement();
 		}
 	}
-	bIsUnarmed = true;
 }
 
 void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -31,8 +31,9 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		float GroundAcceleration = UKismetMathLibrary::VSizeXY(OwnerCharacterMovement->GetCurrentAcceleration());
 		bool bIsAccelerated = FMath::IsNearlyZero(GroundAcceleration) == false;
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
-		bIsUnarmed = OwnerCharacter->GetCurrentWeaponAttackAnimMontage() == nullptr ? true : false;
 
+		WeaponType = OwnerCharacter->GetCurrentWeaponType();
+		
 		if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerCharacter->GetController()))
 		{
 			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
