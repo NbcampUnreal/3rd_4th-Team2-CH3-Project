@@ -43,26 +43,39 @@ void ATCapturePoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bPlayerInArea && !bEnemyInArea && CapturePercent < 100.f)
+	if (!bIsCaptured && bPlayerInArea && !bEnemyInArea && CapturePercent < 100.f)
 	{
-		CapturePercent += DeltaTime * CaptureSpeed; 
+		CapturePercent += DeltaTime * CaptureSpeed;
 		CapturePercent = FMath::Clamp(CapturePercent, 0.f, 100.f);
 
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,
-			FString::Printf(TEXT("점령률: %.1f%%"), CapturePercent));
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
+			FString::Printf(TEXT("Zone %d 점령률: %.1f%%"), ZoneIndex, CapturePercent));
 
 		if (CapturePercent >= 100.f)
 		{
-			if (GM)
-			{
-				GM->OnCapturePointCompleted();
-				GM->LastCapturedPoint = this; 
-			}
-			CapturePercent = 100.f;
-			NotifyWall();
+			CompleteCapture(); // << 여기서만 한 번 호출!
 		}
 	}
+
 	
+}
+
+void ATCapturePoint::CompleteCapture()
+{
+	if (bIsCaptured) return; // 이미 완료된 경우 중복 방지
+
+	bIsCaptured = true;
+	CapturePercent = 100.f;
+
+	if (GM)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[CapturePoint] Zone %d 점령 완료 → GameMode 통보"), ZoneIndex);
+
+		GM->OnCapturePointCompleted();
+		GM->LastCapturedPoint = this;
+	}
+
+	NotifyWall(); // 벽 열기 등 연계 행동
 }
 
 void ATCapturePoint::NotifyWall()
@@ -91,7 +104,7 @@ void ATCapturePoint::OnOverlapBegin(
 		// 웨이브 시작 (최초 진입 때만, 혹은 조건에 따라 한 번만)
 		if (GM && !GM->bIsWaveActive)   // 이미 웨이브 중이면 패스
 		{
-			GM->OnZoneOverlap(ZoneIndex);   // 여기서만 최초 1회!
+			GM->OnZoneOverlap(ZoneIndex);  
 		}
 	}
 	else if (OtherActor->ActorHasTag(TEXT("Enemy")))
