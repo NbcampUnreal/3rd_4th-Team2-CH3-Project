@@ -107,6 +107,30 @@ void UTUIManager::UpdatePlayerAmmo()
 	}
 }
 
+void UTUIManager::UpdateWeaponInfo()
+{
+	// 무기 변경 감지
+	if (CurrentWeapon != PreviousWeapon)
+	{
+		if (CurrentWeapon && PlayerUIWidget)
+		{
+			// 무기이름 가쟈오기
+			FString WeaponName=CurrentWeapon->GetWeaponTypeString();
+			PlayerUIWidget->UpdateWeaponName(WeaponName);
+
+			UE_LOG(LogTemp,Warning,TEXT("Weapon changed to: %s"), *WeaponName);
+		}
+		else if (!CurrentWeapon && PlayerUIWidget)
+		{
+			//무기가 없을때
+			PlayerUIWidget->UpdateWeaponName(TEXT("No Weapon"));
+		}
+
+		// 이전 무기 업데이트
+		PreviousWeapon=CurrentWeapon;
+	}
+}
+
 
 void UTUIManager::ShowCaptureUI(const FString& AreaName)
 {
@@ -345,7 +369,6 @@ void UTUIManager::UpdateMonsterStatus()
 		OnVictoryEvent.Broadcast();
 		UE_LOG(LogTemp,Warning,TEXT("Victory event broadcasted!!"));
 
-
 		
 	}
 
@@ -478,10 +501,6 @@ void UTUIManager::UpdateWaveInfoFromSpawners()
 }
 
 
-
-
-
-
 void UTUIManager::UpdateAllUI()
 {
 	// 기존 UI 업데이트
@@ -492,6 +511,7 @@ void UTUIManager::UpdateAllUI()
 	
 	UpdatePlayerHP();
 	UpdatePlayerAmmo();
+	UpdateWeaponInfo();
 	
 	// 거점 상태 감시 및 UI 업데이트 (디버깅 로그 추가)
 	if (CurrentCapturePoint && PlayerUIWidget)

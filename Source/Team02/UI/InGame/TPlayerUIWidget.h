@@ -54,6 +54,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartFlashingAndChangeText(const FString& NewText);
+
+	//무기 종류
+	UFUNCTION(BlueprintCallable)
+	void UpdateWeaponName(const FString& WeaponName);
 	
 
 
@@ -85,6 +89,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> CaptureLabel;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> WeaponNameText;
 
 	//타이밍 애니메이션 변수
 	UPROPERTY()

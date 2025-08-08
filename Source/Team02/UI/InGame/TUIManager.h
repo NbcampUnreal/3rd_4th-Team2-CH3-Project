@@ -42,6 +42,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerAmmo();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateWeaponInfo();
 	
 	// Player references
 	UFUNCTION(BlueprintCallable)
@@ -101,6 +104,10 @@ protected:
 	// current weapon reference
 	UPROPERTY()
 	TObjectPtr<ATWeaponBase> CurrentWeapon;
+
+	//무기 이름 변환 관련
+	UPROPERTY()
+	TObjectPtr<ATWeaponBase> PreviousWeapon;
 
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
