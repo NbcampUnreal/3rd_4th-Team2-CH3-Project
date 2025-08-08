@@ -303,7 +303,19 @@ bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString
 		  *OldType, *NewType, bIsRealChange ? TEXT("REAL CHANGE") : TEXT("NUMBER UPDATE"));
 
 	return bIsRealChange;
+	
+}
 
-
+void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
+{
+	if (WeaponNameText)
+	{
+		WeaponNameText->SetText(FText::FromString(WeaponName));
+		UE_LOG(LogTemp,Warning,TEXT("Weapon name updated: %s"),*WeaponName);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("WeaponNameText is NULL! Check widget binding,"));
+	}
 	
 }

@@ -13,6 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
 class ATCharacterBase;
 class ATWeaponBase;
 class ATAIBossMonster;
+class ATGameMode;
 
 UCLASS()
 class TEAM02_API UTUIManager : public UGameInstanceSubsystem
@@ -42,6 +43,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerAmmo();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateWeaponInfo();
 	
 	// Player references
 	UFUNCTION(BlueprintCallable)
@@ -83,6 +87,13 @@ public:
 	// spawner 연동(읽기 전용)
 	UFUNCTION(BlueprintCallable)
 	void FindAndRegisterEnemySpawners();
+
+	// 긴급 수정
+	UFUNCTION(BLueprintCallable)
+	void MoveToNextCapturePoint();
+
+	UFUNCTION(BlueprintCallable)
+	void UnlockWeapon();
 	
 
 protected:
@@ -102,25 +113,32 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ATWeaponBase> CurrentWeapon;
 
+	//무기 이름 변환 관련
+	UPROPERTY()
+	TObjectPtr<ATWeaponBase> PreviousWeapon;
+
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
 	
 	// 게임 플로우 반영 변수 ( 웨이브 시작> 몬스터 처치 (웨이브클리어) >거점 점령 >보스전 순서 )
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	bool bWaveActive=false; // 웨이브 활성화 여부
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bWaveCompleted = false;  // 웨이브 완료 여부
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCapturePhase = false;   // 점령 페이즈 여부
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCaptureCompleted = false; // 점령완료
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool bWaveCompleted=false; // 웨이브 완료여부
 	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool bFirstCaptureCompleted=false; //1거점 완료
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bWeaponUnlocked=false;  // 무기 해금
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool bSecondCaptureCompleted=false; // 2거점 완료
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCapturePhase = false;   // 점령 페이즈 여부
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bBossPhase=false; // 보스전 페이즈
 
@@ -130,6 +148,13 @@ protected:
 	// 현재 활성 거점
 	UPROPERTY()
 	TObjectPtr<class ATCapturePoint> CurrentCapturePoint;
+
+	//모든 거점 관련
+	UPROPERTY()
+	TArray<class ATCapturePoint*> AllCapturePoints;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 CurrentCaptureIndex=0;
 
 	//거점 이름
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -164,11 +189,29 @@ protected:
 
 	UPROPERTY()
 	int32 LastFrameBossCount=0;
-	
 
+	UPROPERTY()
+	int32 LastWaveMonsterCount=0;
+	
 	// 보스 추적용
 	UPROPERTY()
 	TArray<class ATAIBossMonster*> TrackedBosses;
+
+	//GameMode 참조 추가
+	UPROPERTY()
+	TObjectPtr<class ATGameMode> GameModeRef;
+
+	//웨이브로 스폰된 몬스터만 추적
+	UPROPERTY()
+	TArray<class ATNonPlayerCharacter*> WaveSpawnedMonsters;
+	
+	UPROPERTY()
+	TArray<class ATNonPlayerCharacter*> PreExistingMonsters;
+
+	//웨이브 시작시 총 몬스터 수
+	UPROPERTY()
+	int32 TotalWaveMonsters=0;
+	
 	
 	// regularly ui update
 	void UpdateAllUI();
