@@ -4,6 +4,10 @@
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
 #include "TGameMode.h"
+#include "AI/TAIController.h"
+#include "Character/TNonPlayerCharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Team02.h"
 
 
@@ -25,12 +29,14 @@ ATCapturePoint::ATCapturePoint()
 	CapturePercent = 0.0f;
 	bPlayerInArea = false;
 	bEnemyInArea = false;
+
 }
 
 void ATCapturePoint::BeginPlay()
 {
 	Super::BeginPlay();
 	GM = GetWorld()->GetAuthGameMode<ATGameMode>();
+	
 }
 
 void ATCapturePoint::Tick(float DeltaTime)

@@ -43,6 +43,12 @@ public:
 	static const FName EndPatrolPositionKey;
 	//타겟 캐릭터
 	static const FName TargetCharacterKey;
+	//웨이브인지 아닌지 확인하는 키
+	static const FName IsInWaveKey;
+	//점령지 위치
+	static const FName CapturePointKey;
+	//보스 점령지 위치
+	static const FName BossCapturePointKey;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))

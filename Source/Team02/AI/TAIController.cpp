@@ -2,6 +2,10 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Area/TCapturePoint.h"
+#include "TGameMode.h"
+
 
 //순찰 범위
 const float ATAIController::PatrolRadius(500.f);
@@ -18,6 +22,9 @@ FAutoConsoleVariableRef CVarShowAIDebug(
 const FName ATAIController::StarPatrolPositionKey(TEXT("StartPatrolPosition"));
 const FName ATAIController::EndPatrolPositionKey(TEXT("EndPatrolPosition"));
 const FName ATAIController::TargetCharacterKey(TEXT("TargetCharacter"));
+const FName ATAIController::IsInWaveKey(TEXT("IsInWave"));
+const FName ATAIController::CapturePointKey(TEXT("CapturePoint"));
+const FName ATAIController::BossCapturePointKey(TEXT("BossCapturePoint"));
 
 ATAIController::ATAIController()
 {
@@ -42,6 +49,13 @@ void ATAIController::OnPossess(APawn* InPawn)
 	{
 		BeginAI(ControlledPawn);
 	}
+
+	//게임 모드 배열에 객체의 컨트롤러 등록
+	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (IsValid(GameMode) == true)
+	{
+		GameMode->RegisterAIController(this);
+	}
 }
 
 
@@ -65,10 +79,34 @@ void ATAIController::BeginAI(APawn* InPawn)
 		{
 			bool bRunSucceeded = RunBehaviorTree(BehaviorTree);
 			checkf(bRunSucceeded == true, TEXT("Fail to run behavior tree."))
-
+		
 			//경계 시작위치를 AI 액터의 현제 위치로 지정
 			BlackboardComponent->SetValueAsVector(StarPatrolPositionKey, InPawn->GetActorLocation());
 
+			ATGameMode* GameMode = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+			if (IsValid(GameMode) == true)
+			{
+				BlackboardComponent->SetValueAsBool(IsInWaveKey, GameMode->bIsWaveActive);
+			
+
+				TArray<AActor*> FoundCapturePoints;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
+
+				if (FoundCapturePoints.Num() > 0)
+				{
+					if (GameMode->WaveIndex == 0)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[0];
+						BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+					else if (GameMode->WaveIndex == 1)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[1];
+						BlackboardComponent->SetValueAsVector(CapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+				}
+			}
+			
 			if (ShowAIDebug == 1)
 			{
 				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
@@ -83,7 +121,14 @@ void ATAIController::EndAI()
 	
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
-		BehaviorTreeComponent->StopTree();
+		BehaviorTreeComponent->StopTree();\
+
+		//게임모드의 배열에서 자기 빼기
+		ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (IsValid(GameMode) == true)
+		{
+			GameMode->UnregisterAIController(this);
+		}
 
 		if (ShowAIDebug == 1)
 		{

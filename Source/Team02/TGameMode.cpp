@@ -8,6 +8,9 @@
 #include "Spawner/TEnemySpawner.h"
 #include "Area/TCapturePoint.h"
 #include "Spawner/TBossSpawner.h"
+#include "AI/TAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "EngineUtils.h"
 
 ATGameMode::ATGameMode()
 {
@@ -27,6 +30,7 @@ ATGameMode::ATGameMode()
 void ATGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	EnemySpawners.Empty();
 	for (AActor* Actor : FoundActors)
 	{
@@ -50,11 +54,41 @@ void ATGameMode::BeginPlay()
 	}
 }
 
+void ATGameMode::RegisterAIController(ATAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		AIControllers.Add(AIController);
+	}
+}
+
+void ATGameMode::UnregisterAIController(ATAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		AIControllers.Remove(AIController);
+	}
+}
+
 void ATGameMode::StartWave(int32 InWaveIndex)
 {
 	if (bIsWaveActive) return;  // 이미 웨이브 중
-
+	
 	bIsWaveActive = true;
+
+	//AI블랙보드의 키를 true로 전환
+	for (ATAIController* AIC : AIControllers)
+	{
+		if (IsValid(AIC) == true)
+		{
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIC->GetBlackboardComponent());
+			if (IsValid(BlackboardComponent) == true)
+			{
+				BlackboardComponent->SetValueAsBool(AIC->IsInWaveKey, true);
+			}
+		}
+	}
+	
 	if (EnemySpawners.IsValidIndex(InWaveIndex))
 	{
 		EnemySpawners[InWaveIndex]->SetSpawnerActive(true); // 예시: 스포너 켜기
@@ -78,6 +112,21 @@ void ATGameMode::EndWave()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Boss Spawned	"));
 		BossSpawner -> SpawnBoss();
+	}
+
+	UWorld* World = GetWorld();
+	
+	//AI블랙보드의 키를 false로 전환
+	for (ATAIController* AIC : AIControllers)
+	{
+		if (IsValid(AIC) == true)
+		{
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIC->GetBlackboardComponent());
+			if (IsValid(BlackboardComponent) == true)
+			{
+				BlackboardComponent->SetValueAsBool(AIC->IsInWaveKey, false);
+			}
+		}
 	}
 }
 

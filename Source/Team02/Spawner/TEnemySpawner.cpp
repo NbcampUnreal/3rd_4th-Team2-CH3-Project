@@ -34,7 +34,7 @@ void ATEnemySpawner::BeginPlay()
 void ATEnemySpawner::ActivateSpawner()
 {
     if (bIsActive || !EnemyClass) return;
-
+    
     bIsActive = true;
     CurrentSpawned = 0;
 
