@@ -63,5 +63,5 @@ void ATitleUIPlayerController::StartGame()
 	SetInputMode(FInputModeGameOnly());
 	bShowMouseCursor = false;
 
-	UGameplayStatics::OpenLevel(GetWorld(), FName("TitleLevel"));
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLevel"));
 }

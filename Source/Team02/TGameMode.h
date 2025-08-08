@@ -50,7 +50,15 @@ public:
 
 	UFUNCTION()
 	void OnZoneOverlap(int32 ZoneIndex);
+	UFUNCTION(BlueprintCallable, Category = "Respawn")
 	void RespawnPlayer(AController* DeadController);
+
+	// 사망 처리
+	UFUNCTION()
+	void OnPlayerDied(AController* DeadController);
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	ATBossSpawner* BossSpawner;
 	//AI 컨트롤러를 베열에 추가하는 함수
