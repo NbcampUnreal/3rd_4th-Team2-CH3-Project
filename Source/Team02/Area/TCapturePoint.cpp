@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
 #include "TGameMode.h"
+#include "Team02.h"
 
 
 ATCapturePoint::ATCapturePoint()
@@ -16,7 +17,7 @@ ATCapturePoint::ATCapturePoint()
 	CaptureAreaMesh -> SetupAttachment(Root);
 	CaptureAreaCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("CaptureAreaCollider"));
 	CaptureAreaCollider->SetupAttachment(Root);
-
+	CaptureAreaCollider->SetCollisionResponseToChannel(ECC_ATTACK, ECR_Ignore);
 	CaptureAreaCollider->OnComponentBeginOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapBegin);
 	CaptureAreaCollider->OnComponentEndOverlap.AddDynamic(this, &ATCapturePoint::OnOverlapEnd);
 

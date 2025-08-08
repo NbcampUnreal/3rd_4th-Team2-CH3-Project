@@ -7,6 +7,7 @@
 #include "TGameMode.generated.h"
 class ATEnemySpawner;
 class ATCapturePoint;
+class ATBossSpawner;
 UCLASS()
 class TEAM02_API ATGameMode : public AGameMode
 {
@@ -48,6 +49,6 @@ public:
 	void OnZoneOverlap(int32 ZoneIndex);
 	void RespawnPlayer(AController* DeadController);
 
-
+	ATBossSpawner* BossSpawner;
 	TArray<AActor*> FoundActors;
 };

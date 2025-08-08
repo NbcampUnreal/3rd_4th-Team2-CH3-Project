@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Spawner/TEnemySpawner.h"
 #include "Area/TCapturePoint.h"
+#include "Spawner/TBossSpawner.h"
 
 ATGameMode::ATGameMode()
 {
@@ -34,6 +35,19 @@ void ATGameMode::BeginPlay()
 			EnemySpawners.Add(Spawner);
 		}
 	}
+
+	TArray<AActor*> FoundBossSpawners;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATBossSpawner::StaticClass(), FoundBossSpawners);
+	if (FoundBossSpawners.Num() > 0)
+	{
+		BossSpawner = Cast<ATBossSpawner>(FoundBossSpawners[0]);
+		UE_LOG(LogTemp, Warning, TEXT("BossSpawner 할당됨: %s"), *BossSpawner->GetName());
+	}
+	else
+	{
+		BossSpawner = nullptr;
+		UE_LOG(LogTemp, Error, TEXT("레벨에 BossSpawner 없음!"));
+	}
 }
 
 void ATGameMode::StartWave(int32 InWaveIndex)
@@ -46,6 +60,8 @@ void ATGameMode::StartWave(int32 InWaveIndex)
 		EnemySpawners[InWaveIndex]->SetSpawnerActive(true); // 예시: 스포너 켜기
 		// 추가로 웨이브 시작 관련 로직
 	}
+
+	
 }
 
 
@@ -57,13 +73,20 @@ void ATGameMode::EndWave()
 	{
 		EnemySpawners[WaveIndex]->SetSpawnerActive(false); // 예시: 활성화 끄기
 	}
+
+	if (WaveIndex == 2)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Boss Spawned	"));
+		BossSpawner -> SpawnBoss();
+	}
 }
 
 void ATGameMode::OnCapturePointCompleted()
 {
 	bIsWaveActive = false;
-	EndWave(); // 현재 웨이브 종료
+	
 	++WaveIndex;
+	EndWave(); // 현재 웨이브 종료
 }
 
 void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
