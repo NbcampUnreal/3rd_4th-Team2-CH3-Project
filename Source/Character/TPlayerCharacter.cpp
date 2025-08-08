@@ -34,7 +34,6 @@ ATPlayerCharacter::ATPlayerCharacter()
   SpringArmComponent->bInheritRoll = false;
   SpringArmComponent->bDoCollisionTest = true;
   SpringArmComponent->SetRelativeLocation(FVector(0.f, 25.f, 25.f));
-
   
   CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
   CameraComponent->SetupAttachment(SpringArmComponent);
@@ -58,29 +57,18 @@ void ATPlayerCharacter::BeginPlay()
       }
     }
   }
-
-  if (DefaultWeaponClass)
+  
+  if (DefaultWeaponClass) // 스폰단계를 처리함
   {
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = this;
     SpawnParams.Instigator = GetInstigator();
-
-    // 손 소켓에 붙이려면 Spawn 위치/회전은 대략 캐릭터 위치로
+    
     FVector SpawnLoc = GetMesh()->GetSocketLocation(TEXT("Hand_R_Socket"));
     FRotator SpawnRot = GetMesh()->GetSocketRotation(TEXT("Hand_R_Socket"));
 
-    // 무기 액터 스폰
-    CurrentWeapon = GetWorld()->SpawnActor<ATWeaponBase>(
-      DefaultWeaponClass, SpawnLoc, SpawnRot, SpawnParams);
-
-    if (CurrentWeapon)
-    {
-      // 손에 Attach
-      CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-                                       TEXT("Hand_R_Socket"));
-      CurrentWeapon->SetActorHiddenInGame(false);
-      CurrentWeapon->SetActorEnableCollision(false);
-    }
+    ATWeaponBase* SpawnedWeapon = GetWorld()->SpawnActor<ATWeaponBase>(DefaultWeaponClass, SpawnLoc, SpawnRot, SpawnParams);
+    EquipWeapon(SpawnedWeapon);
   }
 }
 
@@ -301,6 +289,11 @@ void ATPlayerCharacter::RequestRespawn()
     }
   }
 
+  if (CurrentWeapon)
+  {
+    CurrentWeapon -> Destroy();
+  }
+  
   // 2. 본인은 제거
   Destroy();
 }

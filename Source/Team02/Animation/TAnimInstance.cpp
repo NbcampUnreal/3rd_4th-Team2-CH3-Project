@@ -1,11 +1,11 @@
 #include "Animation/TAnimInstance.h"
+#include "Item/TWeaponBase.h"
 #include "Character/TCharacterBase.h"
 #include "Character/TPlayerCharacter.h"
 #include "Character/TNonPlayerCharacter.h"
 #include "Team02/Character/TNonPlayerCharacterSword.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-
 
 void UTAnimInstance::NativeInitializeAnimation()
 {
@@ -31,6 +31,13 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bool bIsAccelerated = FMath::IsNearlyZero(GroundAcceleration) == false;
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
 
+		WeaponType = OwnerCharacter->GetCurrentWeaponType();
+		
+		if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerCharacter->GetController()))
+		{
+			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
+		}
+		
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;

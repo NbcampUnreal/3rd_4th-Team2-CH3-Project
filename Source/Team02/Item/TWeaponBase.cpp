@@ -40,25 +40,8 @@ void ATWeaponBase::OnOverlapBegin(
 		ATPlayerCharacter* PC = Cast<ATPlayerCharacter>(OtherActor);
 		if (PC)
 		{
-			// 기존 무기 파괴
-			if (PC->CurrentWeapon)
-			{
-				PC->CurrentWeapon->Destroy();
-			}
-
-			// 새 무기 등록
-			PC->CurrentWeapon = this;
-
-			// 손에 붙이기
-			AttachToComponent(
-				PC->GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				TEXT("Hand_R_Socket")
-			);
-			SetActorHiddenInGame(false); 
-			SetActorEnableCollision(false);
+			PC->EquipWeapon(this);
 		}
-		// 추가: 효과음, UI 표시, 인벤토리 추가 등
 	}
 }
 
@@ -227,6 +210,18 @@ void ATWeaponBase::Reload()
 	FString Msg = FString::Printf(
 		TEXT("Reloaded: %d | Current: %d | Remain: %d"), AmmoToReload, GetCurrentAmmo(), GetTotalAmmo());
 	UKismetSystemLibrary::PrintString(this, Msg);
+
+	if (ReloadMontage) // Reload시에 재생하는 몽타주 구현
+	{
+		if (ATPlayerCharacter* PlayerCharacter = Cast<ATPlayerCharacter>(GetOwner()))
+		{
+			UAnimInstance* AnimInstance = PlayerCharacter->GetMesh()->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(ReloadMontage);
+			}
+		}
+	}
 }
 
 bool ATWeaponBase::CanFire() const

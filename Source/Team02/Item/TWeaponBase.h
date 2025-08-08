@@ -8,6 +8,7 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
+	Unarmed, // 비무장 상태를 추가함 
 	Shotgun,
 	Rifle,
 	Pistol,
@@ -17,6 +18,7 @@ class ATItemBase;
 class UAnimMontage;
 class UNiagaraSystem;
 class USoundBase;
+
 UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
@@ -128,6 +130,14 @@ protected:
 	
 	FTimerHandle ReloadTimerHandle;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly) // 주석처리
+#pragma region Montage
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+#pragma endregion
 };

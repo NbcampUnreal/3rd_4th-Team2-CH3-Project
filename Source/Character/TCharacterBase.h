@@ -50,7 +50,7 @@ protected:
 #pragma region Attack
 
 public:
-
+	
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
 	void HandleOnCheckInputAttack();
@@ -58,12 +58,23 @@ public:
 	virtual void BeginAttack();
 
 	UAnimMontage* GetCurrentWeaponAttackAnimMontage() const;
-
+	
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
-
+	
 	UPROPERTY()
 	TObjectPtr<ATWeaponBase> CurrentWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	EWeaponType CurrentWeaponType;
+	
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	EWeaponType GetCurrentWeaponType() const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	ATWeaponBase* GetCurrentWeapon() const;
+    
+	void EquipWeapon(ATWeaponBase* NewWeapon);
 
 protected:
 	FString AttackAnimMontageSectionPrefix = FString(TEXT("Attack"));
@@ -75,7 +86,7 @@ protected:
 	bool bIsNowAttacking = false;
 
 	bool bIsAttackKeyPressed = false;
-
+	
 	//라이플 공격하는 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackFireMontage;

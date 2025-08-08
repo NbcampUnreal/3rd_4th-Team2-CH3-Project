@@ -34,7 +34,6 @@ ATItemBase::ATItemBase()
 	PickupCollider->OnComponentBeginOverlap.AddDynamic(this, &ATItemBase::OnOverlapBegin);
 }
 
-
 void ATItemBase::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,

@@ -4,6 +4,8 @@
 #include "Animation/AnimInstance.h"
 #include "TAnimInstance.generated.h"
 
+enum class EWeaponType : uint8;
+
 class ATCharacterBase;
 class UCharacterMovementComponent;
 
@@ -43,13 +45,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 bIsDead : 1;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	uint8 bIsFalling : 1;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float GroundSpeed;
-	
-	//점프중인지 확인
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	uint8 bIsFalling : 1;
+
+	UPROPERTY(BlueprintReadOnly)
+	float NormalizedCurrentPitch;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	EWeaponType WeaponType;
 };

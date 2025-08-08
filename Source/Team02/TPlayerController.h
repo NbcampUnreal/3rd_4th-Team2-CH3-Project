@@ -8,6 +8,7 @@ class UInputMappingContext;
 class UInputAction;
 class ATWeaponBase;
 class UTUIManager;
+
 UCLASS()
 class TEAM02_API ATPlayerController : public APlayerController
 {
