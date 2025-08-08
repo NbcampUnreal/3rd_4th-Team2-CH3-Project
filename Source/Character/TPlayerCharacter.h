@@ -24,8 +24,6 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
-	
-	//ATWeaponBase* CurrentWeapon;
 
 	virtual void HandleOnPostCharacterDead() override;
 
@@ -45,7 +43,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UCameraComponent> CameraComponent;
 
-	
 #pragma endregion
 
 #pragma region Input

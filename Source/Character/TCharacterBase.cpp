@@ -10,6 +10,8 @@
 ATCharacterBase::ATCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	CurrentWeapon = nullptr;
+	bIsDead = false;
 
 	float CharacterHalfHeight = 90.f;
 	float CharacterRadius = 40.f;
@@ -25,10 +27,6 @@ ATCharacterBase::ATCharacterBase()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.1f;
-
-	CurrentWeaponType = EWeaponType::Unarmed;
-	
-	bIsDead = false;
 }
 
 void ATCharacterBase::BeginPlay()
@@ -44,26 +42,59 @@ void ATCharacterBase::BeginPlay()
 
 void ATCharacterBase::EquipWeapon(ATWeaponBase* NewWeapon)
 {
+	if (NewWeapon == nullptr)
+	{
+		if (IsValid(CurrentWeapon))
+		{
+			CurrentWeapon->Destroy();
+		}
+		CurrentWeapon = nullptr;
+		CurrentWeaponType = EWeaponType::Unarmed;
+		return;
+	}
+	
 	if (IsValid(CurrentWeapon))
 	{
 		CurrentWeapon->Destroy();
 	}
+	
 	CurrentWeapon = NewWeapon;
-
-	if (IsValid(CurrentWeapon))
+	
+	CurrentWeaponType = CurrentWeapon->WeaponType;
+	
+	FName SocketToAttach = NAME_None;
+	
+	switch (CurrentWeaponType)
 	{
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_R_Socket"));
+	case EWeaponType::Pistol:
+		SocketToAttach = TEXT("Hand_R_Socket");
+		break;
+	case EWeaponType::Rifle:
+	case EWeaponType::Shotgun:
+		SocketToAttach = TEXT("Rifle_Socket");
+		break;
+	}
+	if (SocketToAttach != NAME_None)
+	{
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketToAttach);
 		CurrentWeapon->SetOwner(this);
 		CurrentWeapon->SetActorEnableCollision(false);
-
-		CurrentWeaponType = CurrentWeapon->WeaponType;
-	}
-	else
-	{
-		CurrentWeaponType = EWeaponType::Unarmed;
 	}
 }
 
+ATWeaponBase* ATCharacterBase::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
+}
+
+EWeaponType ATCharacterBase::GetCurrentWeaponType() const
+{
+	if (IsValid(CurrentWeapon))
+	{
+		return CurrentWeapon->WeaponType;
+	}
+	return EWeaponType::Unarmed;
+}
 
 void ATCharacterBase::HandleOnCheckInputAttack()
 {

@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-
 void UTAnimInstance::NativeInitializeAnimation()
 {
 	APawn* OwnerPawn = TryGetPawnOwner();

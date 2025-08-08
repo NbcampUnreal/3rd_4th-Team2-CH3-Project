@@ -59,15 +59,21 @@ public:
 
 	UAnimMontage* GetCurrentWeaponAttackAnimMontage() const;
 	
-	UPROPERTY()
-	TObjectPtr<ATWeaponBase> CurrentWeapon;
-	
 	UFUNCTION()
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped);
 	
-	UFUNCTION(BlueprintPure, Category = "Animation")
-	EWeaponType GetCurrentWeaponType() const { return CurrentWeaponType; }
+	UPROPERTY()
+	TObjectPtr<ATWeaponBase> CurrentWeapon;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	EWeaponType CurrentWeaponType;
+	
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	EWeaponType GetCurrentWeaponType() const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	ATWeaponBase* GetCurrentWeapon() const;
+    
 	void EquipWeapon(ATWeaponBase* NewWeapon);
 
 protected:
@@ -80,9 +86,6 @@ protected:
 	bool bIsNowAttacking = false;
 
 	bool bIsAttackKeyPressed = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
-	EWeaponType CurrentWeaponType;
 	
 	//라이플 공격하는 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

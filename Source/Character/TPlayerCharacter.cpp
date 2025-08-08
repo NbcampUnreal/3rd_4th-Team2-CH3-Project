@@ -34,7 +34,6 @@ ATPlayerCharacter::ATPlayerCharacter()
   SpringArmComponent->bInheritRoll = false;
   SpringArmComponent->bDoCollisionTest = true;
   SpringArmComponent->SetRelativeLocation(FVector(0.f, 25.f, 25.f));
-
   
   CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
   CameraComponent->SetupAttachment(SpringArmComponent);
@@ -59,13 +58,12 @@ void ATPlayerCharacter::BeginPlay()
     }
   }
   
-  if (DefaultWeaponClass)
+  if (DefaultWeaponClass) // 스폰단계를 처리함
   {
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = this;
     SpawnParams.Instigator = GetInstigator();
-
-    // 손 소켓에 붙이려면 Spawn 위치/회전은 대략 캐릭터 위치로
+    
     FVector SpawnLoc = GetMesh()->GetSocketLocation(TEXT("Hand_R_Socket"));
     FRotator SpawnRot = GetMesh()->GetSocketRotation(TEXT("Hand_R_Socket"));
 
