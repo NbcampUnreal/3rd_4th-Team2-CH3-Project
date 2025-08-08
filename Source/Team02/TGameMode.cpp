@@ -10,7 +10,6 @@
 #include "Spawner/TBossSpawner.h"
 #include "AI/TAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "EngineUtils.h"
 #include "Blueprint/UserWidget.h"
 
 ATGameMode::ATGameMode()
@@ -108,12 +107,8 @@ void ATGameMode::EndWave()
 	{
 		EnemySpawners[WaveIndex]->SetSpawnerActive(false); // 예시: 활성화 끄기
 	}
-
-	if (WaveIndex == 2)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Spawned	"));
-		BossSpawner -> SpawnBoss();
-	}
+	
+	
 
 	UWorld* World = GetWorld();
 	
@@ -134,13 +129,18 @@ void ATGameMode::EndWave()
 void ATGameMode::OnCapturePointCompleted()
 {
 	bIsWaveActive = false;
-	
+	EndWave();
 	++WaveIndex;
-	EndWave(); // 현재 웨이브 종료
+	if (WaveIndex == 2 )
+	{
+		BossSpawner->SpawnBoss();
+		
+	}
 }
 
 void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 {
+	
 	if (ZoneIndex == WaveIndex)
 	{
 		StartWave(WaveIndex);

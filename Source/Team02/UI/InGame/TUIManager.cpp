@@ -788,7 +788,7 @@ void UTUIManager::UpdateAllUI()
                     if (GameModeRef)
                     {
                         GameModeRef->LastCapturedPoint = CurrentCapturePoint;
-                        GameModeRef->OnCapturePointCompleted();
+                        //GameModeRef->OnCapturePointCompleted(); // 보스 한방에 나와서 주석처리함..(기인)
                         UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: First capture completed"));
                     }
                     
@@ -805,7 +805,7 @@ void UTUIManager::UpdateAllUI()
                     if (GameModeRef)
                     {
                         GameModeRef->LastCapturedPoint = CurrentCapturePoint;
-                        GameModeRef->OnCapturePointCompleted();
+                        //GameModeRef->OnCapturePointCompleted();// 보스 한방에 나와서 주석처리함..(기인)
                         UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: Second capture completed"));
                     }
                     

@@ -56,6 +56,11 @@ public:
 	bool bEnemyInArea;  // << 추가: 적이 구역에 있는지
 
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsCaptured = false;
+
+	UFUNCTION()
+	void CompleteCapture();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Respawn")
 	FTransform RespawnTransform;
