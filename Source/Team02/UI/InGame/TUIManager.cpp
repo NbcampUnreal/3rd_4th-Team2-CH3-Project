@@ -10,10 +10,13 @@
 #include "Character/TNonPlayerCharacter.h"
 #include "Spawner/TEnemySpawner.h"
 #include "TAIBossMonster/TAIBossMonster.h"
+#include "TGameMode.h"
+#include "UnifiedBuffer.h"
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
 	//테스트 로그
 	UE_LOG(LogTemp,Warning,TEXT("UIManager Initialized!!"));
 }
@@ -39,6 +42,20 @@ void UTUIManager::CreatePlayerUI()
 
 	if (GetWorld())
 	{
+
+		// ⭐ 여기서 GameMode 참조 설정
+		GameModeRef = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+		if (GameModeRef)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("✅ GameMode reference set successfully!"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("❌ Failed to get GameMode reference in CreatePlayerUI!"));
+		}
+
+
+		
 		PlayerUIWidget = CreateWidget<UTPlayerUIWidget>(GetWorld(), PlayerUIWidgetClass);
 		if (PlayerUIWidget)
 		{
@@ -166,33 +183,85 @@ void UTUIManager::RegisterCapturePoint(class ATCapturePoint* CapturePoint)
 
 void UTUIManager::FindAndRegisterCapturePoints()
 {
-	if (UWorld* World=GetWorld())
-	{
-		//test log
-		UE_LOG(LogTemp, Warning, TEXT("Searching for capture points in the level..."));
-		//월드에서 모든 Capturepoint 찾기
-		for (TActorIterator<ATCapturePoint> ActorItr(World);ActorItr; ++ActorItr)
-		{
-			ATCapturePoint* CapturePoint= *ActorItr;
-			if (CapturePoint)
-			{
-				RegisterCapturePoint(CapturePoint);
+    if (UWorld* World = GetWorld())
+    {
+        AllCapturePoints.Empty();
+        ATCapturePoint* FirstPoint = nullptr;
+        ATCapturePoint* SecondPoint = nullptr;
 
-				// 거점 이름 설정(엑터,이름 사용)
-				CapturePointName=CapturePoint->GetName();
+        UE_LOG(LogTemp, Warning, TEXT("Searching for capture points by name..."));
 
-				UE_LOG(LogTemp, Warning, TEXT("Found and registered capture point: %s"), *CapturePointName);
+        // 모든 거점 찾기
+        for (TActorIterator<ATCapturePoint> ActorItr(World); ActorItr; ++ActorItr)
+        {
+            ATCapturePoint* CapturePoint = *ActorItr;
+            if (CapturePoint)
+            {
+                FString ActorName = CapturePoint->GetName();
+                UE_LOG(LogTemp, Warning, TEXT("Found CapturePoint: %s"), *ActorName);
+                
+                // ⭐ 이름으로 1거점/2거점 구분
+                if (ActorName.Contains(TEXT("First")) || 
+                    ActorName.Contains(TEXT("1")) || 
+                    ActorName.Contains(TEXT("One")))
+                {
+                    FirstPoint = CapturePoint;
+                    UE_LOG(LogTemp, Warning, TEXT("Identified as FIRST capture point: %s"), *ActorName);
+                }
+                else if (ActorName.Contains(TEXT("Second")) || 
+                         ActorName.Contains(TEXT("2")) || 
+                         ActorName.Contains(TEXT("Two")))
+                {
+                    SecondPoint = CapturePoint;
+                    UE_LOG(LogTemp, Warning, TEXT("Identified as SECOND capture point: %s"), *ActorName);
+                }
+                else
+                {
+                    // 이름에 식별자가 없는 경우 경고
+                    UE_LOG(LogTemp, Warning, TEXT("CapturePoint name doesn't contain identifier: %s"), *ActorName);
+                }
+            }
+        }
 
-				// 첫쨰 거전만 등록(여러 거점 있을시 break 제거)
-				break;
-			}
-		}
-		if (!CurrentCapturePoint)
-		{
-			UE_LOG(LogTemp,Warning,TEXT("No capture points found in level"));
-		}
-		
-	}
+        // ⭐ 순서대로 배열에 추가 (1거점 먼저, 2거점 나중에)
+        if (FirstPoint)
+        {
+            AllCapturePoints.Add(FirstPoint);
+            UE_LOG(LogTemp, Warning, TEXT("Added First Point to index 0: %s"), *FirstPoint->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("First capture point not found! Check actor names."));
+        }
+
+        if (SecondPoint)
+        {
+            AllCapturePoints.Add(SecondPoint);
+            UE_LOG(LogTemp, Warning, TEXT("Added Second Point to index 1: %s"), *SecondPoint->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Second capture point not found! Check actor names."));
+        }
+
+        // 결과 확인
+        if (AllCapturePoints.Num() >= 2)
+        {
+            // 첫 번째 거점을 현재 거점으로 설정
+            CurrentCapturePoint = AllCapturePoints[CurrentCaptureIndex];
+            CapturePointName = CurrentCapturePoint->GetName();
+
+            UE_LOG(LogTemp, Warning, TEXT("✅ Successfully set up %d capture points:"), AllCapturePoints.Num());
+            UE_LOG(LogTemp, Warning, TEXT("   1st Point (Index 0): %s"), *AllCapturePoints[0]->GetName());
+            UE_LOG(LogTemp, Warning, TEXT("   2nd Point (Index 1): %s"), *AllCapturePoints[1]->GetName());
+            UE_LOG(LogTemp, Warning, TEXT("   Starting with: %s"), *CapturePointName);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("❌ Need exactly 2 capture points! Found: %d"), AllCapturePoints.Num());
+            UE_LOG(LogTemp, Error, TEXT("   Make sure actor names contain 'First'/'1' and 'Second'/'2'"));
+        }
+    }
 }
 // 임무 관련 함수
 void UTUIManager::SetMissionObjective(const FString& NewObjective)
@@ -214,44 +283,121 @@ void UTUIManager::UpdateMissionProgress()
 
 void UTUIManager::UpdateMissionState()
 {
-	FString NewObjective;
-	//게임플로우-> 웨이브 시작> 몹처치>점령지 탈환> 무기 해금 > 보스전
-	if (bBossPhase)
-	{
-		NewObjective=TEXT("Defeat the boss");
-	}
-	else if (bCaptureCompleted && bWeaponUnlocked)
-	{
-		//점령 완료 + 무기 해금 후
-		NewObjective=TEXT("New Weapon unlocked! Prepare for boss");
-	}
-	else if (bCapturePhase && bNearCapturePoint)
-	{
-		//웨이브 완료후 거점 근처
-		NewObjective=TEXT("Capture the control point");
-	}
-	else if (bWaveCompleted && !bCapturePhase)
-	{
-		// 웨이브 완료했으나 아직 거점으로 이동 안함
-		NewObjective=TEXT("Move to control point");
-		bCapturePhase=true; // 점령 페이즈 활성화
-	}
-	else if (bWaveActive)
-	{
-		//웨이브 진행중
-		NewObjective=FString::Printf(TEXT("Eliminate enemies(%d remaining)"),RemainingMonsters);
-	}
-	else
-	{
-		//기본 상태
-		NewObjective=TEXT("Eliminate all enemies");
-	}
+    FString NewObjective;
+    
+    // ⭐ 현재 상태를 더 자세히 로깅
+    UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
+    UE_LOG(LogTemp, Warning, TEXT("  bBossPhase: %s"), bBossPhase ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWeaponUnlocked: %s"), bWeaponUnlocked ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
+    UE_LOG(LogTemp, Warning, TEXT("  MonsterKillCount: %d"), MonsterKillCount);
+    UE_LOG(LogTemp, Warning, TEXT("  TrackedMonsters.Num(): %d"), TrackedMonsters.Num());
 
-	// 임무 변경시에만 업데이트
-	if (CurrentMissionObjective != NewObjective)
-	{
-		SetMissionObjective(NewObjective);
-	}
+    if (bBossPhase)
+    {
+        NewObjective = TEXT("Defeat the boss!");
+    }
+    else if (bSecondCaptureCompleted)
+    {
+        NewObjective = TEXT("Prepare for final boss battle!");
+
+        if (!bBossPhase)
+        {
+            FTimerHandle BossTimer;
+            GetWorld()->GetTimerManager().SetTimer(
+                BossTimer,
+                [this]()
+                {
+                    bBossPhase = true;
+                    UpdateMissionState();
+                },
+                5.0f,
+                false
+            );
+        }
+    }
+    else if (bWeaponUnlocked && CurrentCaptureIndex == 1)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture the second control point!");
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter the control point to begin capture!");
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to second control point!");
+        }
+    }
+    else if (bFirstCaptureCompleted && !bWeaponUnlocked)
+    {
+        NewObjective = TEXT("First area captured! Unlocking weapon...");
+
+        FTimerHandle WeaponTimer;
+        GetWorld()->GetTimerManager().SetTimer(
+            WeaponTimer,
+            [this]()
+            {
+                UnlockWeapon();
+                bCapturePhase = false;
+            },
+            2.0f,
+            false
+        );
+    }
+    else if (bWaveCompleted && CurrentCaptureIndex == 0)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture the first control point!");
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter the control point to begin capture!");
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to first control point!");
+        }
+    }
+    else if (bWaveActive || TrackedMonsters.Num() > 0)
+    {
+        // ⭐ 스포너 기반 남은 수 계산 개선
+        int32 SpawnerBasedMax = 0;
+        for (ATEnemySpawner* Spawner : RegisteredSpawners)
+        {
+            if (Spawner) 
+            {
+                SpawnerBasedMax += Spawner->MaxSpawnCount;
+            }
+        }
+        
+        int32 RemainingCount = FMath::Max(0, SpawnerBasedMax - MonsterKillCount);
+        NewObjective = FString::Printf(TEXT("Eliminate enemies (%d remaining)"), RemainingCount);
+        
+        UE_LOG(LogTemp, Warning, TEXT("📊 Enemy Objective: %d killed, %d remaining"), 
+               MonsterKillCount, RemainingCount);
+    }
+    else
+    {
+        NewObjective = TEXT("Eliminate all enemies");
+    }
+
+    // 미션 목표가 실제로 변경되었을 때만 업데이트
+    if (CurrentMissionObjective != NewObjective)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🔄 Mission Updated: '%s' -> '%s'"), 
+               *CurrentMissionObjective, *NewObjective);
+        SetMissionObjective(NewObjective);
+    }
 }
 
 void UTUIManager::FindAndRegisterEnemySpawners()
@@ -311,112 +457,187 @@ void UTUIManager::StopMonitoringMonsters()
 
 void UTUIManager::UpdateMonsterStatus()
 {
-	FindAllMonstersInWorld();
-	FindAllBossesInWorld();
+    FindAllMonstersInWorld();
+    FindAllBossesInWorld();
 
-	int32 CurrentMonsterCount=TrackedMonsters.Num();
-	int32 CurrentBossCount=TrackedBosses.Num();
+    int32 CurrentMonsterCount = TrackedMonsters.Num();
+    int32 CurrentBossCount = TrackedBosses.Num();
 
-	//디버깅 로그
-	if (bBossPhase)
-	{
-		UE_LOG(LogTemp,Warning,TEXT("Boss Phase Active! Boss Count: %d, Last Count: %d"),
-			CurrentBossCount,LastFrameBossCount);
-	}
+    // ⭐ GameMode의 웨이브 상태 확인
+    bool bGameModeWaveActive = false;
+    if (GameModeRef)
+    {
+        bGameModeWaveActive = GameModeRef->bIsWaveActive;
+    }
+
+    // ⭐ 스포너 상태 체크
+    bool bAnySpawnerActive = false;
+    int32 TotalSpawnersCompleted = 0;
+    int32 SpawnerBasedMax = 0;
+    
+    for (ATEnemySpawner* Spawner : RegisteredSpawners)
+    {
+        if (Spawner)
+        {
+            SpawnerBasedMax += Spawner->MaxSpawnCount;
+            int32 CurrentSpawned = Spawner->GetCurrentSpawned();
+            int32 MaxSpawn = Spawner->MaxSpawnCount;
+            
+            bool bSpawnerCompleted = (CurrentSpawned >= MaxSpawn);
+            
+            if (!bSpawnerCompleted && CurrentSpawned > 0)
+            {
+                bAnySpawnerActive = true;
+            }
+            else if (bSpawnerCompleted)
+            {
+                TotalSpawnersCompleted++;
+            }
+        }
+    }
+    
+    // 웨이브 시작 감지
+    if ((bGameModeWaveActive || bAnySpawnerActive) && !bWaveActive && !bWaveCompleted)
+    {
+        bWaveActive = true;
+        bWaveCompleted = false;
+
+    	LastWaveMonsterCount=0;
+    	MonsterKillCount=0;
+
+        // 웨이브 시작 전 기존 몬스터 목록을 저장
+        PreExistingMonsters.Empty();
+        for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+        {
+            PreExistingMonsters.Add(Monster);
+        }
+
+        // 웨이브 몬스터 목록 초기화
+        WaveSpawnedMonsters.Empty();
+        TotalWaveMonsters = 0;
+        
+        UE_LOG(LogTemp, Warning, TEXT("🔥 WAVE STARTED! Wave monsters will be tracked separately."));
+
+        if (PlayerUIWidget)
+        {
+            PlayerUIWidget->ShoWEnemyIncomingAlarm();
+            
+            FTimerHandle AlarmTimer;
+            GetWorld()->GetTimerManager().SetTimer(
+                AlarmTimer,
+                [this]()
+                {
+                    if (PlayerUIWidget)
+                    {
+                        PlayerUIWidget->HideEnemyIncomingAlarm();
+                    }
+                },
+                3.0f,
+                false);
+        }
+    }
+    
+    // ⭐ 웨이브 중일 때 새로 스폰된 몬스터 감지
+    if (bWaveActive && !bWaveCompleted)
+    {
+        // 현재 월드의 모든 몬스터와 이전에 기록된 웨이브 몬스터 비교
+        for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+        {
+            // 기존 몬스터가 아니고, 웨이브 목록에도 없는 경우만 추가
+            if (!WaveSpawnedMonsters.Contains(Monster) && 
+                !PreExistingMonsters.Contains(Monster))
+            {
+                WaveSpawnedMonsters.Add(Monster);
+                TotalWaveMonsters++;
+                UE_LOG(LogTemp, Warning, TEXT("📍 NEW wave monster detected: %s (Total: %d)"), 
+                       *Monster->GetName(), TotalWaveMonsters);
+            }
+        }
+
+        // 죽은 웨이브 몬스터 제거
+        WaveSpawnedMonsters.RemoveAll([](ATNonPlayerCharacter* Monster) {
+            return !Monster || Monster->GetCurrentHP() <= 0;
+        });
+    }
 	
-	// 웨이브가 활성화 되어있을때만 처치 카운트 
-	if (CurrentMonsterCount< LastFrameMonsterCount && bWaveActive && !bWaveCompleted)
-	{
-		int32 KilledCount=LastFrameMonsterCount-CurrentMonsterCount;
 
-		for (int32 i=0; i<KilledCount; i++)
-		{
-			MonsterKillCount++;
-			RemainingMonsters--;
+    // 웨이브 몬스터 기준으로 처치 카운트 (개선된 로직)
+    int32 CurrentWaveMonsterCount = WaveSpawnedMonsters.Num();
 
-			UE_LOG(LogTemp,Warning,TEXT("Monster detected as killed!! Total: %d, Remaining: %d"),
-				MonsterKillCount,RemainingMonsters);
-		}
-		
-		// UI 업데이트
-		if (PlayerUIWidget)
-		{
-			int32 TotalMonsters=MonsterKillCount + RemainingMonsters;
-			PlayerUIWidget->UpdateKillCount(MonsterKillCount,TotalMonsters);
-		}
-		
-		// wave 완료 체크
-		if (RemainingMonsters<=0 && !bWaveCompleted)
-		{
-			bWaveCompleted=true;
-			bWaveActive=false;
-			UE_LOG(LogTemp,Warning,TEXT("Wave completed! All enemies elminated.!"));
-		}
-		
-		UpdateMissionProgress();
-	}
+    //  초기화 시점에서 LastWaveMonsterCount를 올바르게 설정
+    if (bWaveActive && LastWaveMonsterCount == 0 && CurrentWaveMonsterCount > 0)
+    {
+        LastWaveMonsterCount = CurrentWaveMonsterCount;
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Initial wave monster count set: %d"), CurrentWaveMonsterCount);
+    }
 
-	// 보스 처치 감지 (별도 분리, 보스페이즈에서만)
-	if (bBossPhase && CurrentBossCount<LastFrameBossCount)
-	{
-		UE_LOG(LogTemp,Warning,TEXT("Boss DEFEATED!! Game Complete!"));
+    // 몬스터가 죽었을 때 처치 카운트 증가
+    if (bWaveActive && !bWaveCompleted && CurrentWaveMonsterCount< LastWaveMonsterCount)
+    {
+        int32 KilledCount = LastWaveMonsterCount - CurrentWaveMonsterCount;
 
-		//게임 완료 처리
-		bBossPhase=false;
-		SetMissionObjective(TEXT("Victory! Boss Defeated!"));
+        for (int32 i = 0; i < KilledCount; i++)
+        {
+            MonsterKillCount++;
+            UE_LOG(LogTemp, Warning, TEXT("🗡️ Monster killed! Count: %d/%d"), MonsterKillCount, SpawnerBasedMax);
+        }
 
-		// 승리 이벤트 발생!
-		OnVictoryEvent.Broadcast();
-		UE_LOG(LogTemp,Warning,TEXT("Victory event broadcasted!!"));
+        // UI 업데이트
+        if (PlayerUIWidget)
+        {
+            PlayerUIWidget->UpdateKillCount(MonsterKillCount, SpawnerBasedMax);
+            UE_LOG(LogTemp, Warning, TEXT("🔄 UI Updated: %d/%d"), MonsterKillCount, SpawnerBasedMax);
+        }
+        
+        // 즉시 미션 상태 업데이트
+        UpdateMissionState();
+    }
 
-		
-	}
+    // 웨이브 완료 조건 개선
+    if (bWaveActive && !bWaveCompleted)
+    {
+        bool bAllWaveMonstersEliminated = (CurrentWaveMonsterCount == 0);
+        bool bAllSpawnersCompleted = (TotalSpawnersCompleted == RegisteredSpawners.Num());
+        bool bKillCountMet = (MonsterKillCount >= SpawnerBasedMax);
 
-	
-	// 스포너 상태 체크로 웨이브 활성화 감지
-	bool bAnySpawnerActive=false;
-	for (ATEnemySpawner* Spawner: RegisteredSpawners)
-	{
-		if (Spawner && Spawner->GetCurrentSpawned()>0)
-		{
-			bAnySpawnerActive=true;
-			break;
-		}
-	}
+        // 웨이브 완료 조건 계산
+        bool bWaveComplete = (MonsterKillCount>=SpawnerBasedMax);;
 
-	// 웨이브 시작 감지
-	if (bAnySpawnerActive && !bWaveActive && !bWaveCompleted)
-	{
-		// 새 웨이브 시작
-		bWaveActive=true;
-		bWaveCompleted=false;
-		UpdateWaveInfoFromSpawners();
-		UE_LOG(LogTemp,Warning,TEXT("New wave started!"));
+        UE_LOG(LogTemp, Warning, TEXT("🔍 Wave Completion Check:"));
+        UE_LOG(LogTemp, Warning, TEXT("  Wave Monsters: %d"), CurrentWaveMonsterCount);
+        UE_LOG(LogTemp, Warning, TEXT("  Kill Count: %d/%d"), MonsterKillCount, SpawnerBasedMax);
+        UE_LOG(LogTemp, Warning, TEXT("  Spawners Completed: %d/%d"), TotalSpawnersCompleted, RegisteredSpawners.Num());
+        UE_LOG(LogTemp, Warning, TEXT("  All Eliminated: %s"), bAllWaveMonstersEliminated ? TEXT("YES") : TEXT("NO"));
+        UE_LOG(LogTemp, Warning, TEXT("  Kill Count Met: %s"), bKillCountMet ? TEXT("YES") : TEXT("NO"));
+        UE_LOG(LogTemp, Warning, TEXT("  Wave Complete: %s"), bWaveComplete ? TEXT("YES") : TEXT("NO"));
+        
+        if (bWaveComplete)
+        {
+            bWaveCompleted = true;
+            bWaveActive = false;
+            WaveSpawnedMonsters.Empty();
+        	LastWaveMonsterCount=0;
+            
+            UE_LOG(LogTemp, Warning, TEXT("🏆 WAVE COMPLETED! All wave monsters eliminated!"));
+            
+            // ⭐ 웨이브 완료 후 즉시 미션 업데이트
+            UpdateMissionState();
+        }
+    }
 
-		//웨이브 시작 알림 부분
-		if (PlayerUIWidget)
-		{
-			PlayerUIWidget->ShoWEnemyIncomingAlarm();
+    // 보스 처치 감지
+    if (bBossPhase && CurrentBossCount < LastFrameBossCount)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🏆 Boss DEFEATED!! Game Complete!"));
+        bBossPhase = false;
+        SetMissionObjective(TEXT("Victory! Boss Defeated!"));
+        OnVictoryEvent.Broadcast();
+    }
 
-			//3초후 알람 숨김
-			FTimerHandle AlarmTimer;
-			GetWorld()->GetTimerManager().SetTimer(
-				AlarmTimer,
-				[this]()
-				{
-					if (PlayerUIWidget)
-					{
-						PlayerUIWidget->HideEnemyIncomingAlarm();
-					}
-				},
-				3.0f,
-				false);
-		}
-		UE_LOG(LogTemp,Warning,TEXT("New Wave started!"));
-	}
-
-	LastFrameMonsterCount=CurrentMonsterCount;
-	LastFrameBossCount=CurrentBossCount;
+    // ⭐ 프레임 카운트 업데이트
+    LastFrameMonsterCount = CurrentMonsterCount;
+    LastFrameBossCount = CurrentBossCount;
+    LastWaveMonsterCount = CurrentWaveMonsterCount;
 }
 
 void UTUIManager::FindAllMonstersInWorld()
@@ -500,6 +721,31 @@ void UTUIManager::UpdateWaveInfoFromSpawners()
 	}
 }
 
+void UTUIManager::MoveToNextCapturePoint()
+{
+	if (AllCapturePoints.IsValidIndex(CurrentCaptureIndex+1))
+	{
+		CurrentCaptureIndex++;
+		CurrentCapturePoint=AllCapturePoints[CurrentCaptureIndex];
+		CapturePointName=CurrentCapturePoint->GetName();
+
+		UE_LOG(LogTemp, Warning, TEXT("Moved to capture point %d: %s"), 
+			   CurrentCaptureIndex + 1, *CapturePointName);
+		
+	}
+}
+
+void UTUIManager::UnlockWeapon()
+{
+	bWeaponUnlocked=true;
+	MoveToNextCapturePoint(); //2번쨰 거점으로 이동
+
+	UE_LOG(LogTemp, Warning, TEXT("Moved to capture point %d: %s"), 
+			   CurrentCaptureIndex + 1, *CapturePointName);
+}
+
+
+
 
 void UTUIManager::UpdateAllUI()
 {
@@ -513,62 +759,82 @@ void UTUIManager::UpdateAllUI()
 	UpdatePlayerAmmo();
 	UpdateWeaponInfo();
 	
-	// 거점 상태 감시 및 UI 업데이트 (디버깅 로그 추가)
-	if (CurrentCapturePoint && PlayerUIWidget)
-	{
-		// 디버깅 로그 추가
-		if (CurrentCapturePoint->bPlayerInArea)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player is in capture area! Progress: %.1f%%"),CurrentCapturePoint->CapturePercent);
-		}
-        
-		// 플레이어가 거점 안에 있는지 확인
-		if (CurrentCapturePoint->bPlayerInArea)
-		{
-			// UI가 아직 안 보이면 표시
-			if (!PlayerUIWidget->IsCaptureUIVisible())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Showing capture UI"));
-				ShowCaptureUI(CapturePointName);
-			}
+// 거점 상태 감시 및 UI 업데이트
+    if (CurrentCapturePoint && PlayerUIWidget)
+    {
+        if (CurrentCapturePoint->bPlayerInArea)
+        {
+            bNearCapturePoint = true;
             
-			// 점령률 업데이트 (0-100 → 0.0-1.0 변환)
-			float ProgressPercent = CurrentCapturePoint->CapturePercent / 100.0f;
-			UpdateCaptureProgress(ProgressPercent);
+            if (!PlayerUIWidget->IsCaptureUIVisible())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Showing capture UI"));
+                ShowCaptureUI(CapturePointName);
+            }
+            
+            float ProgressPercent = CurrentCapturePoint->CapturePercent / 100.0f;
+            UpdateCaptureProgress(ProgressPercent);
 
-			// 점령 완료 감지 추가
-			if (CurrentCapturePoint->CapturePercent>=100.0f && !bCaptureCompleted)
-			{
-				bCaptureCompleted=true;
-				bBossPhase=true;
-				UE_LOG(LogTemp,Warning,TEXT("Capture completed! Boss phase activated!"));
-				UpdateMissionState();
-			}
-		}
-		
-		else
-		{
-			// 플레이어가 거점 밖에 있으면 UI 숨김
-			if (PlayerUIWidget->IsCaptureUIVisible())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Hiding capture UI"));
-				HideCaptureUI();
-			}
-		}
-	}
-	else
-	{
-		// ⭐ 문제 진단 로그
-		if (!CurrentCapturePoint)
-		{
-			UE_LOG(LogTemp, Error, TEXT("CurrentCapturePoint is NULL!"));
-		}
-		if (!PlayerUIWidget)
-		{
-			UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is NULL!"));
-		}
-	}
-	
+            // ⭐ 거점 완료시 GameMode에 알림 추가
+            if (CurrentCapturePoint->CapturePercent >= 100.0f)
+            {
+                if (CurrentCaptureIndex == 0 && !bFirstCaptureCompleted)
+                {
+                    bFirstCaptureCompleted = true;
+                    bCapturePhase = false;
+                    HideCaptureUI();
+                    
+                    // ⭐ GameMode에 거점 완료 알림
+                    if (GameModeRef)
+                    {
+                        GameModeRef->LastCapturedPoint = CurrentCapturePoint;
+                        GameModeRef->OnCapturePointCompleted();
+                        UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: First capture completed"));
+                    }
+                    
+                    UE_LOG(LogTemp, Warning, TEXT("First capture point completed!"));
+                    UpdateMissionState();
+                }
+                else if (CurrentCaptureIndex == 1 && !bSecondCaptureCompleted)
+                {
+                    bSecondCaptureCompleted = true;
+                    bCapturePhase = false;
+                    HideCaptureUI();
+                    
+                    // ⭐ GameMode에 거점 완료 알림
+                    if (GameModeRef)
+                    {
+                        GameModeRef->LastCapturedPoint = CurrentCapturePoint;
+                        GameModeRef->OnCapturePointCompleted();
+                        UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: Second capture completed"));
+                    }
+                    
+                    UE_LOG(LogTemp, Warning, TEXT("Second capture point completed!"));
+                    UpdateMissionState();
+                }
+            }
+        }
+        else
+        {
+            bNearCapturePoint = false;
+            if (PlayerUIWidget->IsCaptureUIVisible())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Hiding capture UI"));
+                HideCaptureUI();
+            }
+        }
+    }
+    else
+    {
+        if (!CurrentCapturePoint)
+        {
+            UE_LOG(LogTemp, Error, TEXT("CurrentCapturePoint is NULL!"));
+        }
+        if (!PlayerUIWidget)
+        {
+            UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is NULL!"));
+        }
+    }
 }
 
 void UTUIManager::Deinitialize()
