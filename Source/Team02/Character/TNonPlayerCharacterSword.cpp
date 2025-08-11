@@ -114,6 +114,7 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 		if (IsValid(AIController) == true)
 		{
 			AIController->EndAI();
+			this->Destroy();
 			CurrentSword->Destroy();
 		}
 	}

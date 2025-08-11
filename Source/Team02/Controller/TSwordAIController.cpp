@@ -80,6 +80,7 @@ void ATSwordAIController::EndAI()
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
 		BehaviorTreeComponent->StopTree();
+		
 
 		if (ShowSwordAIDebug == 1)
 		{
