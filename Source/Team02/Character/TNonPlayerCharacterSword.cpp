@@ -5,6 +5,7 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Team02.h"
 
 int32 ATNonPlayerCharacterSword::SwordAttackDebug = 0;
@@ -40,4 +41,60 @@ void ATNonPlayerCharacterSword::BeginPlay()
 		GetCharacterMovement()->MaxWalkSpeed = 400.f;
 		
 	}
+}
+
+void ATNonPlayerCharacterSword::BeginAttack()
+{
+	
+	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
+	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
+	
+	if (IsValid(AnimInstance) == true&& IsValid(AttackSwordMontage) == true && AnimInstance->Montage_IsPlaying(AttackSwordMontage) == false)
+	{
+		AnimInstance->Montage_Play(AttackSwordMontage);
+
+		bIsNowAttacking = true;
+
+		if (OnSwordAttackMontageEndedDelegate.IsBound() == false)
+		{
+			AnimInstance->Montage_Play(AttackSwordMontage);
+		
+			//몽타주 종료
+			OnSwordAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+			AnimInstance->Montage_SetEndDelegate(OnSwordAttackMontageEndedDelegate, AttackSwordMontage);
+		}
+	}
+}
+
+float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		ATSwordAIController* AIController = Cast<ATSwordAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			AIController->EndAI();
+			//CurrentRifle->SetLifeSpan(0.7f);
+		}
+	}
+	
+	return FinalDamageAmount;
+}
+
+void ATNonPlayerCharacterSword::EndAttack(UAnimMontage* InMontage, bool bInterruped)
+{
+	bIsNowAttacking = false;
+
+	if (OnSwordAttackMontageEndedDelegate.IsBound() == true)
+	{
+		//바인딩 했던 함수 해재
+		OnSwordAttackMontageEndedDelegate.Unbind();
+	}
+}
+
+void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckSwordHit()"));
 }

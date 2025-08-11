@@ -10,6 +10,7 @@ class ATCharacterBase;
 class UCharacterMovementComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckSwordHit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPostDead);
 
 UCLASS()
@@ -25,13 +26,20 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_CheckHit();
+	
 	UFUNCTION()
 	void AnimNotify_PostDead();
+
+	UFUNCTION()
+	void AnimNotify_CheckSwordHit();
 
 public:
 	FOnCheckHit OnCheckHit;
 
+	FOnCheckSwordHit OnCheckSwordHit;
+
 	FOnPostDead OnPostDead;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<ATCharacterBase> OwnerCharacter;
