@@ -159,19 +159,7 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
             this,                       // DamageCauser: 누가 쐈는지
             nullptr                     // DamageTypeClass(기본 null)
         );
-
-        //  디버그 출력
-        if (ATCharacterBase* HitChar = Cast<ATCharacterBase>(HitResult.GetActor()))
-        {
-            UKismetSystemLibrary::PrintString(
-                this, FString::Printf(TEXT("Hit: %s / HP: %.1f"),
-                *HitChar->GetName(), HitChar->GetCurrentHP()));
-        }
-        else
-        {
-            UKismetSystemLibrary::PrintString(
-                this, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
-        }
+    	
     }
     else
     {
