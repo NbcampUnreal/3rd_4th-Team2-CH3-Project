@@ -70,3 +70,10 @@ void UTAnimInstance::AnimNotify_PostDead()
 	}
 }
 
+void UTAnimInstance::AnimNotify_CheckSwordHit()
+{
+	if (OnCheckSwordHit.IsBound() == true)
+	{
+		OnCheckSwordHit.Broadcast();
+	}
+}

@@ -109,9 +109,6 @@ void ATGameMode::EndWave()
 	}
 	
 	
-
-	UWorld* World = GetWorld();
-	
 	//AI블랙보드의 키를 false로 전환
 	for (ATAIController* AIC : AIControllers)
 	{
