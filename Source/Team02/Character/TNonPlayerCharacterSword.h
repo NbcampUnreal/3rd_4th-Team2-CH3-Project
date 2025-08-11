@@ -28,8 +28,7 @@ protected:
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AttackSwordMontage;
+
 
 public: 
 	static int32 SwordAttackDebug;
@@ -40,6 +39,9 @@ public:
 
 	UFUNCTION()
 	void HandleOnCheckSwordHit();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackSwordMontage;
 	
 protected:
 	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;

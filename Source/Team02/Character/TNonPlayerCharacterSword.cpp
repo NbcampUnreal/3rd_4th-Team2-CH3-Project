@@ -98,3 +98,4 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckSwordHit()"));
 }
+
