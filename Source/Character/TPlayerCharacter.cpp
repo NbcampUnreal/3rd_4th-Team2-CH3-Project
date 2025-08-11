@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TGameMode.h"
+#include "Team02.h"
 
 ATPlayerCharacter::ATPlayerCharacter()
 
@@ -155,7 +156,7 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
     Params.AddIgnoredActor(this);
     Params.AddIgnoredActor(CurrentWeapon);
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLoc, TraceEnd, ECC_Visibility, Params);
+    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLoc, TraceEnd, ECC_ATTACK, Params);
 
     FVector AimTarget = bHit ? Hit.ImpactPoint : TraceEnd;
 

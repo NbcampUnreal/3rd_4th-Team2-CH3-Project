@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Team02.h"
+#include "NiagaraComponent.h"        // ← 반드시 포함
 
 ATWeaponBase::ATWeaponBase()
 {
@@ -129,12 +130,9 @@ void ATWeaponBase::Fire()
 void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
 {
     if (!CanFire()) return;
-	FVector MuzzleLoc = MuzzlePoint->GetComponentLocation();
-	FRotator MuzzleRot = MuzzlePoint->GetComponentRotation();
 	
     FVector TraceEnd = Start + (FireDir * Range);
-	FireEffect(Start, FireDir );
-	FireSounds(FireDir);
+	
     FHitResult HitResult;
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(this);
@@ -143,9 +141,12 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
 
     bool bHit = GetWorld()->LineTraceSingleByChannel(
         HitResult, Start, TraceEnd, ECC_ATTACK, Params);
-	
+	float BeamLength = bHit
+		? (HitResult.ImpactPoint - Start).Size()
+		: Range;
     
-
+	FireEffect(Start, FireDir, BeamLength);
+	FireSounds(FireDir);
     if (bHit && HitResult.GetActor())
     {
 
@@ -257,14 +258,22 @@ UAnimMontage* ATWeaponBase::GetAttackMontage()
 }
 
 
-void ATWeaponBase::FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot) const
+void ATWeaponBase::FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot, float& BeamLength) const
 {
-	// === 1. 총구 이펙트(파티클) 실행 ===
-	if (MuzzleFlashFX)
+	// Niagara 빔 스폰 + 사용자 파라미터 설정
+	if (BeamFlashFX)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(), MuzzleFlashFX, MuzzleLoc,  MuzzleRot.Rotation()
-		);
+		
+		UNiagaraComponent* BeamComp =
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), BeamFlashFX, MuzzleLoc, MuzzleRot.Rotation());
+
+		if (BeamComp)
+		{
+			// 사용자 파라미터 이름이 "Length" 라고 가정
+			BeamComp->SetVectorParameter(FName("Length"),
+										 FVector(BeamLength, 0.f, 0.f));
+		}
 	}
 }
 
