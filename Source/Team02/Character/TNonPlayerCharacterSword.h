@@ -18,6 +18,10 @@ class TEAM02_API ATNonPlayerCharacterSword : public ATCharacterBase
 
 	friend class UBTTask_SwordAttack;
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Sword", meta = (AllowPrivateAccess))
+	TSubclassOf<AActor> Sword;
+	
 public:
 	ATNonPlayerCharacterSword();
 
@@ -27,8 +31,9 @@ protected:
 	virtual void BeginAttack() override;
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bInterruped) override;
-
-
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TObjectPtr<AActor> CurrentSword;
 
 public: 
 	static int32 SwordAttackSwordDebug;
@@ -36,6 +41,8 @@ public:
 	bool bIsNowAttacking;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void AttachWeapon(TSubclassOf<AActor> Weapon);
 
 	UFUNCTION()
 	void HandleOnCheckSwordHit();

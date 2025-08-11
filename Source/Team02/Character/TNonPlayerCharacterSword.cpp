@@ -39,9 +39,40 @@ void ATNonPlayerCharacterSword::BeginPlay()
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
 		GetCharacterMovement()->MaxWalkSpeed = 400.f;
-		
+
+		AttachWeapon(Sword);
 	}
 }
+
+void ATNonPlayerCharacterSword::AttachWeapon(TSubclassOf<AActor> Weapon)
+{
+	if (Weapon)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+
+		CurrentSword = GetWorld()->SpawnActor<AActor>(Weapon, SpawnParams);
+
+		//부착 규칙
+		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+		
+		if (CurrentSword)
+		{
+			//소켓에 부착
+			CurrentSword->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
+			CurrentSword->SetActorEnableCollision(false);
+
+			//총의 물리 피직스 끄기
+			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(CurrentSword->GetRootComponent());
+			if (WeaponRoot)
+			{
+				WeaponRoot->SetSimulatePhysics(false);
+			}
+				
+		}
+	}
+}
+
 
 void ATNonPlayerCharacterSword::BeginAttack()
 {
@@ -76,7 +107,7 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 		if (IsValid(AIController) == true)
 		{
 			AIController->EndAI();
-			//CurrentRifle->SetLifeSpan(0.7f);
+			CurrentSword->Destroy();
 		}
 	}
 	
