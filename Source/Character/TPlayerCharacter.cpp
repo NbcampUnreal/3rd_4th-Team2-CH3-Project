@@ -259,15 +259,29 @@ void ATPlayerCharacter::HandleOnPostCharacterDead()
   // 4. UI 띄우기
   if (APlayerController* PC = Cast<APlayerController>(GetController()))
   {
-    
+    // 게임 일시정지
+    if (!UGameplayStatics::IsGamePaused(GetWorld()))
+    {
+      UGameplayStatics::SetGamePaused(GetWorld(), true);
+    }
+
+    // UI 표시
     if (GameOverWidgetClass)
     {
       UUserWidget* GameOverUI = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
       if (GameOverUI)
       {
         GameOverUI->AddToViewport();
+
+        // UI 전용 입력 모드 설정
+        FInputModeUIOnly InputMode;
+        if (TSharedPtr<SWidget> FocusWidget = GameOverUI->TakeWidget())
+        {
+          InputMode.SetWidgetToFocus(FocusWidget.ToSharedRef());
+        }
+        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+        PC->SetInputMode(InputMode);
         PC->bShowMouseCursor = true;
-        PC->SetInputMode(FInputModeUIOnly());
       }
     }
   }
