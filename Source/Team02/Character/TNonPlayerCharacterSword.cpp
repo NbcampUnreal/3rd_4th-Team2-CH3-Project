@@ -68,7 +68,6 @@ void ATNonPlayerCharacterSword::AttachWeapon()
 			//소켓에 부착
 			CurrentSword->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
 			CurrentSword->SetActorEnableCollision(false);
-			CurrentSword->SetActorScale3D(FVector(0.5f,0.5f,0.5f));
 
 			//총의 물리 피직스 끄기
 			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(CurrentSword->GetRootComponent());
