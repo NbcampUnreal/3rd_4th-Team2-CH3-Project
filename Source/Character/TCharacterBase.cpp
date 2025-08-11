@@ -108,6 +108,7 @@ void ATCharacterBase::BeginAttack()
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
 	
 	bIsNowAttacking = true;
+	
 	if (IsValid(AnimInstance) == true&& IsValid(GetCurrentWeaponAttackAnimMontage()) == true && AnimInstance->Montage_IsPlaying(GetCurrentWeaponAttackAnimMontage()) == false)
 	{
 		AnimInstance->Montage_Play(GetCurrentWeaponAttackAnimMontage());
