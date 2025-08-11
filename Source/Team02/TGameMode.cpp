@@ -172,27 +172,33 @@ void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 // }
 
 // 플레이어 리스폰
+// 플레이어 리스폰
 void ATGameMode::RespawnPlayer(AController* DeadController)
 {
 	if (!DeadController) return;
 
-	// PlayerController로 캐스팅
+	// 1. 게임 일시정지 해제
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+	}
+
+	// 2. 입력 모드 게임 전용으로 변경
 	if (APlayerController* PC = Cast<APlayerController>(DeadController))
 	{
-		// 플레이어 입력을 게임 전용 모드로 설정 (UI 입력 차단, 마우스 커서 숨김)
 		FInputModeGameOnly InputMode;
 		PC->SetInputMode(InputMode);
 		PC->bShowMouseCursor = false; // 커서 숨기기
 	}
 
-	// 기존 Pawn 제거
+	// 3. 기존 Pawn 제거
 	if (APawn* Pawn = DeadController->GetPawn())
 	{
 		DeadController->UnPossess();
 		Pawn->Destroy();
 	}
 
-	// 리스폰 위치 결정
+	// 4. 리스폰 위치 결정
 	FTransform RespawnTransform;
 	if (LastCapturedPoint)
 	{
@@ -207,7 +213,7 @@ void ATGameMode::RespawnPlayer(AController* DeadController)
 		return;
 	}
 
-	// 새 Pawn 스폰 후 Possess
+	// 5. 새 Pawn 스폰 후 Possess
 	APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
 	if (!NewPawn) return;
 
