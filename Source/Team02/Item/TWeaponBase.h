@@ -118,9 +118,9 @@ public:
 	UFUNCTION()
 	void FireSounds(FVector& MuzzleLoc);
 	UFUNCTION()
-	void FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot) const;
+	void FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot, float& BeamLength) const;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
-	UNiagaraSystem* MuzzleFlashFX; // 총구 이펙트
+	UNiagaraSystem* BeamFlashFX; // 총구 이펙트
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
 	USoundBase* FireSound;

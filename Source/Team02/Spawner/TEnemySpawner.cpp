@@ -33,8 +33,17 @@ void ATEnemySpawner::BeginPlay()
 
 void ATEnemySpawner::ActivateSpawner()
 {
-    if (bIsActive || !EnemyClass) return;
-    
+    // 이미 활성화 상태이거나, 배열이 비었으면 종료
+    if (bIsActive || EnemyClasses.Num() == 0)
+        return;
+
+    // 배열 안에 하나라도 null이면 종료
+    for (const auto& ClassType : EnemyClasses)
+    {
+        if (!ClassType) // nullptr이면
+            return;
+    }
+
     bIsActive = true;
     CurrentSpawned = 0;
 
@@ -57,17 +66,21 @@ void ATEnemySpawner::DeactivateSpawner()
 
 void ATEnemySpawner::SpawnEnemy()
 {
-    if (!bIsActive || !EnemyClass) return;
+    if (!bIsActive || EnemyClasses.Num() == 0) return;
     if (CurrentSpawned >= MaxSpawnCount)
     {
         DeactivateSpawner();
         return;
     }
 
+    // 랜덤 적 클래스 선택
+    int32 Index = FMath::RandRange(0, EnemyClasses.Num() - 1);
+    TSubclassOf<ATCharacterBase> SelectedClass = EnemyClasses[Index];
+
     FVector SpawnLoc = GetRandomPointInBox();
     FRotator SpawnRot = GetActorRotation();
 
-    ATNonPlayerCharacter* Enemy = GetWorld()->SpawnActor<ATNonPlayerCharacter>(EnemyClass, SpawnLoc, SpawnRot);
+    ATCharacterBase* Enemy = GetWorld()->SpawnActor<ATCharacterBase>(SelectedClass, SpawnLoc, SpawnRot);
 
     if (Enemy)
     {

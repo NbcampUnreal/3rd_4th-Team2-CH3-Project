@@ -7,7 +7,7 @@
 #include "TEnemySpawner.generated.h"
 
 class UBoxComponent;
-class ATNonPlayerCharacter;
+class ATCharacterBase;
 class UStaticMeshComponent;
 UCLASS()
 class TEAM02_API ATEnemySpawner : public AActor
@@ -20,8 +20,8 @@ public:
 
 	// 스폰 설정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawner")
-	TSubclassOf<ATNonPlayerCharacter> EnemyClass;
-
+	TArray<TSubclassOf<ATCharacterBase>> EnemyClasses;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawner")
 	float SpawnInterval = 3.0f;
 
