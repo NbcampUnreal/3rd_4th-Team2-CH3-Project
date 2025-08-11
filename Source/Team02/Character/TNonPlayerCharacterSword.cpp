@@ -8,11 +8,11 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Team02.h"
 
-int32 ATNonPlayerCharacterSword::SwordAttackDebug = 0;
+int32 ATNonPlayerCharacterSword::SwordAttackSwordDebug = 0;
 
-FAutoConsoleVariableRef CVarSwordAttackDebug(
+FAutoConsoleVariableRef CVarSwordAttackSwordDebug(
 	TEXT("TAI.SwordAttackDebug"),
-	ATNonPlayerCharacterSword::SwordAttackDebug,
+	ATNonPlayerCharacterSword::SwordAttackSwordDebug,
 	TEXT(""),
 	ECVF_Cheat
 	);
@@ -97,5 +97,59 @@ void ATNonPlayerCharacterSword::EndAttack(UAnimMontage* InMontage, bool bInterru
 void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckSwordHit()"));
+
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	bool bResult = GetWorld()->SweepMultiByChannel(
+	HitResults, 
+	GetActorLocation(), 
+	GetActorLocation() + AttackSwordRange * GetActorForwardVector(), 
+	FQuat::Identity, 
+	ECC_ATTACK, 
+	FCollisionShape::MakeSphere(AttackSwordRadius),
+	Params
+	);
+
+	if (true == bResult)
+	{
+		if (HitResults.IsEmpty() == false)
+		{
+			for (FHitResult HitResult : HitResults)
+			{
+				if (IsValid(HitResult.GetActor()) == true)
+				{
+					if (1 == SwordAttackSwordDebug)
+					{
+						UKismetSystemLibrary::PrintString(
+						this,FString::Printf(TEXT("Hit Actor Name: %s"), *HitResult.GetActor()->GetName()));
+					}
+				}
+			}
+		}
+	}
+
+	if (1 == SwordAttackSwordDebug)
+	{
+		FVector TraceVector = AttackSwordRange * GetActorForwardVector();
+		FVector Center = GetActorLocation() + TraceVector + GetActorUpVector() * 40.f;
+		float HalfHeight = AttackSwordRange * 0.5f + AttackSwordRadius;
+		FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVector).ToQuat();
+		FColor DrawColor = true == bResult ? FColor::Green : FColor::Red;
+		float DebugLifeTime = 5.f;
+
+		//디버깅 목적으로 게임 월드에 캡슐(Capsule) 형태의 선을 그리는 언리얼 엔진의 함수
+		DrawDebugCapsule(
+			GetWorld(),
+			Center,
+			HalfHeight,
+			AttackSwordRadius,
+			CapsuleRot,
+			DrawColor,
+			false,
+			DebugLifeTime
+		);
+	}
 }
+
 

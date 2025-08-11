@@ -31,7 +31,7 @@ protected:
 
 
 public: 
-	static int32 SwordAttackDebug;
+	static int32 SwordAttackSwordDebug;
 	
 	bool bIsNowAttacking;
 
@@ -45,4 +45,10 @@ public:
 	
 protected:
 	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AttackSwordRange = 50.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AttackSwordRadius = 20.f;
 };
