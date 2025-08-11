@@ -43,12 +43,12 @@ void ATAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	// 설정한 폰이 Ai의 컨트롤 폰이 된다
+	/*// 설정한 폰이 Ai의 컨트롤 폰이 된다
 	APawn* ControlledPawn = GetPawn();
 	if (IsValid(ControlledPawn) == true)
 	{
 		BeginAI(ControlledPawn);
-	}
+	}*/
 
 	//게임 모드 배열에 객체의 컨트롤러 등록
 	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
