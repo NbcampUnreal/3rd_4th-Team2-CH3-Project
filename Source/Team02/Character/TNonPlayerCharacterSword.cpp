@@ -141,7 +141,7 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 
 	bool bResult = GetWorld()->SweepMultiByChannel(
 	HitResults, 
-	GetActorLocation(), 
+	GetActorLocation() + 40.f, 
 	GetActorLocation() + AttackSwordRange * GetActorForwardVector(), 
 	FQuat::Identity, 
 	ECC_ATTACK, 
@@ -157,6 +157,14 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 			{
 				if (IsValid(HitResult.GetActor()) == true)
 				{
+					FDamageEvent DamageEvent;
+					HitResult.GetActor()->TakeDamage(
+						10.f,
+						DamageEvent,
+						GetController(),
+						this
+						);
+					
 					if (1 == SwordAttackSwordDebug)
 					{
 						UKismetSystemLibrary::PrintString(
