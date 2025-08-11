@@ -40,18 +40,25 @@ void ATNonPlayerCharacterSword::BeginPlay()
 		//NPC의 최고속도
 		GetCharacterMovement()->MaxWalkSpeed = 400.f;
 
-		AttachWeapon(Sword);
+		AttachWeapon();
 	}
 }
 
-void ATNonPlayerCharacterSword::AttachWeapon(TSubclassOf<AActor> Weapon)
+void ATNonPlayerCharacterSword::AttachWeapon()
 {
-	if (Weapon)
+	if (IsValid(Sword) == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WeaponBlueprintClass is not in SwordNPC."))
+		return;
+	}
+	
+	if (IsValid(Sword) == true)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
+		SpawnParams.Instigator = this;
 
-		CurrentSword = GetWorld()->SpawnActor<AActor>(Weapon, SpawnParams);
+		CurrentSword = GetWorld()->SpawnActor<AActor>(Sword, SpawnParams);
 
 		//부착 규칙
 		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
@@ -61,6 +68,7 @@ void ATNonPlayerCharacterSword::AttachWeapon(TSubclassOf<AActor> Weapon)
 			//소켓에 부착
 			CurrentSword->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
 			CurrentSword->SetActorEnableCollision(false);
+			CurrentSword->SetActorScale3D(FVector(0.5f,0.5f,0.5f));
 
 			//총의 물리 피직스 끄기
 			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(CurrentSword->GetRootComponent());

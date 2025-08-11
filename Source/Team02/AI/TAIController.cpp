@@ -121,7 +121,7 @@ void ATAIController::EndAI()
 	
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
-		BehaviorTreeComponent->StopTree();\
+		BehaviorTreeComponent->StopTree();
 
 		//게임모드의 배열에서 자기 빼기
 		ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));

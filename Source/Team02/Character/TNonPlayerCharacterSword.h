@@ -42,7 +42,7 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	void AttachWeapon(TSubclassOf<AActor> Weapon);
+	void AttachWeapon();
 
 	UFUNCTION()
 	void HandleOnCheckSwordHit();
