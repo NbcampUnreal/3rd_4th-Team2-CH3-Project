@@ -1,6 +1,8 @@
 #include "TPlayerUIWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "DSP/DelayStereo.h"
 
 void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 {
@@ -325,4 +327,37 @@ void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 		UE_LOG(LogTemp,Error,TEXT("WeaponNameText is NULL! Check widget binding,"));
 	}
 	
+}
+
+void UTPlayerUIWidget::ShowHitMarker()
+{
+	if (Crosshair)
+	{
+		if (UImage* CrosshairImage = Cast<UImage>(Crosshair))
+		{
+			// Image 위젯의 색상 변경
+			CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+            
+			// 0.15초 후 원래 색으로 복구
+			GetWorld()->GetTimerManager().SetTimer(
+				HitMarkerTimerHandle,
+				[this, CrosshairImage]()
+				{
+					if (CrosshairImage)
+					{
+						// 원래 빨간색으로 복구
+						CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::Red));
+					}
+				},
+				1.0f,
+				false
+			);
+            
+			UE_LOG(LogTemp, Warning, TEXT("✅ Hit marker shown with tint color!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ Crosshair widget is null!"));
+	}
 }

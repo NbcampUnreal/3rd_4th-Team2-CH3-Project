@@ -942,4 +942,17 @@ void UTUIManager::RestartGameUI()
 	
 }
 
+void UTUIManager::TestHitMarker()
+{
+	if (PlayerUIWidget)
+	{
+		PlayerUIWidget->ShowHitMarker();
+		UE_LOG(LogTemp,Warning,TEXT("Test hit marker called"));
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning,TEXT("PlayerUIWidget is null!"));
+	}
+}
+
 

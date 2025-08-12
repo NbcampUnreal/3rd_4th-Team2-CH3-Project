@@ -210,6 +210,10 @@ protected:
 	//웨이브 시작시 총 몬스터 수
 	UPROPERTY()
 	int32 TotalWaveMonsters=0;
+
+	//테스트용 히트마커 함수
+	UFUNCTION(BlueprintCallable)
+	void TestHitMarker();
 	
 	
 	// regularly ui update
