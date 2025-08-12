@@ -47,6 +47,14 @@ void ATSwordAIController::OnPossess(APawn* InPawn)
 	{
 		BeginAI(ControlledPawn);
 	}
+	
+	//게임 모드 배열에 객체의 컨트롤러 등록
+	ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (IsValid(GameMode) == true)
+	{
+		GameMode->RegisterAISwordController(this);
+	}
+	
 }
 
 //플레이를 종료할때 출력되는 함수

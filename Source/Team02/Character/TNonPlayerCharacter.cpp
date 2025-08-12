@@ -60,7 +60,7 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 		if (CurrentRifle)
 		{
 			//소켓에 부착
-			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("weapon_r_muzzle"));
+			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
 			CurrentRifle->SetActorEnableCollision(false);
 
 			//총의 물리 피직스 끄기
