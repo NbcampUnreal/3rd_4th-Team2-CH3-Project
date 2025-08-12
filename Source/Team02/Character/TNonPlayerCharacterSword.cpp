@@ -38,7 +38,7 @@ void ATNonPlayerCharacterSword::BeginPlay()
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
-		GetCharacterMovement()->MaxWalkSpeed = 400.f;
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
 
 		AttachWeapon();
 	}
@@ -114,8 +114,7 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 		if (IsValid(AIController) == true)
 		{
 			AIController->EndAI();
-			this->Destroy();
-			CurrentSword->Destroy();
+			CurrentSword->SetLifeSpan(1.1f);
 		}
 	}
 	
@@ -135,7 +134,11 @@ void ATNonPlayerCharacterSword::EndAttack(UAnimMontage* InMontage, bool bInterru
 
 void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 {
-	UKismetSystemLibrary::PrintString(this, TEXT("HandleOnCheckSwordHit()"));
+	if (!IsValid(CurrentSword))
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("Weapon is not valid."));
+		return;
+	}
 
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params(NAME_None, false, this);
@@ -197,6 +200,11 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 			DebugLifeTime
 		);
 	}
+}
+
+void ATNonPlayerCharacterSword::HandleOnPostCharacterDead()
+{
+	Super::HandleOnPostCharacterDead();
 }
 
 

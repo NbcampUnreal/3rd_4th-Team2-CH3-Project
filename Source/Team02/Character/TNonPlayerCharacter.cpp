@@ -126,6 +126,11 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 	}
 }
 
+void ATNonPlayerCharacter::HandleOnPostCharacterDead()
+{
+	Super::HandleOnPostCharacterDead();
+}
+
 void ATNonPlayerCharacter::HandleOnCheckHit()
 {
 	if (!IsValid(CurrentRifle))

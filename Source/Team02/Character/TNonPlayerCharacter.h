@@ -32,6 +32,8 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<ATGunNPCWeapon> CurrentRifle;
 
+	virtual void HandleOnPostCharacterDead() override;
+
 public: 
 	
 	bool bIsNowAttacking;
