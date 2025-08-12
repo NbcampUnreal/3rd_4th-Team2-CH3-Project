@@ -18,12 +18,19 @@ void UTAnimInstance::NativeInitializeAnimation()
 			OwnerCharacterMovement = OwnerCharacter->GetCharacterMovement();
 		}
 	}
+	bIsUnarmed = true;
 }
 
 void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	if (IsValid(OwnerCharacter) == true && IsValid(OwnerCharacterMovement) == true)
 	{
+		bIsFalling = OwnerCharacterMovement ->IsFalling();
+
+		bIsDead = OwnerCharacter->IsDead();
+
+		bIsUnarmed = OwnerCharacter->GetCurrentWeaponAttackAnimMontage() == nullptr ? true : false;
+		
 		Velocity = OwnerCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
                 
@@ -37,7 +44,7 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
 		}
-		
+	
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
@@ -47,10 +54,6 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
-		
-		bIsFalling = OwnerCharacterMovement ->IsFalling();
-
-		bIsDead = OwnerCharacter->IsDead();
 	}
 	if (ATPlayerCharacter* PlayerCharacter = Cast<ATPlayerCharacter>(OwnerCharacter))
 	{
