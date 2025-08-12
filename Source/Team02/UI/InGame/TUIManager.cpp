@@ -150,7 +150,33 @@ void UTUIManager::UpdateWeaponInfo()
 			PlayerUIWidget->UpdateWeaponName(WeaponName);
 
 			UE_LOG(LogTemp,Warning,TEXT("Weapon changed to: %s"), *WeaponName);
+
+			//새로운 무기 습득 감지 로직 추가
+			if (bFirstCaptureCompleted && !bWeaponPickedUp)
+			{
+				// 새로운 무기인지 확인(기본 무기가 아닌 경우)
+				if (WeaponName != TEXT("Pistol") && WeaponName !=TEXT("No Weapon"))
+				{
+					bWeaponPickedUp=true;
+					bWeaponUnlocked=true;
+					MoveToNextCapturePoint(); // 2번쨰 거점으로 이동
+
+					UE_LOG(LogTemp, Warning, TEXT("🔫 New weapon '%s' picked up! Moving to next objective"), *WeaponName);
+					UpdateMissionState(); // 미션 업데이트
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("🔫 Basic weapon detected: %s (not counting as new weapon)"), *WeaponName);
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("🔫 Weapon change detected but conditions not met:"));
+				UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+				UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+			}
 		}
+		
 		else if (!CurrentWeapon && PlayerUIWidget)
 		{
 			//무기가 없을때
@@ -299,96 +325,83 @@ void UTUIManager::UpdateMissionState()
 {
     FString NewObjective;
     
-    // ⭐ 현재 상태를 더 자세히 로깅
-    UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
-    UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWeaponUnlocked: %s"), bWeaponUnlocked ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
-    UE_LOG(LogTemp, Warning, TEXT("  MonsterKillCount: %d"), MonsterKillCount);
-    UE_LOG(LogTemp, Warning, TEXT("  TrackedMonsters.Num(): %d"), TrackedMonsters.Num());
+    // 임무 확인 로그
+	UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
+	UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+	UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+	UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+	UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
+	UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
+	UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
 
+	// 게임 완료
 	if (bSecondCaptureCompleted)
 	{
-		NewObjective=TEXT("Victory! All Objectives completed!");
-
+		NewObjective=TEXT("Victory! Game Complete!");
 		//승리 이벤트 발생
 		OnVictoryEvent.Broadcast();
 		UE_LOG(LogTemp,Warning,TEXT("Game Completed! All Capture points secured!!"));
 	}
-    else if (bWeaponUnlocked && CurrentCaptureIndex == 1)
-    {
-        if (bNearCapturePoint && bCapturePhase)
-        {
-            NewObjective = TEXT("Capture the second control point!");
-        }
-        else if (bNearCapturePoint && !bCapturePhase)
-        {
-            NewObjective = TEXT("Enter the control point to begin capture!");
-            bCapturePhase = true;
-        }
-        else
-        {
-            NewObjective = TEXT("Move to second control point!");
-        }
-    }
-    else if (bFirstCaptureCompleted && !bWeaponUnlocked)
-    {
-        NewObjective = TEXT("First area captured! Unlocking weapon...");
 
-        FTimerHandle WeaponTimer;
-        GetWorld()->GetTimerManager().SetTimer(
-            WeaponTimer,
-            [this]()
-            {
-                UnlockWeapon();
-                bCapturePhase = false;
-            },
-            2.0f,
-            false
-        );
-    }
-    else if (bWaveCompleted && CurrentCaptureIndex == 0)
-    {
-        if (bNearCapturePoint && bCapturePhase)
-        {
-            NewObjective = TEXT("Capture the first control point!");
-        }
-        else if (bNearCapturePoint && !bCapturePhase)
-        {
-            NewObjective = TEXT("Enter the control point to begin capture!");
-            bCapturePhase = true;
-        }
-        else
-        {
-            NewObjective = TEXT("Move to first control point!");
-        }
-    }
-    else if (bWaveActive || TrackedMonsters.Num() > 0)
-    {
-        // ⭐ 스포너 기반 남은 수 계산 개선
-        int32 SpawnerBasedMax = 0;
-        for (ATEnemySpawner* Spawner : RegisteredSpawners)
-        {
-            if (Spawner) 
-            {
-                SpawnerBasedMax += Spawner->MaxSpawnCount;
-            }
-        }
-        
-        int32 RemainingCount = FMath::Max(0, SpawnerBasedMax - MonsterKillCount);
-        NewObjective = FString::Printf(TEXT("Eliminate enemies (%d remaining)"), RemainingCount);
-        
-        UE_LOG(LogTemp, Warning, TEXT("📊 Enemy Objective: %d killed, %d remaining"), 
-               MonsterKillCount, RemainingCount);
-    }
-    else
-    {
-        NewObjective = TEXT("Eliminate all enemies");
-    }
+	// 무기 습득 완료 이후 2거점으로 이동
+    else if (bWeaponPickedUp && CurrentCaptureIndex==1)
+	{
+    	if (bNearCapturePoint && bCapturePhase)
+    	{
+    		NewObjective=TEXT("Capture the second point!");
+    	}
+    	else if (bNearCapturePoint && !bCapturePhase)
+    	{
+    		NewObjective=TEXT("Enter and start capture!");
+    		bCapturePhase=true;
+    	}
+	    else
+	    {
+		    NewObjective=TEXT("Move Second Control point!");
+	    }
+	}
+	// 1거점 완료후 무기 습득 하라고 텍스트 갱신 하기
+	else if (bFirstCaptureCompleted && !bWeaponPickedUp)
+	{
+		NewObjective=TEXT("Pick up new weapon from Control Point!");
+	}
+	// 1거점 점령 관련
+	else if (bWaveCompleted && CurrentCaptureIndex==0)
+	{
+		if (bNearCapturePoint && bCapturePhase)
+		{
+			NewObjective=TEXT("Capture the first control point!");
+		}
+		else if (bNearCapturePoint && !bCapturePhase)
+		{
+			NewObjective=TEXT("Enter and start capture!");
+			bCapturePhase=true;
+		}
+		else
+		{
+			NewObjective=TEXT("Move to first control point!");
+		}
+	}
+	//몬스터 처치 관련
+	else if (bWaveActive || TrackedMonsters.Num()>0)
+	{
+		int32 SpawnerBasedMax=0;
+		for (ATEnemySpawner* Spawner: RegisteredSpawners)
+		{
+			if (Spawner)
+			{
+				SpawnerBasedMax+=Spawner->MaxSpawnCount;
+			}
+		}
 
+		int32 RemainingCount=FMath::Max(0,SpawnerBasedMax-MonsterKillCount);
+		NewObjective=FString::Printf(TEXT("Eliminate enemies (%d remaining)"),RemainingCount);
+	}
+	else
+	{
+		NewObjective=TEXT("Eliminate all enemies");
+	}
+	
     // 미션 목표가 실제로 변경되었을 때만 업데이트
     if (CurrentMissionObjective != NewObjective)
     {

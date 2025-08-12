@@ -103,6 +103,7 @@ public:
 	void RestartGameUI();
 
 
+	
 protected:
 	// UI widget class
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -226,19 +227,10 @@ private:
 
 	//스포너에서 웨이브 정보 가져오기
 	void UpdateWaveInfoFromSpawners();
+
+	//무기 변경 관련 UI 함수
+	bool bWeaponSpawned=false;
+	bool bWeaponPickedUp=false;
+
 	
 };
-
-// Respawn 버튼
-// ✅ 플레이어 HP 복구
-// ✅ 무기/탄약 정보 갱신
-// ✅ 현재 위치 기반 UI 갱신 (거점 근처면 캡처 UI 표시)
-// ❌ 게임 진행상황 유지 (킬 카운트, 거점 점령 상태, 미션 진행 등)
-
-
-// Restart 버튼
-// ✅ 모든 게임 상태 초기화
-// ✅ 킬 카운트 0으로 리셋
-// ✅ 거점 점령 상태 리셋
-// ✅ 첫 번째 미션부터 다시 시작
-
