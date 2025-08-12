@@ -1,5 +1,6 @@
 #include "Team02/AI/BTDecorator_StartWave.h"
 #include "AI/TAIController.h"
+#include "Controller/TSwordAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_StartWave::UBTDecorator_StartWave()
@@ -13,16 +14,33 @@ bool UBTDecorator_StartWave::CalculateRawConditionValue(UBehaviorTreeComponent& 
 	checkf(bResult == true, TEXT("Super::CalculateRawConditionValue() function has returned false."));
 	
 	ATAIController* AIController = Cast<ATAIController>(OwnerComp.GetAIOwner());
-	checkf(IsValid(AIController) == true, TEXT("Invalid AIController."));
-	
-	UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIController->GetBlackboardComponent());
-	checkf(IsValid(BlackboardComponent) == true, TEXT("Invalid BlackboardComponent."));
-	
-	bool bIsInWave = BlackboardComponent->GetValueAsBool(AIController->IsInWaveKey);
-	
-	if (bIsInWave == true)
+
+	if (IsValid(AIController) == true)
 	{
-		return true;
+		UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIController->GetBlackboardComponent());
+		checkf(IsValid(BlackboardComponent) == true, TEXT("Invalid BlackboardComponent."));
+	
+		bool bIsInWave = BlackboardComponent->GetValueAsBool(AIController->IsInWaveKey);
+	
+		if (bIsInWave == true)
+		{
+			return true;
+		}
+	}
+
+	ATSwordAIController* AISwordController = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
+	
+	if (IsValid(AISwordController) == true)
+	{
+		UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AISwordController->GetBlackboardComponent());
+		checkf(IsValid(BlackboardComponent) == true, TEXT("Invalid BlackboardComponent."));
+	
+		bool bIsInWave = BlackboardComponent->GetValueAsBool(AISwordController->SwordIsInWaveKey);
+	
+		if (bIsInWave == true)
+		{
+			return true;
+		}
 	}
 
 	return false;
