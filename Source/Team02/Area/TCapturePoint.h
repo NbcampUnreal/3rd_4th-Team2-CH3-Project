@@ -41,7 +41,7 @@ public:
 
 	// MovingWall을 연결하는 CapturePoint 예시
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<ATMovingWall*> LinkedWalls;
+	TArray<TObjectPtr<ATMovingWall>> LinkedWalls;
 	
 	// 플레이어가 영역 안에 있는지
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

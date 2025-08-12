@@ -3,42 +3,39 @@
 
 ATMovingWall::ATMovingWall()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	Hinge = CreateDefaultSubobject<USceneComponent>(TEXT("Hinge"));
+	RootComponent = Hinge;
 
-	WallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMesh"));
-	RootComponent = WallMesh;
+	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
+	DoorMesh->SetupAttachment(Hinge);
+}
+
+
+void ATMovingWall::RotateStep()
+{
+	const float DeltaYaw = StepDegrees * (float)Direction;
+	AddActorLocalRotation(FRotator(0.f, DeltaYaw, 0.f));
 }
 
 void ATMovingWall::BeginPlay()
 {
 	Super::BeginPlay();
-	StartLocation = GetActorLocation();
-	TargetLocation = StartLocation + Offset;
+	StartYaw = GetActorRotation().Yaw;
+	TargetYaw = 0.f; // 시작을 0으로 보고 누적
 }
 
-void ATMovingWall::Tick(float DeltaTime)
+void ATMovingWall::AddStep()
 {
-	Super::Tick(DeltaTime);
-
-	if (bIsOpening)
-	{
-		CurrentMoveTime += DeltaTime;
-		float Alpha = FMath::Clamp(CurrentMoveTime / MoveTime, 0.f, 1.f);
-		FVector NewLocation = FMath::Lerp(StartLocation, TargetLocation, Alpha);
-		SetActorLocation(NewLocation);
-
-		if (Alpha >= 1.f)
-		{
-			bIsOpening = false; // 이동 완료 시 중지
-		}
-	}
+	TargetYaw += StepDegrees * (float)Direction;
 }
 
-void ATMovingWall::OpenWall()
+void ATMovingWall::Tick(float DeltaSeconds)
 {
-	if (!bIsOpening)
-	{
-		bIsOpening = true;
-		CurrentMoveTime = 0.f;
-	}
+	Super::Tick(DeltaSeconds);
+
+	// 현재 로컬 기준 Yaw로 맞춰도 되고, 월드Yaw 기준으로 간단히 처리
+	FRotator Cur = GetActorRotation();
+	FRotator Desired = FRotator(Cur.Pitch, StartYaw + TargetYaw, Cur.Roll);
+	FRotator NewRot = FMath::RInterpTo(Cur, Desired, DeltaSeconds, InterpSpeed);
+	SetActorRotation(NewRot);
 }

@@ -14,29 +14,34 @@ public:
 	ATMovingWall();
 
 protected:
-	virtual void BeginPlay() override;
 
 public:    
-	virtual void Tick(float DeltaTime) override;
+	
 
-	// 벽(문) 열기 함수
-	UFUNCTION()
-	void OpenWall();
-
-	// 이동 시작 위치/타겟 위치
-	FVector StartLocation;
-	FVector TargetLocation;
-
-	// 이동 관련 변수
-	bool bIsOpening = false;
-	float MoveTime = 1.0f; // 이동에 걸릴 시간(초)
-	float CurrentMoveTime = 0.f;
-
-	// 에디터에서 벽(문) 메쉬 지정
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* WallMesh;
+    USceneComponent* Hinge;          // 루트 = 힌지
 
-	// (에디터에서 이동 거리 등 지정)
-	UPROPERTY(EditAnywhere, Category="Wall Move")
-	FVector Offset = FVector(200.f, 0.f, 0.f); // 오른쪽 200만큼 이동
+    UPROPERTY(VisibleAnywhere)
+    UStaticMeshComponent* DoorMesh;  // 문 메쉬(힌지에 붙임)
+
+    UPROPERTY(EditAnywhere, Category="Door")
+    float StepDegrees = 90.f;        // 한 번에 회전할 각도
+
+    UPROPERTY(EditAnywhere, Category="Door")
+    int32 Direction = +1;            // +1 이면 +10°, -1 이면 -10°
+
+	UPROPERTY(EditAnywhere, Category="Door")
+	float InterpSpeed = 6.f; // 부드럽게 도달 속도
+
+	float TargetYaw = 0.f;   // 로컬 Yaw 목표
+	float StartYaw = 0.f;
+    UFUNCTION(BlueprintCallable, Category="Door")
+    void RotateStep();
+
+
+	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void AddStep(); // 목표각을 10°씩 늘림
 };

@@ -84,7 +84,7 @@ void ATCapturePoint::NotifyWall()
 	{
 		if (Wall)    // nullptr 안전체크
 		{
-			Wall->OpenWall(); // 벽 열기
+			Wall->RotateStep(); // 벽 열기
 		}
 	}
 }
