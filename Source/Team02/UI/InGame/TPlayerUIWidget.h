@@ -58,6 +58,10 @@ public:
 	//무기 종류
 	UFUNCTION(BlueprintCallable)
 	void UpdateWeaponName(const FString& WeaponName);
+
+	//히트 마커 함수 추가
+	UFUNCTION(BlueprintCallable)
+	void ShowHitMarker();
 	
 
 
@@ -93,6 +97,9 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> WeaponNameText;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UWidget> Crosshair;// 기존 크로스헤어를 히트마커로 활용
+
 	//타이밍 애니메이션 변수
 	UPROPERTY()
 	FString TargetText; // 최종 표시 텍스트
@@ -117,5 +124,8 @@ private:
 
 	// 진짜 미션인지 확인 하는 함수
 	bool IsRealMissionChange(const FString& OldText,const FString& NewText);
+
+	//히트 마커 타이머
+	FTimerHandle HitMarkerTimerHandle;
 	
 };

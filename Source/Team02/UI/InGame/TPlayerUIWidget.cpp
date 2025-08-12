@@ -1,6 +1,8 @@
 #include "TPlayerUIWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "DSP/DelayStereo.h"
 
 void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 {
@@ -118,13 +120,13 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 
 		// 진짜 미션 변경 인지 확인
 		bool bIsRealMissionChange=IsRealMissionChange(CurrentText,ObjectiveText);
-		
 
-		if (CurrentText.IsEmpty() || CurrentText==TEXT("Kill Monsters"))
+		// 조건 수정: "Mission:" 이상테에서 실제 미션으로 변경
+		if (CurrentText.IsEmpty() || CurrentText==TEXT("Kill Monsters")|| CurrentText==TEXT("Mission:"))
 		{
-			//처음 미션 바로 타이밍
+			//처음 미션이거나 "Mission:" 상테에서 변경(타이핑 효과)
 			StartTypingAnimation(ObjectiveText);
-			UE_LOG(LogTemp,Warning,TEXT("First mission typing: %s"),*ObjectiveText);
+			UE_LOG(LogTemp,Warning,TEXT("Initial mission typing: %s"),*ObjectiveText);
 		}
 		else if (bIsRealMissionChange)
 		{
@@ -271,12 +273,19 @@ void UTPlayerUIWidget::StopFlashing()
 
 bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString& NewText)
 {
+
+	if (OldText==TEXT("Mission:")&& NewText != TEXT("Mission:"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mission initialization: 'Mission:' -> '%s' = REAL CHANGE"), *NewText);
+		return true;
+	}
+
+	
 	// 진짜 미션 변경 패턴
 	TArray<FString> MissionTypes={
 	TEXT("Eliminate enemies"),
 	TEXT("Move to control point"),
 	TEXT("Capture the control"),
-	TEXT("Defeat the boss"),
 	TEXT("Victory")
 	};
 
@@ -318,4 +327,37 @@ void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 		UE_LOG(LogTemp,Error,TEXT("WeaponNameText is NULL! Check widget binding,"));
 	}
 	
+}
+
+void UTPlayerUIWidget::ShowHitMarker()
+{
+	if (Crosshair)
+	{
+		if (UImage* CrosshairImage = Cast<UImage>(Crosshair))
+		{
+			// Image 위젯의 색상 변경
+			CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+            
+			// 0.15초 후 원래 색으로 복구
+			GetWorld()->GetTimerManager().SetTimer(
+				HitMarkerTimerHandle,
+				[this, CrosshairImage]()
+				{
+					if (CrosshairImage)
+					{
+						// 원래 빨간색으로 복구
+						CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::Red));
+					}
+				},
+				1.0f,
+				false
+			);
+            
+			UE_LOG(LogTemp, Warning, TEXT("✅ Hit marker shown with tint color!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ Crosshair widget is null!"));
+	}
 }
