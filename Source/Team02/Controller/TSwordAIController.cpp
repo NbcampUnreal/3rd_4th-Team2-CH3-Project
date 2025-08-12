@@ -2,6 +2,9 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Area/TCapturePoint.h"
+#include "TGameMode.h"
 
 int32 ATSwordAIController::ShowSwordAIDebug(0);
 
@@ -15,6 +18,9 @@ FAutoConsoleVariableRef CVarShowSwordAIDebug(
 const FName ATSwordAIController::SwordNPCStartPatrolLocationKey(TEXT("SwordNPCStartPatrolLocation"));
 const FName ATSwordAIController::SwordNPCEndPatrolLocationKey(TEXT("SwordNPCEndPatrolLocation"));
 const FName ATSwordAIController::SwordNPCTargetCharacterKey(TEXT("TargetCharacter"));
+const FName ATSwordAIController::SwordIsInWaveKey(TEXT("IsInWave"));
+const FName ATSwordAIController::SwordCapturePointKey(TEXT("CapturePoint"));
+const FName ATSwordAIController::SwordBossCapturePointKey(TEXT("BossCapturePoint"));
 
 ATSwordAIController::ATSwordAIController()
 {
@@ -65,6 +71,30 @@ void ATSwordAIController::BeginAI(APawn* InPawn)
 			//경계 시작위치를 AI 액터의 현제 위치로 지정
 			BlackboardComponent->SetValueAsVector(SwordNPCStartPatrolLocationKey, InPawn->GetActorLocation());
 
+			ATGameMode* GameMode = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
+			if (IsValid(GameMode) == true)
+			{
+				BlackboardComponent->SetValueAsBool(SwordIsInWaveKey, GameMode->bIsWaveActive);
+			
+
+				TArray<AActor*> FoundCapturePoints;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
+
+				if (FoundCapturePoints.Num() > 0)
+				{
+					if (GameMode->WaveIndex == 0)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[0];
+						BlackboardComponent->SetValueAsVector(SwordCapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+					else if (GameMode->WaveIndex == 1)
+					{
+						AActor* TargetCapturePoint = FoundCapturePoints[1];
+						BlackboardComponent->SetValueAsVector(SwordCapturePointKey, TargetCapturePoint->GetActorLocation());
+					}
+				}
+			}
+			
 			if (ShowSwordAIDebug == 1)
 			{
 				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
@@ -80,7 +110,13 @@ void ATSwordAIController::EndAI()
 	if (IsValid(BehaviorTreeComponent) == true)
 	{
 		BehaviorTreeComponent->StopTree();
-		
+
+		//게임모드의 배열에서 자기 빼기
+		ATGameMode* GameMode = Cast<ATGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (IsValid(GameMode) == true)
+		{
+			GameMode->UnregisterAISwordController(this);
+		}
 
 		if (ShowSwordAIDebug == 1)
 		{

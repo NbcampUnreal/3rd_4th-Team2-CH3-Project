@@ -44,6 +44,12 @@ public:
 	static const FName SwordNPCEndPatrolLocationKey;
 	//타겟 캐릭터
 	static const FName SwordNPCTargetCharacterKey;
+	//웨이브인지 아닌지 확인하는 키
+	static const FName SwordIsInWaveKey;
+	//점령지 위치
+	static const FName SwordCapturePointKey;
+	//보스 점령지 위치
+	static const FName SwordBossCapturePointKey;
 
 
 
