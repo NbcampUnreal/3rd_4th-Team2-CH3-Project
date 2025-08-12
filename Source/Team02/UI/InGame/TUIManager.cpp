@@ -840,7 +840,6 @@ void UTUIManager::RespawnGameUI()
 }
 
 
-
 void UTUIManager::RestartGameUI()
 {
 	UE_LOG(LogTemp,Warning,TEXT("Resetting Game UI..."));
