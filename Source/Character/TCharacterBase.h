@@ -20,7 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 #pragma endregion
-	
+
 #pragma region HP
 	
 public:
@@ -46,7 +46,7 @@ protected:
 	virtual void HandleOnPostCharacterDead();
 
 #pragma endregion
-	
+
 #pragma region Attack
 
 public:
