@@ -10,6 +10,7 @@ class ATEnemySpawner;
 class ATCapturePoint;
 class ATBossSpawner;
 class ATAIController;
+class ATSwordAIController;
 
 UCLASS()
 class TEAM02_API ATGameMode : public AGameMode
@@ -61,13 +62,21 @@ public:
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	ATBossSpawner* BossSpawner;
+	
 	//AI 컨트롤러를 베열에 추가하는 함수
 	void RegisterAIController(ATAIController* AIController);
 
 	void UnregisterAIController(ATAIController* AIController);
 
+	void RegisterAISwordController(ATSwordAIController* AIController);
+
+	void UnregisterAISwordController(ATSwordAIController* AIController);
+
 	TArray<AActor*> FoundActors;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ATAIController>> AIControllers;
+
+	UPROPERTY()
+	TArray<TObjectPtr<ATSwordAIController>> SwordAIControllers;
 };

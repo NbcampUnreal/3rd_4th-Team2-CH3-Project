@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsDead : 1;
 	
-	UFUNCTION()
+	UFUNCTION(Blueprintable, Category = "Dead")
 	virtual void HandleOnPostCharacterDead();
 
 #pragma endregion

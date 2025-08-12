@@ -9,6 +9,7 @@
 #include "Area/TCapturePoint.h"
 #include "Spawner/TBossSpawner.h"
 #include "AI/TAIController.h"
+#include "Controller/TSwordAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
 
@@ -62,6 +63,14 @@ void ATGameMode::RegisterAIController(ATAIController* AIController)
 	}
 }
 
+void ATGameMode::RegisterAISwordController(ATSwordAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		SwordAIControllers.Add(AIController);
+	}
+}
+
 void ATGameMode::UnregisterAIController(ATAIController* AIController)
 {
 	if (IsValid(AIController) == true)
@@ -69,6 +78,16 @@ void ATGameMode::UnregisterAIController(ATAIController* AIController)
 		AIControllers.Remove(AIController);
 	}
 }
+
+void ATGameMode::UnregisterAISwordController(ATSwordAIController* AIController)
+{
+	if (IsValid(AIController) == true)
+	{
+		SwordAIControllers.Remove(AIController);
+	}
+}
+
+
 
 void ATGameMode::StartWave(int32 InWaveIndex)
 {
@@ -88,14 +107,24 @@ void ATGameMode::StartWave(int32 InWaveIndex)
 			}
 		}
 	}
+
+	for (ATSwordAIController* SAIC : SwordAIControllers)
+	{
+		if (IsValid(SAIC) == true)
+		{
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(SAIC->GetBlackboardComponent());
+			if (IsValid(BlackboardComponent) == true)
+			{
+				BlackboardComponent->SetValueAsBool(SAIC->SwordIsInWaveKey, true);
+			}
+		}
+	}
 	
 	if (EnemySpawners.IsValidIndex(InWaveIndex))
 	{
 		EnemySpawners[InWaveIndex]->SetSpawnerActive(true); // 예시: 스포너 켜기
 		// 추가로 웨이브 시작 관련 로직
 	}
-
-	
 }
 
 
@@ -118,6 +147,19 @@ void ATGameMode::EndWave()
 			if (IsValid(BlackboardComponent) == true)
 			{
 				BlackboardComponent->SetValueAsBool(AIC->IsInWaveKey, false);
+			}
+		}
+	}
+
+	//AI블랙보드의 키를 false로 전환
+	for (ATSwordAIController* AIC : SwordAIControllers)
+	{
+		if (IsValid(AIC) == true)
+		{
+			UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIC->GetBlackboardComponent());
+			if (IsValid(BlackboardComponent) == true)
+			{
+				BlackboardComponent->SetValueAsBool(AIC->SwordIsInWaveKey, false);
 			}
 		}
 	}

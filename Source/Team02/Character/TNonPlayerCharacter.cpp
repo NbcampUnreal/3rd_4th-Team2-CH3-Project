@@ -60,7 +60,7 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 		if (CurrentRifle)
 		{
 			//소켓에 부착
-			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("weapon_r_muzzle"));
+			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
 			CurrentRifle->SetActorEnableCollision(false);
 
 			//총의 물리 피직스 끄기
@@ -124,6 +124,11 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 		//바인딩 했던 함수 해재
 		OnAttackMontageEndedDelegate.Unbind();
 	}
+}
+
+void ATNonPlayerCharacter::HandleOnPostCharacterDead()
+{
+	Super::HandleOnPostCharacterDead();
 }
 
 void ATNonPlayerCharacter::HandleOnCheckHit()
