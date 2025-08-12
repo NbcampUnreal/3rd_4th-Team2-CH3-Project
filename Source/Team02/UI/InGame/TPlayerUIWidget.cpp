@@ -118,13 +118,13 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 
 		// 진짜 미션 변경 인지 확인
 		bool bIsRealMissionChange=IsRealMissionChange(CurrentText,ObjectiveText);
-		
 
-		if (CurrentText.IsEmpty() || CurrentText==TEXT("Kill Monsters"))
+		// 조건 수정: "Mission:" 이상테에서 실제 미션으로 변경
+		if (CurrentText.IsEmpty() || CurrentText==TEXT("Kill Monsters")|| CurrentText==TEXT("Mission:"))
 		{
-			//처음 미션 바로 타이밍
+			//처음 미션이거나 "Mission:" 상테에서 변경(타이핑 효과)
 			StartTypingAnimation(ObjectiveText);
-			UE_LOG(LogTemp,Warning,TEXT("First mission typing: %s"),*ObjectiveText);
+			UE_LOG(LogTemp,Warning,TEXT("Initial mission typing: %s"),*ObjectiveText);
 		}
 		else if (bIsRealMissionChange)
 		{
@@ -271,12 +271,19 @@ void UTPlayerUIWidget::StopFlashing()
 
 bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString& NewText)
 {
+
+	if (OldText==TEXT("Mission:")&& NewText != TEXT("Mission:"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mission initialization: 'Mission:' -> '%s' = REAL CHANGE"), *NewText);
+		return true;
+	}
+
+	
 	// 진짜 미션 변경 패턴
 	TArray<FString> MissionTypes={
 	TEXT("Eliminate enemies"),
 	TEXT("Move to control point"),
 	TEXT("Capture the control"),
-	TEXT("Defeat the boss"),
 	TEXT("Victory")
 	};
 

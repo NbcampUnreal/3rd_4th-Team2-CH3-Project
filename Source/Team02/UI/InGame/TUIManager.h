@@ -94,7 +94,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UnlockWeapon();
+
+	//게임 리스폰, 리스타트 UI 함수
+	UFUNCTION(BlueprintCallable)
+	void RespawnGameUI();
 	
+	UFUNCTION(BlueprintCallable)
+	void RestartGameUI();
+
 
 protected:
 	// UI widget class
@@ -119,6 +126,8 @@ protected:
 
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
+	FTimerHandle MonsterMonitorTimer; // 몬스터 감시 타이머
+	FTimerHandle RestartMissionTimer; // 재시작 타이머
 	
 	// 게임 플로우 반영 변수 ( 웨이브 시작> 몬스터 처치 (웨이브클리어) >거점 점령 >보스전 순서 )
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -139,9 +148,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCapturePhase = false;   // 점령 페이즈 여부
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bBossPhase=false; // 보스전 페이즈
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 RemainingMonsters = 0;  // 남은 몬스터 수 (가상)
 
@@ -172,9 +178,7 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool bNearCapturePoint=false; 
 
-	// 몬스터 감시 타이머
-	FTimerHandle MonsterMonitorTimer;
-
+	
 	// 등록된 스포너들
 	UPROPERTY()
 	TArray<class ATEnemySpawner*> RegisteredSpawners;
@@ -183,19 +187,13 @@ protected:
 	UPROPERTY()
 	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
 
-	// 이전 프레임 몬스터,보스 수(변화 감지용)
+	// 이전 프레임 몬스터 수(변화 감지용)
 	UPROPERTY()
 	int32 LastFrameMonsterCount=0;
-
-	UPROPERTY()
-	int32 LastFrameBossCount=0;
-
+	
 	UPROPERTY()
 	int32 LastWaveMonsterCount=0;
 	
-	// 보스 추적용
-	UPROPERTY()
-	TArray<class ATAIBossMonster*> TrackedBosses;
 
 	//GameMode 참조 추가
 	UPROPERTY()
@@ -228,13 +226,19 @@ private:
 
 	//스포너에서 웨이브 정보 가져오기
 	void UpdateWaveInfoFromSpawners();
-
-	//보스 찾기 함수
-	void FindAllBossesInWorld();
+	
 };
 
-//TCapturePoint의 Tick() 함수에서 이미 점령률이 계산되고 있으니
-//UIManager가 CapturePoint를 감시
-//플레이어 진입/이탈 감지
-//점령률 변화 자동 감지
-//웨이브 를 다 마치고 점령 100% 채우면 점령이 되는 방식
+// Respawn 버튼
+// ✅ 플레이어 HP 복구
+// ✅ 무기/탄약 정보 갱신
+// ✅ 현재 위치 기반 UI 갱신 (거점 근처면 캡처 UI 표시)
+// ❌ 게임 진행상황 유지 (킬 카운트, 거점 점령 상태, 미션 진행 등)
+
+
+// Restart 버튼
+// ✅ 모든 게임 상태 초기화
+// ✅ 킬 카운트 0으로 리셋
+// ✅ 거점 점령 상태 리셋
+// ✅ 첫 번째 미션부터 다시 시작
+
