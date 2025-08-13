@@ -359,38 +359,38 @@ void UTUIManager::UpdateMissionState()
 	{
     	if (bNearCapturePoint && bCapturePhase)
     	{
-    		NewObjective=TEXT("Capture the second point!");
+    		NewObjective=TEXT("Capture Second point!");
     	}
     	else if (bNearCapturePoint && !bCapturePhase)
     	{
-    		NewObjective=TEXT("Go second control point!");
+    		NewObjective=TEXT("Enter Second Point!");
     		bCapturePhase=true;
     	}
 	    else
 	    {
-		    NewObjective=TEXT("Move Second Control point!");
+		    NewObjective=TEXT("Move to Second Point!");
 	    }
 	}
 	// 1거점 완료후 무기 습득 하라고 텍스트 갱신 하기
 	else if (bFirstCaptureCompleted && !bWeaponPickedUp)
 	{
-		NewObjective=TEXT("Pick up new weapon from Control Point!");
+		NewObjective=TEXT("Get New Weapon!");
 	}
 	// 1거점 점령 관련
 	else if (bWaveCompleted && CurrentCaptureIndex==0)
 	{
 		if (bNearCapturePoint && bCapturePhase)
 		{
-			NewObjective=TEXT("Capture the first control point!");
+			NewObjective=TEXT("Capture the First Point!");
 		}
 		else if (bNearCapturePoint && !bCapturePhase)
 		{
-			NewObjective=TEXT("Enter and start capture!");
+			NewObjective=TEXT("Enter First Point!");
 			bCapturePhase=true;
 		}
 		else
 		{
-			NewObjective=TEXT("Move to first control point!");
+			NewObjective=TEXT("Move to First Point!");
 		}
 	}
 	//몬스터 처치 관련
