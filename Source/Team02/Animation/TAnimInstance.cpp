@@ -87,3 +87,11 @@ void UTAnimInstance::AnimNotify_CheckSwordHit()
 		OnCheckSwordHit.Broadcast();
 	}
 }
+
+void UTAnimInstance::AnimNotify_BeginDissolve()
+{
+	if (OnBeginDissolve.IsBound() == true)
+	{
+		OnBeginDissolve.Broadcast();
+	}
+}

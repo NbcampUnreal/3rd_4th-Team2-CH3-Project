@@ -12,6 +12,7 @@ class UCharacterMovementComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckSwordHit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPostDead);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginDissolve);
 
 UCLASS()
 class TEAM02_API UTAnimInstance : public UAnimInstance
@@ -33,12 +34,17 @@ private:
 	UFUNCTION()
 	void AnimNotify_CheckSwordHit();
 
+	UFUNCTION()
+	void AnimNotify_BeginDissolve();
+
 public:
 	FOnCheckHit OnCheckHit;
 
 	FOnCheckSwordHit OnCheckSwordHit;
 
 	FOnPostDead OnPostDead;
+
+	FOnBeginDissolve OnBeginDissolve;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

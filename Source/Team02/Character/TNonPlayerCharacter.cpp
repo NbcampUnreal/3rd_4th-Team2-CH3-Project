@@ -137,6 +137,7 @@ void ATNonPlayerCharacter::HandleOnPostCharacterDead()
 	
 }
 
+
 void ATNonPlayerCharacter::HandleOnCheckHit()
 {
 	if (!IsValid(CurrentRifle))

@@ -18,6 +18,9 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dissolve")
+	void BeginPlayDissolve();
 	
 #pragma endregion
 
