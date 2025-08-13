@@ -37,6 +37,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float AttackDamage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
+	bool SwordNPCIsDead;
+
 public: 
 	
 	bool bIsNowAttacking;

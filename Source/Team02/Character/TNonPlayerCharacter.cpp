@@ -35,6 +35,7 @@ void ATNonPlayerCharacter::BeginPlay()
 	{
 		bUseControllerRotationYaw = false;
 		AttackDamage = 5.f;
+		SwordNPCIsDead = false;
 		
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -108,6 +109,7 @@ float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 		ATAIController* AIController = Cast<ATAIController>(GetController());
 		if (IsValid(AIController) == true)
 		{
+			SwordNPCIsDead = true;
 			AIController->EndAI();
 			CurrentRifle->SetLifeSpan(0.7f);
 		}
@@ -131,6 +133,8 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 void ATNonPlayerCharacter::HandleOnPostCharacterDead()
 {
 	Super::HandleOnPostCharacterDead();
+	
+	SetLifeSpan(3.0f);
 }
 
 void ATNonPlayerCharacter::HandleOnCheckHit()
