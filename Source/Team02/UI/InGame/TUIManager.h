@@ -5,6 +5,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TPlayerUIWidget.h"
 #include "Area/TCapturePoint.h"
+#include "Character/TNonPlayerCharacterSword.h"
 #include "TUIManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
@@ -102,8 +103,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RestartGameUI();
 
+	//히트마커 제어함수
+	UFUNCTION(BlueprintCallable,Category="HitMarker")
+	void StartHitDetection();
+
+	UFUNCTION(BlueprintCallable,Category="HitMarker")
+	void StopHitDetection();
 
 	
+
+
 protected:
 	// UI widget class
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -235,6 +244,22 @@ private:
 	//무기 변경 관련 UI 함수
 	bool bWeaponSpawned=false;
 	bool bWeaponPickedUp=false;
+	bool bSecondWeaponPickedUp=false;
+
+	//히트마커 관련변수
+	int32 LastWeaponAmmo=-1;
+	TArray<float> LastMonsterHPs;
+	FTimerHandle HitDetectionTimer;
+
+	//히트 감지 함수들
+	UFUNCTION()
+	void CheckForHits();
+
+	UFUNCTION()
+	bool CheckMonsterHPChanges();
+
+	UFUNCTION()
+	void UpdateMonsterHPList();
 
 	
 };

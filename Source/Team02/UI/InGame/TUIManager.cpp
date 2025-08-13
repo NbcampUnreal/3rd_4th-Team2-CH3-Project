@@ -8,9 +8,11 @@
 #include "Area/TCapturePoint.h"
 #include "EngineUtils.h"
 #include "Character/TNonPlayerCharacter.h"
+#include "Character/TNonPlayerCharacterSword.h"
 #include "Spawner/TEnemySpawner.h"
-#include "TAIBossMonster/TAIBossMonster.h"
+#include "Engine/DamageEvents.h"
 #include "TGameMode.h"
+#include "Engine/Engine.h"
 #include "UnifiedBuffer.h"
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -28,6 +30,8 @@ void UTUIManager::Deinitialize()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
 		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
+		GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
+		
 	}
 	Super::Deinitialize();
 }
@@ -64,7 +68,7 @@ void UTUIManager::CreatePlayerUI()
 		{
 			UE_LOG(LogTemp, Error, TEXT("❌ Failed to get GameMode reference in CreatePlayerUI!"));
 		}
-
+		
 		
 		PlayerUIWidget = CreateWidget<UTPlayerUIWidget>(GetWorld(), PlayerUIWidgetClass);
 		if (PlayerUIWidget)
@@ -79,6 +83,9 @@ void UTUIManager::CreatePlayerUI()
 				&UTUIManager::UpdateAllUI,
 				0.1f,
 				true);
+
+			//히트 감지 시작
+			StartHitDetection();
 			
 			// 거점 자동 검색 및 등록(UI 생성 이후)
 			FindAndRegisterCapturePoints();
@@ -86,6 +93,8 @@ void UTUIManager::CreatePlayerUI()
 			// 스포너 및 몬스터 모너터링 시작
 			FindAndRegisterEnemySpawners();
 			StartMonitoringMonsters();
+
+			
 
 			//초기 미션 설정
 			CurrentMissionObjective=TEXT("Mission:");
@@ -110,6 +119,8 @@ void UTUIManager::CreatePlayerUI()
 		}
 	}
 }
+
+
 
 void UTUIManager::SetPlayerCharacter(ATCharacterBase* PlayerChar)
 {
@@ -151,7 +162,7 @@ void UTUIManager::UpdateWeaponInfo()
 
 			UE_LOG(LogTemp,Warning,TEXT("Weapon changed to: %s"), *WeaponName);
 
-			//새로운 무기 습득 감지 로직 추가
+			//첫번째 무기 습득감지
 			if (bFirstCaptureCompleted && !bWeaponPickedUp)
 			{
 				// 새로운 무기인지 확인(기본 무기가 아닌 경우)
@@ -167,6 +178,21 @@ void UTUIManager::UpdateWeaponInfo()
 				else
 				{
 					UE_LOG(LogTemp, Warning, TEXT("🔫 Basic weapon detected: %s (not counting as new weapon)"), *WeaponName);
+				}
+			}
+			//두번쨰 무기 습득 감지(2거점 가기 전 라이플)
+			else if (bWeaponPickedUp && !bSecondWeaponPickedUp && CurrentCaptureIndex==1)
+			{
+				//라이플이나 새로운 무기인지 확인
+				if (WeaponName != TEXT("Pistol") && WeaponName !=TEXT("No Weapon"))
+				{
+					//이전에 먹은 무기와 다른 무기인지 확인
+					if (PreviousWeapon && WeaponName != PreviousWeapon->GetWeaponTypeString())
+					{
+						bSecondWeaponPickedUp=true;
+						UE_LOG(LogTemp, Warning, TEXT("🔫 Second weapon '%s' picked up!"), *WeaponName);
+						UpdateMissionState();// 미션 업데이트
+					}
 				}
 			}
 			else
@@ -321,87 +347,94 @@ void UTUIManager::UpdateMissionProgress()
 	UpdateMissionState();
 }
 
+// TUIManager.cpp의 UpdateMissionState() 함수를 이것으로 교체하세요
+
 void UTUIManager::UpdateMissionState()
 {
     FString NewObjective;
     
     // 임무 확인 로그
-	UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
-	UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
+    UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
+    UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bSecondWeaponPickedUp: %s"), bSecondWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
 
-	// 게임 완료
-	if (bSecondCaptureCompleted)
-	{
-		NewObjective=TEXT("Victory! Game Complete!");
-		//승리 이벤트 발생
-		OnVictoryEvent.Broadcast();
-		UE_LOG(LogTemp,Warning,TEXT("Game Completed! All Capture points secured!!"));
-	}
+    // 게임 완료
+    if (bSecondCaptureCompleted)
+    {
+        NewObjective = TEXT("Victory!");  // 짧게 수정
+        //승리 이벤트 발생
+        OnVictoryEvent.Broadcast();
+        UE_LOG(LogTemp, Warning, TEXT("Game Completed! All Capture points secured!!"));
+    }
+    // 2거점 점령 관련 (두 번째 무기 습득 완료 후)
+    else if (bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture Point 2");  // 짧게 수정
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter Point 2");  // 짧게 수정
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to Point 2");  // 짧게 수정
+        }
+    }
+    // 두 번째 무기 습득 단계 (첫 번째 무기 습득 후, 2거점 가기 전)
+    else if (bWeaponPickedUp && !bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
+    {
+        NewObjective = TEXT("Get Rifle");  // 새로 추가
+    }
+    // 첫 번째 무기 습득 단계 (1거점 완료 후)
+    else if (bFirstCaptureCompleted && !bWeaponPickedUp)
+    {
+        NewObjective = TEXT("Get Shotgun");  // 짧게 수정
+    }
+    // 1거점 점령 관련
+    else if (bWaveCompleted && CurrentCaptureIndex == 0)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture Point 1");  // 짧게 수정
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter Point 1");  // 짧게 수정
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to Point 1");  // 짧게 수정
+        }
+    }
+    //몬스터 처치 관련
+    else if (bWaveActive || TrackedMonsters.Num() > 0)
+    {
+        int32 SpawnerBasedMax = 0;
+        for (ATEnemySpawner* Spawner : RegisteredSpawners)
+        {
+            if (Spawner)
+            {
+                SpawnerBasedMax += Spawner->MaxSpawnCount;
+            }
+        }
 
-	// 무기 습득 완료 이후 2거점으로 이동
-    else if (bWeaponPickedUp && CurrentCaptureIndex==1)
-	{
-    	if (bNearCapturePoint && bCapturePhase)
-    	{
-    		NewObjective=TEXT("Capture the second point!");
-    	}
-    	else if (bNearCapturePoint && !bCapturePhase)
-    	{
-    		NewObjective=TEXT("Enter and start capture!");
-    		bCapturePhase=true;
-    	}
-	    else
-	    {
-		    NewObjective=TEXT("Move Second Control point!");
-	    }
-	}
-	// 1거점 완료후 무기 습득 하라고 텍스트 갱신 하기
-	else if (bFirstCaptureCompleted && !bWeaponPickedUp)
-	{
-		NewObjective=TEXT("Pick up new weapon from Control Point!");
-	}
-	// 1거점 점령 관련
-	else if (bWaveCompleted && CurrentCaptureIndex==0)
-	{
-		if (bNearCapturePoint && bCapturePhase)
-		{
-			NewObjective=TEXT("Capture the first control point!");
-		}
-		else if (bNearCapturePoint && !bCapturePhase)
-		{
-			NewObjective=TEXT("Enter and start capture!");
-			bCapturePhase=true;
-		}
-		else
-		{
-			NewObjective=TEXT("Move to first control point!");
-		}
-	}
-	//몬스터 처치 관련
-	else if (bWaveActive || TrackedMonsters.Num()>0)
-	{
-		int32 SpawnerBasedMax=0;
-		for (ATEnemySpawner* Spawner: RegisteredSpawners)
-		{
-			if (Spawner)
-			{
-				SpawnerBasedMax+=Spawner->MaxSpawnCount;
-			}
-		}
-
-		int32 RemainingCount=FMath::Max(0,SpawnerBasedMax-MonsterKillCount);
-		NewObjective=FString::Printf(TEXT("Eliminate enemies (%d remaining)"),RemainingCount);
-	}
-	else
-	{
-		NewObjective=TEXT("Eliminate all enemies");
-	}
-	
+        int32 RemainingCount = FMath::Max(0, SpawnerBasedMax - MonsterKillCount);
+        NewObjective = FString::Printf(TEXT("Kill Enemies (%d left)"), RemainingCount);  // 짧게 수정
+    }
+    else
+    {
+        NewObjective = TEXT("Kill All Enemies");  // 짧게 수정
+    }
+    
     // 미션 목표가 실제로 변경되었을 때만 업데이트
     if (CurrentMissionObjective != NewObjective)
     {
@@ -453,7 +486,7 @@ void UTUIManager::StartMonitoringMonsters()
 			0.5f,
 			true);
 
-		UE_LOG(LogTemp,Warning,TEXT("Monster monitering startered!"));
+		UE_LOG(LogTemp,Warning,TEXT("Monster monitoring started!"));
 	}
 }
 
@@ -704,7 +737,6 @@ void UTUIManager::UnlockWeapon()
 
 
 
-
 void UTUIManager::UpdateAllUI()
 {
 	// 기존 UI 업데이트
@@ -873,6 +905,15 @@ void UTUIManager::RestartGameUI()
 	LastWaveMonsterCount=0;
 	TotalWaveMonsters=0;
 
+	//히트 감지 변수 초기화
+	LastWeaponAmmo=-1;
+	LastMonsterHPs.Empty();
+
+	//무기 관련 초기화
+	bWeaponSpawned=false;
+	bWeaponPickedUp=false;
+	bSecondWeaponPickedUp=false;
+
 	//거점 관련 초기화
 	CurrentCaptureIndex=0;
 	if (AllCapturePoints.IsValidIndex(0))
@@ -903,14 +944,17 @@ void UTUIManager::RestartGameUI()
 		PlayerUIWidget->HideEnemyIncomingAlarm();
 	}
 
+	
 	//타이머 초기화
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
 
 		//모니터링 재시작
 		StartMonitoringMonsters();
+		StartHitDetection();
 
 		//UI업데이트 타이머 재시작
 		GetWorld()->GetTimerManager().SetTimer(
@@ -942,17 +986,119 @@ void UTUIManager::RestartGameUI()
 	
 }
 
-void UTUIManager::TestHitMarker()
+void UTUIManager::StartHitDetection()
 {
-	if (PlayerUIWidget)
-	{
-		PlayerUIWidget->ShowHitMarker();
-		UE_LOG(LogTemp,Warning,TEXT("Test hit marker called"));
-	}
-	else
-	{
-		UE_LOG(LogTemp,Warning,TEXT("PlayerUIWidget is null!"));
-	}
+    if (GetWorld() && !HitDetectionTimer.IsValid())
+    {
+        GetWorld()->GetTimerManager().SetTimer(
+            HitDetectionTimer,
+            this,
+            &UTUIManager::CheckForHits,
+            0.1f,  // 0.1초마다 체크
+            true   // 반복
+        );
+        
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Hit detection started"));
+    }
 }
 
+void UTUIManager::StopHitDetection()
+{
+    if (GetWorld() && HitDetectionTimer.IsValid())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Hit detection stopped"));
+    }
+}
 
+void UTUIManager::CheckForHits()
+{
+    // 플레이어와 무기 확인
+    if (!PlayerCharacter) return;
+    
+    ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(PlayerCharacter);
+    if (!Player) return;
+    
+    ATWeaponBase* Weapon = Player->CurrentWeapon;
+    if (!Weapon) return;
+    
+    // 🔫 무기 발사 감지 (탄약 변화)
+    int32 CurrentAmmo = Weapon->GetCurrentAmmo();
+    
+    if (LastWeaponAmmo > 0 && CurrentAmmo < LastWeaponAmmo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🔫 Weapon fired! Ammo: %d -> %d"), LastWeaponAmmo, CurrentAmmo);
+        
+        // 🎯 몬스터 HP 변화 체크
+        if (CheckMonsterHPChanges())
+        {
+            // 히트마커 표시!
+            if (PlayerUIWidget)
+            {
+                PlayerUIWidget->ShowHitMarker();
+                UE_LOG(LogTemp, Warning, TEXT("🎯 HIT DETECTED! Showing red hitmarker"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("❌ Miss detected - no monster HP change"));
+        }
+    }
+    
+    // 상태 업데이트
+    LastWeaponAmmo = CurrentAmmo;
+    UpdateMonsterHPList();
+}
+
+bool UTUIManager::CheckMonsterHPChanges()
+{
+    // 현재 추적 중인 모든 몬스터의 HP 체크
+    for (int32 i = 0; i < TrackedMonsters.Num(); i++)
+    {
+        if (TrackedMonsters[i] && IsValid(TrackedMonsters[i]))
+        {
+            float CurrentHP = TrackedMonsters[i]->GetCurrentHP();
+            
+            // 이전 HP와 비교
+            if (i < LastMonsterHPs.Num())
+            {
+                if (CurrentHP < LastMonsterHPs[i])
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("🩸 Monster %s HP decreased: %.1f -> %.1f"), 
+                           *TrackedMonsters[i]->GetName(), LastMonsterHPs[i], CurrentHP);
+                    return true; // 히트 감지!
+                }
+            }
+        }
+    }
+    
+    return false; // 히트 없음
+}
+
+void UTUIManager::UpdateMonsterHPList()
+{
+    LastMonsterHPs.Empty();
+    
+    // 현재 추적 중인 모든 몬스터의 HP 저장
+    for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+    {
+        if (Monster && IsValid(Monster))
+        {
+            LastMonsterHPs.Add(Monster->GetCurrentHP());
+        }
+    }
+}
+
+// ===== 기존 TestHitMarker 함수 수정 =====
+void UTUIManager::TestHitMarker()
+{
+    if (PlayerUIWidget)
+    {
+        PlayerUIWidget->ShowHitMarker();
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Test red hitmarker called"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is null!"));
+    }
+}

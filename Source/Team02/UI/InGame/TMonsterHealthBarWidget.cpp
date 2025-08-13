@@ -18,11 +18,43 @@ void UTMonsterHealthBarWidget::UpdateHealthBar(float CurrentHP,float MaxHP)
 	}
 }
 
-void UTMonsterHealthBarWidget::SetMonsterName(const FString& Name)
+void UTMonsterHealthBarWidget::SetMonsterNameByType(AActor* OwnerMonster)
+{
+	if (!OwnerMonster || !MonsterNameText)
+	{
+		UE_LOG(LogTemp,Error,TEXT("OwnerMonster or MonsterNameText is null"));
+		return;
+	}
+
+	FString ClassName=OwnerMonster->GetClass()->GetName();
+	FString MonsterTypeName;
+	
+	// 클래스 이름으로 몬스터 타입 구분
+	if (ClassName.Contains(TEXT("GunNPC")) || ClassName.Contains(TEXT("Gun")))
+	{
+		MonsterTypeName = TEXT("Gun Enemy");
+	}
+	else if (ClassName.Contains(TEXT("SwordNPC")) || ClassName.Contains(TEXT("Sword")))
+	{
+		MonsterTypeName = TEXT("Sword Enemy");
+	}
+	else
+	{
+		MonsterTypeName = TEXT("Enemy");
+	}
+	
+	MonsterNameText->SetText(FText::FromString(MonsterTypeName));
+	UE_LOG(LogTemp, Warning, TEXT("🏷️ Monster name set to: %s for %s"), 
+		  *MonsterTypeName, *OwnerMonster->GetName());
+	
+}
+
+
+void UTMonsterHealthBarWidget::SetMonsterName(const FString& NewName)
 {
 	if (MonsterNameText)
 	{
-		MonsterNameText->SetText(FText::FromString(Name));
+		MonsterNameText->SetText(FText::FromString(NewName));
 	}
 }
 

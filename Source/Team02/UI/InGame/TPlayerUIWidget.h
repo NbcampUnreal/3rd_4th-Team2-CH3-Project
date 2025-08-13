@@ -62,7 +62,9 @@ public:
 	//히트 마커 함수 추가
 	UFUNCTION(BlueprintCallable)
 	void ShowHitMarker();
+
 	
+
 
 
 protected:
@@ -98,7 +100,10 @@ protected:
 	TObjectPtr<UTextBlock> WeaponNameText;
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UWidget> Crosshair;// 기존 크로스헤어를 히트마커로 활용
+	TObjectPtr<UWidget> Crosshair;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UWidget> HitMarker; 
 
 	//타이밍 애니메이션 변수
 	UPROPERTY()
@@ -127,5 +132,15 @@ private:
 
 	//히트 마커 타이머
 	FTimerHandle HitMarkerTimerHandle;
+
+	//힌트 감지 타이머
+	FTimerHandle HitDetectionTimer;
+
+	// 이전 상태 저장용
+	int32 LastWeaponAmmo = -1;
+	TArray<float> LastMonsterHPs;
+	bool bLastFireButtonPressed = false;
+    
+	
 	
 };
