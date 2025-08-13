@@ -36,6 +36,9 @@ void UTMonsterHealthBarComponent::BeginPlay()
 	}
     
 	InitializeHealthBar();
+
+	//위젯 생성 이후 몬스터 이름 초기화
+	SetupMonsterNameAfterWidgetCreation();
 	
 }
 
@@ -78,8 +81,6 @@ void UTMonsterHealthBarComponent::TickComponent(float DeltaTime, ELevelTick Tick
 			HealthBarWidgetComponent->SetWorldRotation(LookRotation);
 		}
 	}
-
-
 	
 }
 
@@ -100,4 +101,42 @@ void UTMonsterHealthBarComponent::InitializeHealthBar()
 		// 오류 점검 로그
 		UE_LOG(LogTemp, Warning, TEXT("Widget setup complete"));
 	}
+}
+
+void UTMonsterHealthBarComponent::InitializeMonsterName()
+{
+	if (HealthBarWidgetComponent)
+	{
+		if (UTMonsterHealthBarWidget* MonsterWidget = Cast<UTMonsterHealthBarWidget>(HealthBarWidgetComponent->GetUserWidgetObject()))
+		{
+			MonsterWidget->SetMonsterNameByType(GetOwner());
+			UE_LOG(LogTemp, Warning, TEXT("✅ Monster name initialized for: %s"), 
+				   GetOwner() ? *GetOwner()->GetName() : TEXT("Unknown"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("❌ Failed to cast to UTMonsterHealthBarWidget"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ HealthBarWidgetComponent is null"));
+	}
+}
+
+void UTMonsterHealthBarComponent::SetupMonsterNameAfterWidgetCreation()
+{
+	// 위젯이 아직 생성되지 않았다면 잠시 대기 후 재시도
+	if (!HealthBarWidgetComponent->GetUserWidgetObject())
+	{
+		// 0.1초 후 다시 시도
+		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			SetupMonsterNameAfterWidgetCreation();
+		});
+		return;
+	}
+    
+	// 위젯이 준비되면 몬스터 이름 초기화
+	InitializeMonsterName();
 }

@@ -364,7 +364,7 @@ void UTPlayerUIWidget::ShowHitMarker()
 				false
 			);
             
-			// ⏱️ 0.15초 후 히트마커 숨김
+			// ⏱️ 0.3초 후 히트마커 숨김
 			GetWorld()->GetTimerManager().SetTimer(
 				HitMarkerTimerHandle,
 				[this, HitMarkerImage]()
@@ -375,7 +375,7 @@ void UTPlayerUIWidget::ShowHitMarker()
 						UE_LOG(LogTemp, Warning, TEXT("🎯 Red hitmarker hidden"));
 					}
 				},
-				0.15f,
+				0.3f,
 				false
 			);
             

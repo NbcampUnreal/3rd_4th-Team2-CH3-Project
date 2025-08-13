@@ -26,6 +26,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitializeHealthBar();
 
+	//위잿 생성시 자동으로 몬스터 이름 설정
+	UFUNCTION(BlueprintCallable)
+	void InitializeMonsterName();
+
 protected:
 	// widget component(world space UI)
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
@@ -42,5 +46,9 @@ protected:
 	// 오너 캐릭터 레퍼런스
 	UPROPERTY()
 	TObjectPtr<ATCharacterBase> OwnerCharacter;
+
+private:
+	//내부적으로 사용하는 헬퍼함수
+	void SetupMonsterNameAfterWidgetCreation();
 		
 };
