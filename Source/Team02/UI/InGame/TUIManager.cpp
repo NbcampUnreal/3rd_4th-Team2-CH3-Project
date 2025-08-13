@@ -162,7 +162,7 @@ void UTUIManager::UpdateWeaponInfo()
 
 			UE_LOG(LogTemp,Warning,TEXT("Weapon changed to: %s"), *WeaponName);
 
-			//새로운 무기 습득 감지 로직 추가
+			//첫번째 무기 습득감지
 			if (bFirstCaptureCompleted && !bWeaponPickedUp)
 			{
 				// 새로운 무기인지 확인(기본 무기가 아닌 경우)
@@ -178,6 +178,21 @@ void UTUIManager::UpdateWeaponInfo()
 				else
 				{
 					UE_LOG(LogTemp, Warning, TEXT("🔫 Basic weapon detected: %s (not counting as new weapon)"), *WeaponName);
+				}
+			}
+			//두번쨰 무기 습득 감지(2거점 가기 전 라이플)
+			else if (bWeaponPickedUp && !bSecondWeaponPickedUp && CurrentCaptureIndex==1)
+			{
+				//라이플이나 새로운 무기인지 확인
+				if (WeaponName != TEXT("Pistol") && WeaponName !=TEXT("No Weapon"))
+				{
+					//이전에 먹은 무기와 다른 무기인지 확인
+					if (PreviousWeapon && WeaponName != PreviousWeapon->GetWeaponTypeString())
+					{
+						bSecondWeaponPickedUp=true;
+						UE_LOG(LogTemp, Warning, TEXT("🔫 Second weapon '%s' picked up!"), *WeaponName);
+						UpdateMissionState();// 미션 업데이트
+					}
 				}
 			}
 			else
@@ -332,87 +347,94 @@ void UTUIManager::UpdateMissionProgress()
 	UpdateMissionState();
 }
 
+// TUIManager.cpp의 UpdateMissionState() 함수를 이것으로 교체하세요
+
 void UTUIManager::UpdateMissionState()
 {
     FString NewObjective;
     
     // 임무 확인 로그
-	UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
-	UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
-	UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
+    UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
+    UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bSecondWeaponPickedUp: %s"), bSecondWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
 
-	// 게임 완료
-	if (bSecondCaptureCompleted)
-	{
-		NewObjective=TEXT("Victory! Game Complete!");
-		//승리 이벤트 발생
-		OnVictoryEvent.Broadcast();
-		UE_LOG(LogTemp,Warning,TEXT("Game Completed! All Capture points secured!!"));
-	}
+    // 게임 완료
+    if (bSecondCaptureCompleted)
+    {
+        NewObjective = TEXT("Victory!");  // 짧게 수정
+        //승리 이벤트 발생
+        OnVictoryEvent.Broadcast();
+        UE_LOG(LogTemp, Warning, TEXT("Game Completed! All Capture points secured!!"));
+    }
+    // 2거점 점령 관련 (두 번째 무기 습득 완료 후)
+    else if (bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture Point 2");  // 짧게 수정
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter Point 2");  // 짧게 수정
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to Point 2");  // 짧게 수정
+        }
+    }
+    // 두 번째 무기 습득 단계 (첫 번째 무기 습득 후, 2거점 가기 전)
+    else if (bWeaponPickedUp && !bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
+    {
+        NewObjective = TEXT("Get Rifle");  // 새로 추가
+    }
+    // 첫 번째 무기 습득 단계 (1거점 완료 후)
+    else if (bFirstCaptureCompleted && !bWeaponPickedUp)
+    {
+        NewObjective = TEXT("Get Shotgun");  // 짧게 수정
+    }
+    // 1거점 점령 관련
+    else if (bWaveCompleted && CurrentCaptureIndex == 0)
+    {
+        if (bNearCapturePoint && bCapturePhase)
+        {
+            NewObjective = TEXT("Capture Point 1");  // 짧게 수정
+        }
+        else if (bNearCapturePoint && !bCapturePhase)
+        {
+            NewObjective = TEXT("Enter Point 1");  // 짧게 수정
+            bCapturePhase = true;
+        }
+        else
+        {
+            NewObjective = TEXT("Move to Point 1");  // 짧게 수정
+        }
+    }
+    //몬스터 처치 관련
+    else if (bWaveActive || TrackedMonsters.Num() > 0)
+    {
+        int32 SpawnerBasedMax = 0;
+        for (ATEnemySpawner* Spawner : RegisteredSpawners)
+        {
+            if (Spawner)
+            {
+                SpawnerBasedMax += Spawner->MaxSpawnCount;
+            }
+        }
 
-	// 무기 습득 완료 이후 2거점으로 이동
-    else if (bWeaponPickedUp && CurrentCaptureIndex==1)
-	{
-    	if (bNearCapturePoint && bCapturePhase)
-    	{
-    		NewObjective=TEXT("Capture Second point!");
-    	}
-    	else if (bNearCapturePoint && !bCapturePhase)
-    	{
-    		NewObjective=TEXT("Enter Second Point!");
-    		bCapturePhase=true;
-    	}
-	    else
-	    {
-		    NewObjective=TEXT("Move to Second Point!");
-	    }
-	}
-	// 1거점 완료후 무기 습득 하라고 텍스트 갱신 하기
-	else if (bFirstCaptureCompleted && !bWeaponPickedUp)
-	{
-		NewObjective=TEXT("Get New Weapon!");
-	}
-	// 1거점 점령 관련
-	else if (bWaveCompleted && CurrentCaptureIndex==0)
-	{
-		if (bNearCapturePoint && bCapturePhase)
-		{
-			NewObjective=TEXT("Capture the First Point!");
-		}
-		else if (bNearCapturePoint && !bCapturePhase)
-		{
-			NewObjective=TEXT("Enter First Point!");
-			bCapturePhase=true;
-		}
-		else
-		{
-			NewObjective=TEXT("Move to First Point!");
-		}
-	}
-	//몬스터 처치 관련
-	else if (bWaveActive || TrackedMonsters.Num()>0)
-	{
-		int32 SpawnerBasedMax=0;
-		for (ATEnemySpawner* Spawner: RegisteredSpawners)
-		{
-			if (Spawner)
-			{
-				SpawnerBasedMax+=Spawner->MaxSpawnCount;
-			}
-		}
-
-		int32 RemainingCount=FMath::Max(0,SpawnerBasedMax-MonsterKillCount);
-		NewObjective=FString::Printf(TEXT("Eliminate enemies (%d remaining)"),RemainingCount);
-	}
-	else
-	{
-		NewObjective=TEXT("Eliminate all enemies");
-	}
-	
+        int32 RemainingCount = FMath::Max(0, SpawnerBasedMax - MonsterKillCount);
+        NewObjective = FString::Printf(TEXT("Kill Enemies (%d left)"), RemainingCount);  // 짧게 수정
+    }
+    else
+    {
+        NewObjective = TEXT("Kill All Enemies");  // 짧게 수정
+    }
+    
     // 미션 목표가 실제로 변경되었을 때만 업데이트
     if (CurrentMissionObjective != NewObjective)
     {
@@ -886,6 +908,11 @@ void UTUIManager::RestartGameUI()
 	//히트 감지 변수 초기화
 	LastWeaponAmmo=-1;
 	LastMonsterHPs.Empty();
+
+	//무기 관련 초기화
+	bWeaponSpawned=false;
+	bWeaponPickedUp=false;
+	bSecondWeaponPickedUp=false;
 
 	//거점 관련 초기화
 	CurrentCaptureIndex=0;

@@ -244,6 +244,7 @@ private:
 	//무기 변경 관련 UI 함수
 	bool bWeaponSpawned=false;
 	bool bWeaponPickedUp=false;
+	bool bSecondWeaponPickedUp=false;
 
 	//히트마커 관련변수
 	int32 LastWeaponAmmo=-1;
