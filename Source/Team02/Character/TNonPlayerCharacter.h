@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<ATGunNPCWeapon> CurrentRifle;
 
-	virtual void HandleOnPostCharacterDead_Implementation() override;
+	virtual void HandleOnPostCharacterDead() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float AttackDamage;

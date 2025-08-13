@@ -129,11 +129,12 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 	}
 }
 
-void ATNonPlayerCharacter::HandleOnPostCharacterDead_Implementation()
+void ATNonPlayerCharacter::HandleOnPostCharacterDead()
 {
 	Super::HandleOnPostCharacterDead();
 	
-	SetLifeSpan(3.0f);
+	SetLifeSpan(1.0f);
+	
 }
 
 void ATNonPlayerCharacter::HandleOnCheckHit()

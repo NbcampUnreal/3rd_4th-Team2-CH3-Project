@@ -263,7 +263,7 @@ void ATPlayerCharacter::ResumeGame()
   }
 }
 
-void ATPlayerCharacter::HandleOnPostCharacterDead_Implementation()
+void ATPlayerCharacter::HandleOnPostCharacterDead()
 {
   // 1. 죽은 직후, 입력/이동 등 완전히 비활성화
   DisableInput(Cast<APlayerController>(GetController()));

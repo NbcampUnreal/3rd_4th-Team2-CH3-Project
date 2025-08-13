@@ -53,7 +53,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackSwordMontage;
 	
-	virtual void HandleOnPostCharacterDead_Implementation() override;
+	virtual void HandleOnPostCharacterDead() override;
 	
 protected:
 	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;

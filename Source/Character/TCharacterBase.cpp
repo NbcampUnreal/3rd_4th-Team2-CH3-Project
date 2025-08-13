@@ -158,7 +158,7 @@ float ATCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	return FinalDamageAmount;
 }
 
-void ATCharacterBase::HandleOnPostCharacterDead_Implementation()
+void ATCharacterBase::HandleOnPostCharacterDead()
 {
 	SetLifeSpan(0.1f);
 }
