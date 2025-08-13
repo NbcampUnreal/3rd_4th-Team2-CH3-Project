@@ -1,4 +1,7 @@
 #include "TPlayerUIWidget.h"
+
+#include "Character/TNonPlayerCharacter.h"
+#include "Character/TNonPlayerCharacterSword.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
@@ -331,33 +334,64 @@ void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 
 void UTPlayerUIWidget::ShowHitMarker()
 {
-	if (Crosshair)
+	if (HitMarker)
 	{
-		if (UImage* CrosshairImage = Cast<UImage>(Crosshair))
+		// 🔧 UImage로 캐스팅해서 함수 사용
+		if (UImage* HitMarkerImage = Cast<UImage>(HitMarker))
 		{
-			// Image 위젯의 색상 변경
-			CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+			// 기존 타이머 정리
+			GetWorld()->GetTimerManager().ClearTimer(HitMarkerTimerHandle);
             
-			// 0.15초 후 원래 색으로 복구
+			// 🎯 히트마커 표시
+			HitMarkerImage->SetVisibility(ESlateVisibility::Visible);
+			HitMarkerImage->SetOpacity(1.0f);
+            
+			// 📏 임팩트 효과: 크기 변화
+			HitMarkerImage->SetRenderScale(FVector2D(1.8f, 1.8f)); // 1.8배로 크게 시작
+            
+			// ⚡ 0.1초 후 원래 크기로
+			FTimerHandle ScaleTimer;
 			GetWorld()->GetTimerManager().SetTimer(
-				HitMarkerTimerHandle,
-				[this, CrosshairImage]()
+				ScaleTimer,
+				[this, HitMarkerImage]()
 				{
-					if (CrosshairImage)
+					if (HitMarkerImage && IsValid(HitMarkerImage))
 					{
-						// 원래 빨간색으로 복구
-						CrosshairImage->SetBrushTintColor(FSlateColor(FLinearColor::Red));
+						HitMarkerImage->SetRenderScale(FVector2D(1.0f, 1.0f));
 					}
 				},
-				1.0f,
+				0.1f,
 				false
 			);
             
-			UE_LOG(LogTemp, Warning, TEXT("✅ Hit marker shown with tint color!"));
+			// ⏱️ 0.15초 후 히트마커 숨김
+			GetWorld()->GetTimerManager().SetTimer(
+				HitMarkerTimerHandle,
+				[this, HitMarkerImage]()
+				{
+					if (HitMarkerImage && IsValid(HitMarkerImage))
+					{
+						HitMarkerImage->SetVisibility(ESlateVisibility::Hidden);
+						UE_LOG(LogTemp, Warning, TEXT("🎯 Red hitmarker hidden"));
+					}
+				},
+				0.15f,
+				false
+			);
+            
+			UE_LOG(LogTemp, Warning, TEXT("🔴 RED HITMARKER shown! Scale: 1.8x -> 1.0x"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("❌ HitMarker is not UImage! Check widget type."));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ Crosshair widget is null!"));
+		UE_LOG(LogTemp, Error, TEXT("❌ HitMarker widget not found! Check Blueprint binding."));
 	}
 }
+
+
+
+

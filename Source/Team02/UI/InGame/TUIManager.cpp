@@ -8,9 +8,11 @@
 #include "Area/TCapturePoint.h"
 #include "EngineUtils.h"
 #include "Character/TNonPlayerCharacter.h"
+#include "Character/TNonPlayerCharacterSword.h"
 #include "Spawner/TEnemySpawner.h"
-#include "TAIBossMonster/TAIBossMonster.h"
+#include "Engine/DamageEvents.h"
 #include "TGameMode.h"
+#include "Engine/Engine.h"
 #include "UnifiedBuffer.h"
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -28,6 +30,8 @@ void UTUIManager::Deinitialize()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
 		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
+		GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
+		
 	}
 	Super::Deinitialize();
 }
@@ -64,7 +68,7 @@ void UTUIManager::CreatePlayerUI()
 		{
 			UE_LOG(LogTemp, Error, TEXT("❌ Failed to get GameMode reference in CreatePlayerUI!"));
 		}
-
+		
 		
 		PlayerUIWidget = CreateWidget<UTPlayerUIWidget>(GetWorld(), PlayerUIWidgetClass);
 		if (PlayerUIWidget)
@@ -79,6 +83,9 @@ void UTUIManager::CreatePlayerUI()
 				&UTUIManager::UpdateAllUI,
 				0.1f,
 				true);
+
+			//히트 감지 시작
+			StartHitDetection();
 			
 			// 거점 자동 검색 및 등록(UI 생성 이후)
 			FindAndRegisterCapturePoints();
@@ -86,6 +93,8 @@ void UTUIManager::CreatePlayerUI()
 			// 스포너 및 몬스터 모너터링 시작
 			FindAndRegisterEnemySpawners();
 			StartMonitoringMonsters();
+
+			
 
 			//초기 미션 설정
 			CurrentMissionObjective=TEXT("Mission:");
@@ -110,6 +119,8 @@ void UTUIManager::CreatePlayerUI()
 		}
 	}
 }
+
+
 
 void UTUIManager::SetPlayerCharacter(ATCharacterBase* PlayerChar)
 {
@@ -352,7 +363,7 @@ void UTUIManager::UpdateMissionState()
     	}
     	else if (bNearCapturePoint && !bCapturePhase)
     	{
-    		NewObjective=TEXT("Enter and start capture!");
+    		NewObjective=TEXT("Go second control point!");
     		bCapturePhase=true;
     	}
 	    else
@@ -453,7 +464,7 @@ void UTUIManager::StartMonitoringMonsters()
 			0.5f,
 			true);
 
-		UE_LOG(LogTemp,Warning,TEXT("Monster monitering startered!"));
+		UE_LOG(LogTemp,Warning,TEXT("Monster monitoring started!"));
 	}
 }
 
@@ -704,7 +715,6 @@ void UTUIManager::UnlockWeapon()
 
 
 
-
 void UTUIManager::UpdateAllUI()
 {
 	// 기존 UI 업데이트
@@ -873,6 +883,10 @@ void UTUIManager::RestartGameUI()
 	LastWaveMonsterCount=0;
 	TotalWaveMonsters=0;
 
+	//히트 감지 변수 초기화
+	LastWeaponAmmo=-1;
+	LastMonsterHPs.Empty();
+
 	//거점 관련 초기화
 	CurrentCaptureIndex=0;
 	if (AllCapturePoints.IsValidIndex(0))
@@ -903,14 +917,17 @@ void UTUIManager::RestartGameUI()
 		PlayerUIWidget->HideEnemyIncomingAlarm();
 	}
 
+	
 	//타이머 초기화
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
 
 		//모니터링 재시작
 		StartMonitoringMonsters();
+		StartHitDetection();
 
 		//UI업데이트 타이머 재시작
 		GetWorld()->GetTimerManager().SetTimer(
@@ -942,17 +959,119 @@ void UTUIManager::RestartGameUI()
 	
 }
 
-void UTUIManager::TestHitMarker()
+void UTUIManager::StartHitDetection()
 {
-	if (PlayerUIWidget)
-	{
-		PlayerUIWidget->ShowHitMarker();
-		UE_LOG(LogTemp,Warning,TEXT("Test hit marker called"));
-	}
-	else
-	{
-		UE_LOG(LogTemp,Warning,TEXT("PlayerUIWidget is null!"));
-	}
+    if (GetWorld() && !HitDetectionTimer.IsValid())
+    {
+        GetWorld()->GetTimerManager().SetTimer(
+            HitDetectionTimer,
+            this,
+            &UTUIManager::CheckForHits,
+            0.1f,  // 0.1초마다 체크
+            true   // 반복
+        );
+        
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Hit detection started"));
+    }
 }
 
+void UTUIManager::StopHitDetection()
+{
+    if (GetWorld() && HitDetectionTimer.IsValid())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Hit detection stopped"));
+    }
+}
 
+void UTUIManager::CheckForHits()
+{
+    // 플레이어와 무기 확인
+    if (!PlayerCharacter) return;
+    
+    ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(PlayerCharacter);
+    if (!Player) return;
+    
+    ATWeaponBase* Weapon = Player->CurrentWeapon;
+    if (!Weapon) return;
+    
+    // 🔫 무기 발사 감지 (탄약 변화)
+    int32 CurrentAmmo = Weapon->GetCurrentAmmo();
+    
+    if (LastWeaponAmmo > 0 && CurrentAmmo < LastWeaponAmmo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🔫 Weapon fired! Ammo: %d -> %d"), LastWeaponAmmo, CurrentAmmo);
+        
+        // 🎯 몬스터 HP 변화 체크
+        if (CheckMonsterHPChanges())
+        {
+            // 히트마커 표시!
+            if (PlayerUIWidget)
+            {
+                PlayerUIWidget->ShowHitMarker();
+                UE_LOG(LogTemp, Warning, TEXT("🎯 HIT DETECTED! Showing red hitmarker"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("❌ Miss detected - no monster HP change"));
+        }
+    }
+    
+    // 상태 업데이트
+    LastWeaponAmmo = CurrentAmmo;
+    UpdateMonsterHPList();
+}
+
+bool UTUIManager::CheckMonsterHPChanges()
+{
+    // 현재 추적 중인 모든 몬스터의 HP 체크
+    for (int32 i = 0; i < TrackedMonsters.Num(); i++)
+    {
+        if (TrackedMonsters[i] && IsValid(TrackedMonsters[i]))
+        {
+            float CurrentHP = TrackedMonsters[i]->GetCurrentHP();
+            
+            // 이전 HP와 비교
+            if (i < LastMonsterHPs.Num())
+            {
+                if (CurrentHP < LastMonsterHPs[i])
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("🩸 Monster %s HP decreased: %.1f -> %.1f"), 
+                           *TrackedMonsters[i]->GetName(), LastMonsterHPs[i], CurrentHP);
+                    return true; // 히트 감지!
+                }
+            }
+        }
+    }
+    
+    return false; // 히트 없음
+}
+
+void UTUIManager::UpdateMonsterHPList()
+{
+    LastMonsterHPs.Empty();
+    
+    // 현재 추적 중인 모든 몬스터의 HP 저장
+    for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+    {
+        if (Monster && IsValid(Monster))
+        {
+            LastMonsterHPs.Add(Monster->GetCurrentHP());
+        }
+    }
+}
+
+// ===== 기존 TestHitMarker 함수 수정 =====
+void UTUIManager::TestHitMarker()
+{
+    if (PlayerUIWidget)
+    {
+        PlayerUIWidget->ShowHitMarker();
+        UE_LOG(LogTemp, Warning, TEXT("🎯 Test red hitmarker called"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is null!"));
+    }
+}
