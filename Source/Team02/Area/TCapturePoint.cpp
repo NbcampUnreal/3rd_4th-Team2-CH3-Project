@@ -3,11 +3,8 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
+#include "Engine/StaticMeshActor.h" 
 #include "TGameMode.h"
-#include "AI/TAIController.h"
-#include "Character/TNonPlayerCharacter.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Team02.h"
 
 
@@ -75,6 +72,9 @@ void ATCapturePoint::CompleteCapture()
 		GM->LastCapturedPoint = this;
 	}
 
+	
+	DestroyAssignedMeshesIfNeeded();
+
 	NotifyWall(); // 벽 열기 등 연계 행동
 }
 
@@ -85,6 +85,19 @@ void ATCapturePoint::NotifyWall()
 		if (Wall)    // nullptr 안전체크
 		{
 			Wall->RotateStep(); // 벽 열기
+		}
+	}
+}
+void ATCapturePoint::DestroyAssignedMeshesIfNeeded()
+{
+	// 1거점에서만 실행
+	if (ZoneIndex != 0) return;
+
+	for (AStaticMeshActor* MeshActor : MeshesToDestroyOnComplete)
+	{
+		if (IsValid(MeshActor))
+		{
+			MeshActor->Destroy();
 		}
 	}
 }
