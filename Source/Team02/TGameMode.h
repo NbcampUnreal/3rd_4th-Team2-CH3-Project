@@ -8,7 +8,6 @@
 
 class ATEnemySpawner;
 class ATCapturePoint;
-class ATBossSpawner;
 class ATAIController;
 class ATSwordAIController;
 
@@ -61,7 +60,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
-	ATBossSpawner* BossSpawner;
+	
 	
 	//AI 컨트롤러를 베열에 추가하는 함수
 	void RegisterAIController(ATAIController* AIController);

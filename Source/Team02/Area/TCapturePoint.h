@@ -6,6 +6,7 @@
 class UBoxComponent;
 class UStaticMeshComponent;
 class ATMovingWall;
+class AStaticMeshActor;
 class ATGameMode;
 UCLASS()
 class TEAM02_API ATCapturePoint : public AActor
@@ -80,4 +81,10 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	);
+
+	void DestroyAssignedMeshesIfNeeded();
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Capture|OnComplete")
+	TArray<TObjectPtr<AStaticMeshActor>> MeshesToDestroyOnComplete;
+
 };

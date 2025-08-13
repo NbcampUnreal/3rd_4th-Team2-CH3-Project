@@ -7,7 +7,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Spawner/TEnemySpawner.h"
 #include "Area/TCapturePoint.h"
-#include "Spawner/TBossSpawner.h"
 #include "AI/TAIController.h"
 #include "Controller/TSwordAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -41,18 +40,7 @@ void ATGameMode::BeginPlay()
 		}
 	}
 
-	TArray<AActor*> FoundBossSpawners;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATBossSpawner::StaticClass(), FoundBossSpawners);
-	if (FoundBossSpawners.Num() > 0)
-	{
-		BossSpawner = Cast<ATBossSpawner>(FoundBossSpawners[0]);
-		UE_LOG(LogTemp, Warning, TEXT("BossSpawner 할당됨: %s"), *BossSpawner->GetName());
-	}
-	else
-	{
-		BossSpawner = nullptr;
-		UE_LOG(LogTemp, Error, TEXT("레벨에 BossSpawner 없음!"));
-	}
+	
 }
 
 void ATGameMode::RegisterAIController(ATAIController* AIController)
@@ -170,11 +158,7 @@ void ATGameMode::OnCapturePointCompleted()
 	bIsWaveActive = false;
 	EndWave();
 	++WaveIndex;
-	if (WaveIndex == 2 )
-	{
-		BossSpawner->SpawnBoss();
-		
-	}
+	
 }
 
 void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
