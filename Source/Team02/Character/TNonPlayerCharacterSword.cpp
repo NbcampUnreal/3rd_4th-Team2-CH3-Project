@@ -214,9 +214,9 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 	}
 }
 
-void ATNonPlayerCharacterSword::HandleOnPostCharacterDead()
+/*void ATNonPlayerCharacterSword::HandleOnPostCharacterDead()
 {
 	Super::HandleOnPostCharacterDead();
-}
+}*/
 
 

@@ -25,7 +25,7 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	virtual void HandleOnPostCharacterDead() override;
+	virtual void HandleOnPostCharacterDead_Implementation() override;
 
 	UFUNCTION()
 	void RequestRespawn();

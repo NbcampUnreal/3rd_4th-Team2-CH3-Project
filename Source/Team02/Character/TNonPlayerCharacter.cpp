@@ -109,7 +109,6 @@ float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 		ATAIController* AIController = Cast<ATAIController>(GetController());
 		if (IsValid(AIController) == true)
 		{
-			SwordNPCIsDead = true;
 			AIController->EndAI();
 			CurrentRifle->SetLifeSpan(0.7f);
 		}
@@ -130,7 +129,7 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 	}
 }
 
-void ATNonPlayerCharacter::HandleOnPostCharacterDead()
+void ATNonPlayerCharacter::HandleOnPostCharacterDead_Implementation()
 {
 	Super::HandleOnPostCharacterDead();
 	
