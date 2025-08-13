@@ -82,26 +82,26 @@ void ATPlayerCharacter::Tick(float DeltaSeconds)
 
   const FVector Velocity = GetVelocity();
   
-  if (Velocity.SizeSquared() > KINDA_SMALL_NUMBER)
-  {
-    const FVector ForwardVector = GetActorForwardVector();
-    const FVector RightVector = GetActorRightVector();
-    
-    const float ForwardValue = FVector::DotProduct(Velocity.GetSafeNormal(), ForwardVector);
-    const float RightValue = FVector::DotProduct(Velocity.GetSafeNormal(), RightVector);
-
-    bIsMovingForward = ForwardValue > 0.5f;
-    bIsMovingBackward = ForwardValue < -0.5f;
-    bIsMovingRight = RightValue > 0.5f;
-    bIsMovingLeft = RightValue < -0.5f;
-  }
-  else
-  {
-    bIsMovingForward = false;
-    bIsMovingBackward = false;
-    bIsMovingRight = false;
-    bIsMovingLeft = false;
-  }
+  // if (Velocity.SizeSquared() > KINDA_SMALL_NUMBER)
+  // {
+  //   const FVector ForwardVector = GetActorForwardVector();
+  //   const FVector RightVector = GetActorRightVector();
+  //   
+  //   const float ForwardValue = FVector::DotProduct(Velocity.GetSafeNormal(), ForwardVector);
+  //   const float RightValue = FVector::DotProduct(Velocity.GetSafeNormal(), RightVector);
+  //
+  //   bIsMovingForward = ForwardValue > 0.5f;
+  //   bIsMovingBackward = ForwardValue < -0.5f;
+  //   bIsMovingRight = RightValue > 0.5f;
+  //   bIsMovingLeft = RightValue < -0.5f;
+  // }
+  // else
+  // {
+  //   bIsMovingForward = false;
+  //   bIsMovingBackward = false;
+  //   bIsMovingRight = false;
+  //   bIsMovingLeft = false;
+  // }
 }
 
 void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

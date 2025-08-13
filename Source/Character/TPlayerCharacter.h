@@ -33,17 +33,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
-	bool bIsMovingForward = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
-	bool bIsMovingBackward = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
-	bool bIsMovingLeft = false;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
-	bool bIsMovingRight = false;
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
+	// bool bIsMovingForward = false;
+	//
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
+	// bool bIsMovingBackward = false;
+	//
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
+	// bool bIsMovingLeft = false;
+	//
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation");
+	// bool bIsMovingRight = false;
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
