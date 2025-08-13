@@ -34,6 +34,9 @@ protected:
 
 	virtual void HandleOnPostCharacterDead() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float AttackDamage;
+
 public: 
 	
 	bool bIsNowAttacking;

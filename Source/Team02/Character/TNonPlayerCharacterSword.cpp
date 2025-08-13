@@ -18,7 +18,7 @@ FAutoConsoleVariableRef CVarSwordAttackSwordDebug(
 	);
 
 ATNonPlayerCharacterSword::ATNonPlayerCharacterSword()
-	: bIsNowAttacking(false)
+	: bIsNowAttacking(false), bSwordNPCIsDead(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	//건 npc 컨트롤 가져오기
@@ -33,6 +33,8 @@ void ATNonPlayerCharacterSword::BeginPlay()
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
+		AttackDamage = 5.f;
+		
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -114,6 +116,7 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 		if (IsValid(AIController) == true)
 		{
 			AIController->EndAI();
+			bSwordNPCIsDead = true;
 			CurrentSword->SetLifeSpan(1.1f);
 		}
 	}
@@ -155,19 +158,28 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 
 	if (true == bResult)
 	{
+
+		TArray<AActor*> DamagedActors;
+		
 		if (HitResults.IsEmpty() == false)
 		{
 			for (FHitResult HitResult : HitResults)
 			{
 				if (IsValid(HitResult.GetActor()) == true)
 				{
-					FDamageEvent DamageEvent;
-					HitResult.GetActor()->TakeDamage(
-						10.f,
-						DamageEvent,
-						GetController(),
-						this
-						);
+					
+					if (DamagedActors.Contains(HitResult.GetActor()) == false)
+					{
+						FDamageEvent DamageEvent;
+						HitResult.GetActor()->TakeDamage(
+							5.f,
+							DamageEvent,
+							GetController(),
+							this
+							);
+					}
+
+					DamagedActors.Add(HitResult.GetActor());
 					
 					if (1 == SwordAttackSwordDebug)
 					{

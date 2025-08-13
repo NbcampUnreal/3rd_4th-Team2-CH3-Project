@@ -32,8 +32,8 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 			{
 				//중심점
 				FVector CenterPosition = NPC->GetActorLocation();
-				float DetectRadius = 1300.0f;
-				float VisionAngle = 80.0f;
+				float DetectRadius = 3000.0f;
+				float VisionAngle = 100.0f;
 				
 				//시야 시작 위치
 				const FVector ConeOrigin = NPC->GetMesh()->GetSocketLocation("head");
@@ -196,12 +196,7 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 			{
 				//중심점
 				FVector CenterPosition = NPC->GetActorLocation();
-				float DetectRadius = 1300.0f;
-				float VisionAngle = 90.0f;
-				
-				//시야 시작 위치
-				const FVector ConeOrigin = NPC->GetMesh()->GetSocketLocation("head");
-				const FVector ForwardVector = NPC->GetActorForwardVector();
+				float DetectRadius = 900.0f;
 				
 				TArray<FOverlapResult> OverlapResults;
 				FCollisionQueryParams CollisionQueryParams(NAME_None, false, NPC);
@@ -209,7 +204,7 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 				// 시야
 				bool bResult = World->OverlapMultiByChannel(
 					OverlapResults,
-					ConeOrigin,
+					CenterPosition,
 					FQuat::Identity,
 					ECollisionChannel::ECC_GameTraceChannel12,
 					FCollisionShape::MakeSphere(DetectRadius),
@@ -225,54 +220,40 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 						
 						if (IsValid(PC) == true && PC->GetController()->IsPlayerController() == true)
 						{
-							
-							FVector DirectionToTarget = (PC->GetActorLocation() - ConeOrigin).GetSafeNormal();
-							//내적 구하기
-							float DotProduct = FVector::DotProduct(ForwardVector, DirectionToTarget);
-							//시야각의 절반에 해당하는 코사인 값 계산
-							float AngleThreshold = FMath::Cos(FMath::DegreesToRadians(VisionAngle / 2.0f));
+							//장애물 시야
+							FHitResult HitResult;
 
-							if (DotProduct >= AngleThreshold)
+							FCollisionQueryParams LineTraceQueryParams;
+							LineTraceQueryParams.AddIgnoredActor(NPC);
+							LineTraceQueryParams.AddIgnoredActor(PC);
+
+							bool bHit = World->LineTraceSingleByChannel(
+							HitResult,
+							CenterPosition,
+							PC->GetActorLocation(),
+							ECollisionChannel::ECC_Visibility,
+							LineTraceQueryParams
+							);
+
+							if (!bHit)
 							{
-								//장애물 시야
-								FHitResult HitResult;
-
-								FCollisionQueryParams LineTraceQueryParams;
-								LineTraceQueryParams.AddIgnoredActor(NPC);
-								LineTraceQueryParams.AddIgnoredActor(PC);
-
-								bool bHit = World->LineTraceSingleByChannel(
-								HitResult,
-								ConeOrigin,
-								PC->GetActorLocation(),
-								ECollisionChannel::ECC_Visibility,
-								LineTraceQueryParams
-								);
-
-								if (!bHit)
-								{
-									//시야에 플레이어가 오버랩되면
-									OwnerComp.GetBlackboardComponent()->SetValueAsObject(ATSwordAIController::SwordNPCTargetCharacterKey, PC);
-								}
-								
+								//시야에 플레이어가 오버랩되면
+								OwnerComp.GetBlackboardComponent()->SetValueAsObject(ATSwordAIController::SwordNPCTargetCharacterKey, PC);
 							}
+							
 							
 							//디버깅용
 							if (ATSwordAIController::ShowSwordAIDebug == 1)
 							{
 
-								DrawDebugCone(
+								DrawDebugSphere(
 								World,
-								ConeOrigin,
-								ForwardVector,
+								CenterPosition,
 								DetectRadius,
-								FMath::DegreesToRadians(VisionAngle / 2.0f),
-								FMath::DegreesToRadians(VisionAngle / 2.0f),
-								12,
+								16,
 								FColor::Red,
 								false,
-								0.5f,
-								3.0f
+								0.5f
 								);
 
 								DrawDebugPoint(
@@ -306,18 +287,14 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 							if (ATSwordAIController::ShowSwordAIDebug == 1)
 							{
 								
-								DrawDebugCone(
+								DrawDebugSphere(
 								World,
-								ConeOrigin,
-								ForwardVector,
+								CenterPosition,
 								DetectRadius,
-								FMath::DegreesToRadians(VisionAngle / 2.0f),
-								FMath::DegreesToRadians(VisionAngle / 2.0f),
-								12,
+								16,
 								FColor::Green,
 								false,
-								0.5f,
-								3.0f
+								0.5f
 								);
 							}
 						}
@@ -332,18 +309,14 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 				if (ATSwordAIController::ShowSwordAIDebug == 1)
 				{
 
-					DrawDebugCone(
+					DrawDebugSphere(
 					World,
-					ConeOrigin,
-					ForwardVector,
+					CenterPosition,
 					DetectRadius,
-					FMath::DegreesToRadians(VisionAngle / 2.0f),
-					FMath::DegreesToRadians(VisionAngle / 2.0f),
-					12,
+					16,
 					FColor::Green,
 					false,
-					0.5f,
-					3.0f
+					0.5f
 					);
 				}
 			}

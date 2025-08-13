@@ -7,7 +7,7 @@
 #include "TAIBossMonster/TBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-const float UBTDecorator_IsInGunAttackRange::AttackRange(1500.f);
+const float UBTDecorator_IsInGunAttackRange::AttackRange(2000.f);
 
 UBTDecorator_IsInGunAttackRange::UBTDecorator_IsInGunAttackRange()
 {
@@ -20,7 +20,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 	checkf(bResult == true, TEXT("Super::CalculateRawConditionValue() function has returned false."));
 
 	ATAIController* AIController1 = Cast<ATAIController>(OwnerComp.GetAIOwner());
-	ATBossAIController* AIController2 = Cast<ATBossAIController>(OwnerComp.GetAIOwner());
+	/*ATBossAIController* AIController2 = Cast<ATBossAIController>(OwnerComp.GetAIOwner());*/
 	ATSwordAIController* AIController3 = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
 	
 	
@@ -41,7 +41,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		}
 	}
 
-	if (IsValid(AIController2) == true)
+	/*if (IsValid(AIController2) == true)
 	{
 
 		ATAIBossMonster* NPC = Cast<ATAIBossMonster>(AIController2->GetPawn());
@@ -52,7 +52,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		{
 			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1200);
 		}
-	}
+	}*/
 
 	if (IsValid(AIController3) == true)
 	{
@@ -63,7 +63,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		ATCharacterBase* TargetPlayerCharacter = Cast<ATCharacterBase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ATBossAIController::TargetCharacterKey));
 		if (IsValid(TargetPlayerCharacter)==true && TargetPlayerCharacter->IsPlayerControlled()==true)
 		{
-			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1300);
+			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1800);
 		}
 	}
 

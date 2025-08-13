@@ -34,6 +34,8 @@ void ATNonPlayerCharacter::BeginPlay()
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
+		AttackDamage = 5.f;
+		
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -171,7 +173,7 @@ void ATNonPlayerCharacter::HandleOnCheckHit()
 			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Hit Actor Name: %s"), *HitResult.GetActor()->GetName()));
 			FDamageEvent DamageEvent;
 			HittedCharacter->TakeDamage(
-				10.f,
+				AttackDamage,
 				DamageEvent,
 				GetController(),
 				this
