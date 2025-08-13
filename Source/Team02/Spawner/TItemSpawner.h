@@ -9,6 +9,8 @@
 class ATItemBase;
 class UBoxComponent;
 class UStaticMeshComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class TEAM02_API ATItemSpawner : public AActor
@@ -39,10 +41,29 @@ public:
 	// 스폰 지역(박스)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	UBoxComponent* SpawnArea;
+	
 	ATItemBase* SpawnedItem;
+
+
+	// 에디터에서 NS_RingCooldown 지정
+	UPROPERTY(EditDefaultsOnly, Category="FX|Ring")
+	UNiagaraSystem* RingCooldownSystem = nullptr;
+
+	// 런타임에 붙일 컴포넌트
+	UPROPERTY(VisibleAnywhere, Category="FX|Ring")
+	UNiagaraComponent* RingFX = nullptr;
+
+	// (선택) 반지름/두께를 User 파라미터로 넘기고 싶다면 이름 고정
+	UPROPERTY(EditAnywhere, Category="FX|Ring")
+	FName ParamCooldown = TEXT("User.Cooldown");   // Lifetime
+	
+	// === 제어 함수 ===
+	void StartCooldownFX(float InSeconds);
+	void StopCooldownFX();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 
 	
 
