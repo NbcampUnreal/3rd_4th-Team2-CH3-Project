@@ -37,6 +37,7 @@ void ATCharacterBase::BeginPlay()
 	if (IsValid(AnimInstance) == true)
 	{
 		AnimInstance->OnPostDead.AddDynamic(this, &ThisClass::HandleOnPostCharacterDead);
+		AnimInstance->OnBeginDissolve.AddDynamic(this, &ThisClass::BeginPlayDissolve);
 	}
 }
 
@@ -162,5 +163,4 @@ void ATCharacterBase::HandleOnPostCharacterDead()
 {
 	SetLifeSpan(0.1f);
 }
-
 

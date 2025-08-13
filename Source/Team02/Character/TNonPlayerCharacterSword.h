@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<AActor> CurrentSword;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float AttackDamage;
+
 public: 
 	static int32 SwordAttackSwordDebug;
 	
@@ -60,4 +63,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackSwordRadius = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bSwordNPCIsDead;
 };
