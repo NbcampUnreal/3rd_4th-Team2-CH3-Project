@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Item/TWeaponBase.h"
 #include "TRifle.generated.h"
-class USphereComponent;
-class UBoxComponent;
 UCLASS()
 class TEAM02_API ATRifle : public ATWeaponBase
 {

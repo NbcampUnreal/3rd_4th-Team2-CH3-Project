@@ -7,12 +7,13 @@
 ATRifle:: ATRifle()
 {
 	Damage = 15;
-	MaxAmmo = 30;
-	TotalAmmo = 50;
-	CurrentAmmo = 30;
-	FireRate = 0.2f;
-	ReloadTime = 1.5f;
-	Range = 600.0f;
+	SetTotalAmmo(99999999);
+	MaxAmmo = 7;
+	CurrentAmmo = 7;
+	
+	FireRate = 4.0f;
+	ReloadTime = 2.0f;
+	Range = 200.0f;
 }
 
 

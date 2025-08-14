@@ -47,7 +47,7 @@ public:
 
 	// 총 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
-	int32 MaxTotalAmmo = 180;
+	int32 MaxTotalAmmo = 9999999;
 
 	//장전할 수 있는 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
