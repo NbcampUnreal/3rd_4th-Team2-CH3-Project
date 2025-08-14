@@ -159,7 +159,8 @@ void UTUIManager::UpdatePlayerAmmo()
 {
 	if (PlayerUIWidget && CurrentWeapon)
 	{
-		PlayerUIWidget->UpdateAmmoInfo(CurrentWeapon->GetCurrentAmmo(),CurrentWeapon->GetTotalAmmo());
+		PlayerUIWidget->UpdateAmmoInfo(
+			CurrentWeapon->GetCurrentAmmo(),CurrentWeapon->GetTotalAmmo());
 	}
 }
 

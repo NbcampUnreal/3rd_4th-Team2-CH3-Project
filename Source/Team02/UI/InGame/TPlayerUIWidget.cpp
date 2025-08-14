@@ -22,12 +22,25 @@ void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 	}
 }
 
-void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 MaxAmmo)
+void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 TotalAmmo)
 {
 	if (AmmoText)
 	{
-		FString AmmoString=FString::Printf(TEXT("%d/%d"),CurrentAmmo,MaxAmmo);
+		FString AmmoString;
+
+		//total ammo가 매우 큰값이면 무한대표시
+		if (TotalAmmo>=999)
+		{
+			AmmoString = FString::Printf(TEXT("%d/∞"), CurrentAmmo);
+		}
+		else
+		{
+			//일반적인 경우 (제한된 탄창)
+			AmmoString=FString::Printf(TEXT("%d/%d"),CurrentAmmo,TotalAmmo);
+		}
+
 		AmmoText->SetText(FText::FromString(AmmoString));
+		
 	}
 }
 
