@@ -9,7 +9,6 @@ ATShotgun::ATShotgun()
 	Damage = 60;
 	MaxAmmo = 7;
 	SetTotalAmmo(99999999);
-	TotalAmmo = 30;
 	CurrentAmmo = 7;
 	FireRate = 1.2f;
 	ReloadTime = 1.5f;

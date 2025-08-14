@@ -85,9 +85,7 @@ void ATItemSpawner::StopCooldownFX()
 void ATItemSpawner::TrySpawnItem()
 {
 	if (IsValid(SpawnedItem)) return;
-	SpawnDebugCount++;
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow,
-		FString::Printf(TEXT("TrySpawnItem 호출 횟수: %d"), SpawnDebugCount));
+	
 
 	// 2. 스폰 위치/회전 (예시: BoxComponent 중심)
 	FVector Location = SpawnArea->GetComponentLocation();
@@ -103,7 +101,6 @@ void ATItemSpawner::TrySpawnItem()
 	SpawnedItem = GetWorld()->SpawnActor<ATItemBase>(ItemClass, Location, Rotation, Params);
 	if (SpawnedItem)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("OnDestroyed 바인딩!"));
 		SpawnedItem->OnDestroyed.AddDynamic(this, &ATItemSpawner::OnItemDestroyed);
 	}
 	

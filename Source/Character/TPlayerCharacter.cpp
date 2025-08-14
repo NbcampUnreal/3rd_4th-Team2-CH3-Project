@@ -209,9 +209,7 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
   {
     CurrentWeapon->Reload();
 
-    // 무기 타입 문자열 출력
-    FString Msg = FString::Printf(TEXT("Current Weapon: %s"), *CurrentWeapon->GetWeaponTypeString());
-    UKismetSystemLibrary::PrintString(this, Msg);
+    
   }
 }
 
