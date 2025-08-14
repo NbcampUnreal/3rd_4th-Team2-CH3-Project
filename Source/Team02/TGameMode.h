@@ -19,6 +19,9 @@ class TEAM02_API ATGameMode : public AGameMode
 public:
 	ATGameMode();
 
+	// 게임 재시작 함수 오버라이드 (UFUNCTION 매크로 제거)
+	virtual void RestartGame() override;
+
 	virtual void BeginPlay() override;
 	// 웨이브 관련
 	UPROPERTY(BlueprintReadOnly, Category="Wave")
@@ -60,7 +63,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
-	
+	// Blueprint에서 호출할 수 있는 별도 함수
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void RestartGameFromUI();
 	
 	//AI 컨트롤러를 베열에 추가하는 함수
 	void RegisterAIController(ATAIController* AIController);
@@ -78,4 +83,9 @@ public:
 
 	UPROPERTY()
 	TArray<TObjectPtr<ATSwordAIController>> SwordAIControllers;
+
+private:
+	// 게임 상태 초기화 함수들
+	void InitializeGameState();
+	void InitializeUIManager();
 };
