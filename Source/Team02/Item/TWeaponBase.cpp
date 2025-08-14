@@ -106,24 +106,7 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
     // 5) 쿨타임/탄약
     bCanFire = false;
     GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATWeaponBase::ResetCanFire, FireRate, false); //:contentReference[oaicite:4]{index=4}
-    SetCurrentAmmo(GetCurrentAmmo() - 1); 
-
- 	/*// 카메라선(빨강) — 얇게
-	DrawDebugLine(GetWorld(), CamLoc, bCamHit ? CamHit.ImpactPoint : CamEnd,
-				  FColor::Red,  false, /*Life#1#0.35f, /*Depth#1#0, /*Thickness#1#0.6f);
-
-	// 머즐→사거리(파랑) — 얇게
-	DrawDebugLine(GetWorld(), Start, TraceEnd,
-				  FColor::Blue, false, 0.35f, 0, 0.6f);
-
-	// 히트 지점(노랑) — 구체 반지름도 축소
-	DrawDebugSphere(GetWorld(), bHit ? HitResult.ImpactPoint : TraceEnd,
-					/*Radius#1#4.f, /*Segments#1#10, FColor::Yellow,
-					false, 0.35f);*/
-    // --- (디버그 원하면 주석 해제) ---
-    // DrawDebugLine(GetWorld(), CamLoc, AimPoint, FColor::Red,   false, 1.5f, 0, 2.f);  // 카메라선
-    // DrawDebugLine(GetWorld(), Start,  FinalPoint, FColor::Blue, false, 1.5f, 0, 2.f);  // 머즐선(판정/이펙트와 동일)
-    // DrawDebugSphere(GetWorld(), FinalPoint, 6.f, 12, FColor::Yellow, false, 1.5f);
+    SetCurrentAmmo(GetCurrentAmmo() - 1);
 }
 
 void ATWeaponBase::Reload()

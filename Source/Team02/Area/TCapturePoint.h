@@ -81,6 +81,12 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	);
+	UPROPERTY()
+	TSet<TWeakObjectPtr<AActor>> EnemiesInArea;
+
+	UFUNCTION()
+	void OnOverlappingEnemyDestroyed(AActor* DestroyedActor);
+
 
 	void DestroyAssignedMeshesIfNeeded();
 	

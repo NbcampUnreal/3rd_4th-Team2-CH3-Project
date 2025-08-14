@@ -100,42 +100,68 @@ void ATCapturePoint::DestroyAssignedMeshesIfNeeded()
 	}
 }
 
-void ATCapturePoint::OnOverlapBegin(
-	UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
+void ATCapturePoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+									AActor* OtherActor,
+									UPrimitiveComponent* OtherComp,
+									int32 OtherBodyIndex,
+									bool bFromSweep,
+									const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->ActorHasTag(TEXT("Player")))
+	if (!OtherActor || OtherActor == this) return;
+
+	if (OtherActor->ActorHasTag(TEXT("Enemy")))
+	{
+		// 동일 액터의 여러 컴포넌트가 겹쳐도 한 번만 추가됨
+		if (!EnemiesInArea.Contains(OtherActor))
+		{
+			EnemiesInArea.Add(OtherActor);
+
+			// 죽어서 사라질 때 EndOverlap이 안 올 수 있으니 안전장치
+			OtherActor->OnDestroyed.AddDynamic(this, &ATCapturePoint::OnOverlappingEnemyDestroyed);
+		}
+
+		bEnemyInArea = EnemiesInArea.Num() > 0;
+		return;
+	}
+
+	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		bPlayerInArea = true;
-
 		// 웨이브 시작 (최초 진입 때만, 혹은 조건에 따라 한 번만)
 		if (GM && !GM->bIsWaveActive)   // 이미 웨이브 중이면 패스
 		{
 			GM->OnZoneOverlap(ZoneIndex);  
 		}
-	}
-	else if (OtherActor->ActorHasTag(TEXT("Enemy")))
-	{
-		bEnemyInArea = true; // << 적이 들어오면 true
+		return;
 	}
 }
 
-void ATCapturePoint::OnOverlapEnd(
-	UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
+void ATCapturePoint::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
+								  AActor* OtherActor,
+								  UPrimitiveComponent* OtherComp,
+								  int32 OtherBodyIndex)
 {
+	if (!OtherActor || OtherActor == this) return;
+
+	if (OtherActor->ActorHasTag(TEXT("Enemy")))
+	{
+		// 깔끔하게 파괴 델리게이트도 해제(선택)
+		OtherActor->OnDestroyed.RemoveDynamic(this, &ATCapturePoint::OnOverlappingEnemyDestroyed);
+
+		EnemiesInArea.Remove(OtherActor);
+		bEnemyInArea = EnemiesInArea.Num() > 0;
+		return;
+	}
+
 	if (OtherActor->ActorHasTag(TEXT("Player")))
 	{
 		bPlayerInArea = false;
+		return;
 	}
-	else if (OtherActor->ActorHasTag(TEXT("Enemy")))
-	{
-		bEnemyInArea = false; // << 적이 나가면 false
-	}
+}
+
+void ATCapturePoint::OnOverlappingEnemyDestroyed(AActor* DestroyedActor)
+{
+	EnemiesInArea.Remove(DestroyedActor);
+	bEnemyInArea = EnemiesInArea.Num() > 0;
 }
