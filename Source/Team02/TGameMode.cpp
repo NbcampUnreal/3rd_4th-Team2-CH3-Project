@@ -32,6 +32,9 @@ ATGameMode::ATGameMode()
 void ATGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 게임 시작 시 항상 모든 상태 초기화
+	InitializeGameState();
 	
 	EnemySpawners.Empty();
 	for (AActor* Actor : FoundActors)
@@ -42,7 +45,63 @@ void ATGameMode::BeginPlay()
 		}
 	}
 
+	// UIManager 초기화 (지연 호출)
+	FTimerHandle UIInitTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		UIInitTimer,
+		this,
+		&ATGameMode::InitializeUIManager,
+		1.0f, // 1초 지연
+		false
+	);
+}
+
+// 게임 상태 초기화
+void ATGameMode::InitializeGameState()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Initializing Game State..."));
 	
+	// GameMode 상태 초기화
+	CurrentWave = 0;
+	MaxWave = 1;
+	bIsWaveActive = false;
+	WaveIndex = 0;
+	LastCapturedPoint = nullptr;
+	
+	// AI Controller 배열 초기화
+	AIControllers.Empty();
+	SwordAIControllers.Empty();
+	
+	// 모든 Enemy Spawner 비활성화
+	for (ATEnemySpawner* Spawner : EnemySpawners)
+	{
+		if (IsValid(Spawner))
+		{
+			Spawner->SetSpawnerActive(false);
+		}
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Game State Initialized!"));
+}
+
+// UIManager 초기화
+void ATGameMode::InitializeUIManager()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Initializing UIManager..."));
+	
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		UTUIManager* UIManager = GI->GetSubsystem<UTUIManager>();
+		if (UIManager)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UIManager found, calling RestartGameUI()"));
+			UIManager->RestartGameUI();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UIManager not found during initialization!"));
+		}
+	}
 }
 
 void ATGameMode::RegisterAIController(ATAIController* AIController)
@@ -173,33 +232,6 @@ void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 	
 }
 
-// void ATGameMode::RespawnPlayer(AController* DeadController)
-// {
-// 	if (LastCapturedPoint)
-// 	{
-// 		// 1. 현재 Pawn 제거
-// 		if (APawn* Pawn = DeadController->GetPawn())
-// 		{
-// 			Pawn->Destroy();
-// 		}
-//
-// 		// 2. Respawn 위치 세팅
-// 		FTransform RespawnTransform = LastCapturedPoint->RespawnTransform;
-//
-// 		// 3. 새로운 Pawn(캐릭터) 스폰
-// 		APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
-//
-// 		// 4. 컨트롤러가 새 Pawn을 Possess
-// 		DeadController->Possess(NewPawn);
-// 	}
-// 	else
-// 	{
-// 		// 디폴트 리스폰 (예: 맵 시작 위치)
-// 		RestartPlayer(DeadController);
-// 	}
-// }
-
-// 플레이어 리스폰
 // 플레이어 리스폰
 void ATGameMode::RespawnPlayer(AController* DeadController)
 {

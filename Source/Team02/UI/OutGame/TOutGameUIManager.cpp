@@ -5,6 +5,8 @@
 #include "Engine/GameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"    
 
 AOutGameUIManager::AOutGameUIManager()
 {
@@ -21,7 +23,7 @@ void AOutGameUIManager::BeginPlay()
     // UIManager 이벤트 구독
     SubscribeToUIManagerEvents();
 
-    // ⭐ 지연된 이벤트 구독 (UIManager가 완전히 초기화된 후)
+    // 지연된 이벤트 구독 (UIManager가 완전히 초기화된 후)
     FTimerHandle DelayedSubscribeTimer;
     GetWorld()->GetTimerManager().SetTimer(
         DelayedSubscribeTimer,
@@ -200,4 +202,18 @@ void AOutGameUIManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
     ResetUIAndState();
     
     Super::EndPlay(EndPlayReason);
+}
+
+// Quit 버튼용 함수
+void AOutGameUIManager::QuitToMainMenu()
+{
+    UE_LOG(LogTemp, Warning, TEXT("OutGameUIManager: Quit to main menu requested"));
+    
+    // 현재 레벨 이름 저장 (다시 시작할 때 사용)
+    FString CurrentLevelName = GetWorld()->GetMapName();
+    CurrentLevelName = FPackageName::GetShortName(CurrentLevelName);
+    
+    // 메인 메뉴로 이동
+    UGameplayStatics::OpenLevel(GetWorld(), TEXT("MenuLevel"));
+    
 }

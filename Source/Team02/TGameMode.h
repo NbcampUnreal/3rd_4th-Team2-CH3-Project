@@ -83,4 +83,9 @@ public:
 
 	UPROPERTY()
 	TArray<TObjectPtr<ATSwordAIController>> SwordAIControllers;
+
+private:
+	// 게임 상태 초기화 함수들
+	void InitializeGameState();
+	void InitializeUIManager();
 };
