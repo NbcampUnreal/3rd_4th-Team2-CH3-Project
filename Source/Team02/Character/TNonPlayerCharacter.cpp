@@ -34,7 +34,7 @@ void ATNonPlayerCharacter::BeginPlay()
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
-		AttackDamage = 5.f;
+		AttackDamage = 2.f;
 		SwordNPCIsDead = false;
 		
 		//NPC의 회전 부드러움 적용
@@ -111,6 +111,25 @@ float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 		{
 			AIController->EndAI();
 			CurrentRifle->SetLifeSpan(0.7f);
+		}
+	}
+	else
+	{
+		ATAIController* AIController = Cast<ATAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			if (IsValid(HurtSound) == true)
+			{
+				//피격시 사운드 재생
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					HurtSound,
+					GetActorLocation(),
+					1.0f,
+					1.0f,
+					0.f,
+					HurtSoundAttenuation);
+			}
 		}
 	}
 	

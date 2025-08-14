@@ -35,6 +35,12 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<AActor> CurrentSword;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	TObjectPtr<USoundBase> HurtSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	TObjectPtr<USoundAttenuation> HurtSoundAttenuation;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float AttackDamage;
 
