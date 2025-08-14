@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Team02.h"
 
+
 int32 ATNonPlayerCharacterSword::SwordAttackSwordDebug = 0;
 
 FAutoConsoleVariableRef CVarSwordAttackSwordDebug(
