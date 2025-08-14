@@ -361,7 +361,6 @@ void UTUIManager::UpdateMissionProgress()
 	UpdateMissionState();
 }
 
-// TUIManager.cpp의 UpdateMissionState() 함수를 이것으로 교체하세요
 
 void UTUIManager::UpdateMissionState()
 {
@@ -405,7 +404,7 @@ void UTUIManager::UpdateMissionState()
     // 두 번째 무기 습득 단계 (첫 번째 무기 습득 후, 2거점 가기 전)
     else if (bWeaponPickedUp && !bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
     {
-        NewObjective = TEXT("Get Rifle");  // 새로 추가
+        NewObjective = TEXT("Get RailGun");  // 새로 추가
     }
     // 첫 번째 무기 습득 단계 (1거점 완료 후)
     else if (bFirstCaptureCompleted && !bWeaponPickedUp)
