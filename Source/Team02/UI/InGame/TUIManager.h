@@ -98,8 +98,8 @@ public:
 	void UnlockWeapon();
 
 	//게임 리스폰, 리스타트 UI 함수
-	UFUNCTION(BlueprintCallable)
-	void RespawnGameUI();
+	// UFUNCTION(BlueprintCallable)
+	// void RespawnGameUI();
 	
 	UFUNCTION(BlueprintCallable)
 	void RestartGameUI();

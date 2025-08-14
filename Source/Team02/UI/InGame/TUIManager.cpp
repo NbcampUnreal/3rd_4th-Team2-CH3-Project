@@ -847,62 +847,62 @@ void UTUIManager::UpdateAllUI()
     }
 }
 
-void UTUIManager::RespawnGameUI()
-{
-	UE_LOG(LogTemp, Warning, TEXT("🔄 Player Respawning - Updating UI..."));
-
-	//리스폰 시에는 게임 진행상황은 유지, 플레이어 관련만 초기화
-
-	if (PlayerUIWidget)
-	{
-		//플레이어 HP 초기화 (최대 HP로 복구)
-		if (PlayerCharacter)
-		{
-			float MaxHP=PlayerCharacter->GetMaxHP();
-			PlayerUIWidget->UpdateHPBar(MaxHP,MaxHP);
-		}
-		
-		// 무기 정보 갱신 (현재 무기 상태 반영)
-		if (ATPlayerCharacter* PC=Cast<ATPlayerCharacter>(PlayerCharacter))
-		{
-			CurrentWeapon=PC->CurrentWeapon;
-			if (CurrentWeapon)
-			{
-				//탄약 정보 업데이트
-				PlayerUIWidget->UpdateAmmoInfo(CurrentWeapon->GetCurrentAmmo(),CurrentWeapon->GetTotalAmmo());
-
-				//무기 이름 업데이트
-				FString WeaponName=CurrentWeapon->GetWeaponTypeString();
-				PlayerUIWidget->UpdateWeaponName(WeaponName);
-
-				//test log
-				UE_LOG(LogTemp,Warning,TEXT("Weapon info updated: %s"),*WeaponName);
-				
-			}
-		}
-
-		// 점령 UI 상태 갱신 (플레이어가 죽기전에 거점 근처에 있엇다면)
-		if (CurrentCapturePoint && CurrentCapturePoint->bPlayerInArea)
-		{
-			ShowCaptureUI(CapturePointName);
-			float ProgressPercent=CurrentCapturePoint->CapturePercent/100.0f;
-			UpdateCaptureProgress(ProgressPercent);
-		}
-		else
-		{
-			HideCaptureUI();
-		}
-
-		//알람 UI 갱신
-		PlayerUIWidget->HideEnemyIncomingAlarm();
-	}
-
-	// 현재 미션 상태 재확인 (게임 진행상황에 맞게)
-	UpdateMissionState();
-
-	UE_LOG(LogTemp, Warning, TEXT("✅ Player Respawn UI Update Complete!"));
-	
-}
+// void UTUIManager::RespawnGameUI() // 시간 문제로 연결못함
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("🔄 Player Respawning - Updating UI..."));
+//
+// 	//리스폰 시에는 게임 진행상황은 유지, 플레이어 관련만 초기화
+//
+// 	if (PlayerUIWidget)
+// 	{
+// 		//플레이어 HP 초기화 (최대 HP로 복구)
+// 		if (PlayerCharacter)
+// 		{
+// 			float MaxHP=PlayerCharacter->GetMaxHP();
+// 			PlayerUIWidget->UpdateHPBar(MaxHP,MaxHP);
+// 		}
+// 		
+// 		// 무기 정보 갱신 (현재 무기 상태 반영)
+// 		if (ATPlayerCharacter* PC=Cast<ATPlayerCharacter>(PlayerCharacter))
+// 		{
+// 			CurrentWeapon=PC->CurrentWeapon;
+// 			if (CurrentWeapon)
+// 			{
+// 				//탄약 정보 업데이트
+// 				PlayerUIWidget->UpdateAmmoInfo(CurrentWeapon->GetCurrentAmmo(),CurrentWeapon->GetTotalAmmo());
+//
+// 				//무기 이름 업데이트
+// 				FString WeaponName=CurrentWeapon->GetWeaponTypeString();
+// 				PlayerUIWidget->UpdateWeaponName(WeaponName);
+//
+// 				//test log
+// 				UE_LOG(LogTemp,Warning,TEXT("Weapon info updated: %s"),*WeaponName);
+// 				
+// 			}
+// 		}
+//
+// 		// 점령 UI 상태 갱신 (플레이어가 죽기전에 거점 근처에 있엇다면)
+// 		if (CurrentCapturePoint && CurrentCapturePoint->bPlayerInArea)
+// 		{
+// 			ShowCaptureUI(CapturePointName);
+// 			float ProgressPercent=CurrentCapturePoint->CapturePercent/100.0f;
+// 			UpdateCaptureProgress(ProgressPercent);
+// 		}
+// 		else
+// 		{
+// 			HideCaptureUI();
+// 		}
+//
+// 		//알람 UI 갱신
+// 		PlayerUIWidget->HideEnemyIncomingAlarm();
+// 	}
+//
+// 	// 현재 미션 상태 재확인 (게임 진행상황에 맞게)
+// 	UpdateMissionState();
+//
+// 	UE_LOG(LogTemp, Warning, TEXT("✅ Player Respawn UI Update Complete!"));
+// 	
+// }
 
 
 void UTUIManager::RestartGameUI()
