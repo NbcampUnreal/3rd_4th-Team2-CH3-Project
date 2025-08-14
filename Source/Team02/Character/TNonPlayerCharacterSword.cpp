@@ -33,14 +33,14 @@ void ATNonPlayerCharacterSword::BeginPlay()
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
-		AttackDamage = 5.f;
+		AttackDamage = 3.f;
 		
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 
 		AttachWeapon();
 	}
@@ -120,6 +120,25 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 			CurrentSword->SetLifeSpan(1.1f);
 		}
 	}
+	else
+	{
+		ATSwordAIController* AIController = Cast<ATSwordAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			if (IsValid(HurtSound) == true)
+			{
+				//피격시 사운드 재생
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					HurtSound,
+					GetActorLocation(),
+					0.7f,
+					1.0f,
+					0.f,
+					HurtSoundAttenuation);
+			}
+		}
+	}
 	
 	return FinalDamageAmount;
 }
@@ -172,7 +191,7 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 					{
 						FDamageEvent DamageEvent;
 						HitResult.GetActor()->TakeDamage(
-							5.f,
+							AttackDamage,
 							DamageEvent,
 							GetController(),
 							this

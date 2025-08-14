@@ -29,10 +29,16 @@ protected:
 
 	virtual void EndAttack(UAnimMontage* InMontage, bool bIbterruped);
 
+	virtual void HandleOnPostCharacterDead() override;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<ATGunNPCWeapon> CurrentRifle;
 
-	virtual void HandleOnPostCharacterDead() override;
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	TObjectPtr<USoundBase> HurtSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	TObjectPtr<USoundAttenuation> HurtSoundAttenuation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float AttackDamage;
