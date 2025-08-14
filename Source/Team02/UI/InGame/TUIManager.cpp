@@ -15,6 +15,7 @@
 #include "Engine/Engine.h"
 #include "UnifiedBuffer.h"
 
+
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -135,10 +136,23 @@ void UTUIManager::SetPlayerCharacter(ATCharacterBase* PlayerChar)
 
 void UTUIManager::UpdatePlayerHP()
 {
-	if (PlayerUIWidget && PlayerCharacter)
+	//활성화된 플레이어 캐릭터 가져오기
+	if (APlayerController* PC=GetWorld()->GetFirstPlayerController())
 	{
-		PlayerUIWidget->UpdateHPBar(PlayerCharacter->GetCurrentHP(),PlayerCharacter->GetMaxHP());
+		if (APawn* CurrentPawn=PC->GetPawn())
+		{
+			if (ATPlayerCharacter*CurrentPlayer=Cast<ATPlayerCharacter>(CurrentPawn))
+			{
+				float CurrentHP=CurrentPlayer->GetCurrentHP();
+				float MaxHP=CurrentPlayer->GetMaxHP();
+				PlayerUIWidget->UpdateHPBar(CurrentHP,MaxHP);
+
+				return;
+			}
+		}
 	}
+	// 플레이어를 찾지 못했을 때
+	UE_LOG(LogTemp, Error, TEXT("❌ UpdatePlayerHP: No valid player found"));
 }
 
 void UTUIManager::UpdatePlayerAmmo()
@@ -550,6 +564,12 @@ void UTUIManager::UpdateMonsterStatus()
    
     if (!bWaveActive && !bWaveCompleted)
     {
+
+    	UE_LOG(LogTemp, Warning, TEXT("🔍 Checking wave start conditions:"));
+    	UE_LOG(LogTemp, Warning, TEXT("  bGameModeWaveActive: %s"), bGameModeWaveActive ? TEXT("YES") : TEXT("NO"));
+    	UE_LOG(LogTemp, Warning, TEXT("  bAnySpawnerActive: %s"), bAnySpawnerActive ? TEXT("YES") : TEXT("NO"));
+    	UE_LOG(LogTemp, Warning, TEXT("  CurrentMonsterCount: %d"), CurrentMonsterCount)
+    	
         // 조건 1: GameMode나 스포너에서 웨이브 시작
         // 조건 2: 필드에 몬스터가 있으면 즉시 시작 (새로 추가!)
         if (bGameModeWaveActive || bAnySpawnerActive || CurrentMonsterCount > 0)
@@ -667,8 +687,8 @@ void UTUIManager::FindAllMonstersInWorld()
 			if (Monster)
 			{
 				float HP = Monster->GetCurrentHP();
-				UE_LOG(LogTemp, Warning, TEXT("🔍 Found Monster: %s (HP: %.1f)"), 
-					   *Monster->GetName(), HP);
+				// UE_LOG(LogTemp, Warning, TEXT("🔍 Found Monster: %s (HP: %.1f)"), 
+				// 	   *Monster->GetName(), HP);
                 
 				if (HP > 0)
 				{
@@ -678,8 +698,8 @@ void UTUIManager::FindAllMonstersInWorld()
 			}
 		}
         
-		UE_LOG(LogTemp, Warning, TEXT("🔍 Monster Search Results: %d total found, %d alive"), 
-			   TotalFound, AliveCount);
+		// UE_LOG(LogTemp, Warning, TEXT("🔍 Monster Search Results: %d total found, %d alive"), 
+		// 	   TotalFound, AliveCount);
 	}
 }
 
@@ -887,7 +907,7 @@ void UTUIManager::RespawnGameUI()
 
 void UTUIManager::RestartGameUI()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Resetting Game UI..."));
+	UE_LOG(LogTemp,Error,TEXT("Resetting Game UI..."));
 
 	//미션 관련 변수 초기화
 	bWaveActive=false;
@@ -942,6 +962,62 @@ void UTUIManager::RestartGameUI()
 
 		// 알람 숨기기
 		PlayerUIWidget->HideEnemyIncomingAlarm();
+
+		// 🔧 실제 플레이어 정보로 업데이트
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			if (APawn* PlayerPawn = PC->GetPawn()) //지역변수명 다르게
+			{
+				if (ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(PlayerPawn))
+				{
+					// 실제 플레이어 체력으로 업데이트
+					float CurrentHealth = Player->GetCurrentHP();
+					float MaxHealth = Player->GetMaxHP();
+					PlayerUIWidget->UpdateHPBar(CurrentHealth, MaxHealth);
+            
+					UE_LOG(LogTemp, Warning, TEXT("🔧 Health updated from player: %.1f/%.1f"), 
+						   CurrentHealth, MaxHealth);
+
+					// 🔧 플레이어가 가진 무기 정보 업데이트
+					ATWeaponBase* PlayerWeapon = Player->GetCurrentWeapon();
+					if (PlayerWeapon)
+					{
+						// 무기 탄약 정보 업데이트
+						int32 CurrentAmmo = PlayerWeapon->GetCurrentAmmo();
+						int32 TotalAmmo = PlayerWeapon->GetTotalAmmo();
+						PlayerUIWidget->UpdateAmmoInfo(CurrentAmmo, TotalAmmo);
+                
+						// 무기 이름 업데이트
+						FString WeaponName = PlayerWeapon->GetWeaponTypeString();
+						PlayerUIWidget->UpdateWeaponName(WeaponName);
+                
+						UE_LOG(LogTemp, Warning, TEXT("🔧 Weapon updated: %s (%d/%d)"), 
+							   *WeaponName, CurrentAmmo, TotalAmmo);
+					}
+					else
+					{
+						// 무기가 없다면 기본값 (권총 7/100)
+						PlayerUIWidget->UpdateAmmoInfo(7, 100);
+						PlayerUIWidget->UpdateWeaponName(TEXT("Pistol"));
+						UE_LOG(LogTemp, Warning, TEXT("🔧 No weapon found, using default pistol (7/100)"));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("❌ Failed to cast to ATPlayerCharacter"));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("❌ PlayerPawn is NULL"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("❌ Failed to get PlayerController for UI update"));
+		}
+
+		
 	}
 
 	
@@ -952,18 +1028,31 @@ void UTUIManager::RestartGameUI()
 		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimerHandle);
 		GetWorld()->GetTimerManager().ClearTimer(HitDetectionTimer);
 
-		//모니터링 재시작
-		StartMonitoringMonsters();
-		StartHitDetection();
-
-		//UI업데이트 타이머 재시작
+		//잠시 지연후 재시작
+		FTimerHandle DelayTimer;
 		GetWorld()->GetTimerManager().SetTimer(
-			UIUpdateTimerHandle,
-			this,
-			&UTUIManager::UpdateAllUI,
+			DelayTimer,
+			[this]()
+			{
+				//모니터링 재시작
+		          StartMonitoringMonsters();
+		           StartHitDetection();
+
+		           //UI업데이트 타이머 재시작
+		          GetWorld()->GetTimerManager().SetTimer(
+			      UIUpdateTimerHandle,
+			      this,
+			       &UTUIManager::UpdateAllUI,
 			0.1f,
 			true
 			);
+				UE_LOG(LogTemp, Warning, TEXT("✅ Monitoring systems restarted after delay"));
+			},
+			0.5f,
+			false
+			);
+
+		
 	}
 
 	//스포너 재등록 및 웨이브 정보 업데이트

@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
 
 class ATCharacterBase;
+class ATPlayerCharacter;
 class ATWeaponBase;
 class ATAIBossMonster;
 class ATGameMode;
