@@ -125,7 +125,7 @@ float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 					this,
 					HurtSound,
 					GetActorLocation(),
-					1.0f,
+					0.8f,
 					1.0f,
 					0.f,
 					HurtSoundAttenuation);
