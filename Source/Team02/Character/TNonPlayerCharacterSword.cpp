@@ -132,7 +132,7 @@ float ATNonPlayerCharacterSword::TakeDamage(float DamageAmount, FDamageEvent con
 					this,
 					HurtSound,
 					GetActorLocation(),
-					1.0f,
+					0.7f,
 					1.0f,
 					0.f,
 					HurtSoundAttenuation);
