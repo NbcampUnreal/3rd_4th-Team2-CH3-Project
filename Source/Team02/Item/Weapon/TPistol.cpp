@@ -7,7 +7,7 @@
 ATPistol::ATPistol()
 {
 	Damage = 15;
-	SetTotalAmmo(100);
+	SetTotalAmmo(99999999);
 	MaxAmmo = 7;
 	CurrentAmmo = 7;
 	

@@ -45,8 +45,7 @@ void ATCapturePoint::Tick(float DeltaTime)
 		CapturePercent += DeltaTime * CaptureSpeed;
 		CapturePercent = FMath::Clamp(CapturePercent, 0.f, 100.f);
 
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green,
-			FString::Printf(TEXT("Zone %d 점령률: %.1f%%"), ZoneIndex, CapturePercent));
+		
 
 		if (CapturePercent >= 100.f)
 		{
@@ -66,7 +65,6 @@ void ATCapturePoint::CompleteCapture()
 
 	if (GM)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[CapturePoint] Zone %d 점령 완료 → GameMode 통보"), ZoneIndex);
 
 		GM->OnCapturePointCompleted();
 		GM->LastCapturedPoint = this;

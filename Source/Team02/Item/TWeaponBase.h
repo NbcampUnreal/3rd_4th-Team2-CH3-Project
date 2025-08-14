@@ -47,7 +47,7 @@ public:
 
 	// 총 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
-	int32 MaxTotalAmmo = 180;
+	int32 MaxTotalAmmo = 9999999;
 
 	//장전할 수 있는 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
@@ -60,7 +60,6 @@ public:
 	void SetCurrentAmmo(int32 NewAmmo)
 	{
 		CurrentAmmo = FMath::Clamp(NewAmmo, 0, MaxAmmo);
-		// (선택) 여기서 UI 업데이트, 사운드, 로그 등 추가 가능
 	}
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float FireRate;        // 연사 속도
@@ -75,8 +74,6 @@ public:
 	TSubclassOf<ATBullet> BulletClass;
 
 	// --- 무기 동작 ---
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Fire();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void FireFrom(FVector Start, FVector FireDir);
@@ -86,16 +83,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual bool CanFire() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual bool CanReload() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Equip();
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Unequip();
-
+	
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	FString GetWeaponTypeString() const;
 
