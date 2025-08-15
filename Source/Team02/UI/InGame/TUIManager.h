@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
 
 class ATCharacterBase;
+class ATPlayerCharacter;
 class ATWeaponBase;
 class ATAIBossMonster;
 class ATGameMode;
@@ -97,8 +98,8 @@ public:
 	void UnlockWeapon();
 
 	//게임 리스폰, 리스타트 UI 함수
-	UFUNCTION(BlueprintCallable)
-	void RespawnGameUI();
+	// UFUNCTION(BlueprintCallable)
+	// void RespawnGameUI();
 	
 	UFUNCTION(BlueprintCallable)
 	void RestartGameUI();

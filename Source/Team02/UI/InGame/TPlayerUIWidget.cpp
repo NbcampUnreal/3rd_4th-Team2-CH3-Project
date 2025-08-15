@@ -22,12 +22,25 @@ void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 	}
 }
 
-void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 MaxAmmo)
+void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 TotalAmmo)
 {
 	if (AmmoText)
 	{
-		FString AmmoString=FString::Printf(TEXT("%d/%d"),CurrentAmmo,MaxAmmo);
+		FString AmmoString;
+
+		//total ammo가 매우 큰값이면 무한대표시
+		if (TotalAmmo>=999)
+		{
+			AmmoString = FString::Printf(TEXT("%d/∞"), CurrentAmmo);
+		}
+		else
+		{
+			//일반적인 경우 (제한된 탄창)
+			AmmoString=FString::Printf(TEXT("%d/%d"),CurrentAmmo,TotalAmmo);
+		}
+
 		AmmoText->SetText(FText::FromString(AmmoString));
+		
 	}
 }
 
@@ -55,7 +68,7 @@ void UTPlayerUIWidget::ShowCaptureUI(const FString& AreaName)
 		CaptureLabel->SetText(FText::FromString(CaptureMessage));
 
 		//테스트 로그
-		UE_LOG(LogTemp,Warning,TEXT("CaptureLabel set to Visible!!"));
+		//UE_LOG(LogTemp,Warning,TEXT("CaptureLabel set to Visible!!"));
 	}
 	
 }
@@ -79,7 +92,7 @@ void UTPlayerUIWidget::HideCaptureUI()
 	}
 
 	//테스트 로그
-	UE_LOG(LogTemp,Warning,TEXT("Capture UI Hidden"));
+	//UE_LOG(LogTemp,Warning,TEXT("Capture UI Hidden"));
 }
 
 void UTPlayerUIWidget::UpdateCaptureProgress(float Progress)
@@ -129,19 +142,19 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 		{
 			//처음 미션이거나 "Mission:" 상테에서 변경(타이핑 효과)
 			StartTypingAnimation(ObjectiveText);
-			UE_LOG(LogTemp,Warning,TEXT("Initial mission typing: %s"),*ObjectiveText);
+			//UE_LOG(LogTemp,Warning,TEXT("Initial mission typing: %s"),*ObjectiveText);
 		}
 		else if (bIsRealMissionChange)
 		{
 			// 진짜 미션 변경: 깜빡임 + 타이핑
 			StartFlashingAndChangeText(ObjectiveText);
-			UE_LOG(LogTemp, Warning, TEXT("Real mission change with effects: %s"), *ObjectiveText);
+			//UE_LOG(LogTemp, Warning, TEXT("Real mission change with effects: %s"), *ObjectiveText);
 		}
 		else
 		{
 			// 숫자만 변경: 즉시 업데이트 (깜빡임 없음)
 			ObjectText->SetText(FText::FromString(ObjectiveText));
-			UE_LOG(LogTemp, Warning, TEXT("Number only update: %s"), *ObjectiveText);
+			//UE_LOG(LogTemp, Warning, TEXT("Number only update: %s"), *ObjectiveText);
 		}
 		
 	}
@@ -154,7 +167,7 @@ void UTPlayerUIWidget::UpdateKillCount(int32 CurrentKills,int32 TotalMonsters)
 		FString KillString=FString::Printf(TEXT("Monster: %d/%d"),CurrentKills,TotalMonsters);
 		KillCountText->SetText(FText::FromString(KillString));
 
-		UE_LOG(LogTemp,Warning,TEXT("Kill count updated: %s"), *KillString);
+		//UE_LOG(LogTemp,Warning,TEXT("Kill count updated: %s"), *KillString);
 	}
 }
 
@@ -164,7 +177,7 @@ void UTPlayerUIWidget::ShoWEnemyIncomingAlarm()
 	{
 		WaveAlarmText->SetText(FText::FromString(TEXT("Enemy Incoming!!")));
 		WaveAlarmText->SetVisibility(ESlateVisibility::Visible);
-		UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alram shown!!"));
+		//UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alram shown!!"));
 	}
 }
 
@@ -173,7 +186,9 @@ void UTPlayerUIWidget::HideEnemyIncomingAlarm()
 	if (WaveAlarmText)
 	{
 		WaveAlarmText->SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alarm hidden!!"));
+		WaveAlarmText->SetText(FText::FromString(TEXT(""))); //문구까지 초기화
+		
+		//UE_LOG(LogTemp,Warning,TEXT("Enemy Incoming alarm hidden!!"));
 	}
 }
 
@@ -198,7 +213,7 @@ void UTPlayerUIWidget::StartTypingAnimation(const FString& FullText)
 		true
 		);
 
-	UE_LOG(LogTemp,Warning,TEXT("Started typing animation for: %s"), *FullText);
+	//UE_LOG(LogTemp,Warning,TEXT("Started typing animation for: %s"), *FullText);
 	
 }
 
@@ -211,7 +226,7 @@ void UTPlayerUIWidget::UpdateTypingText()
 		GetWorld()->GetTimerManager().ClearTimer(TypingTimerHandle);
 		CurrentDisplayText=TargetText;
 		ObjectText->SetText(FText::FromString(CurrentDisplayText));
-		UE_LOG(LogTemp,Warning,TEXT("Typing animation completed"));
+		//UE_LOG(LogTemp,Warning,TEXT("Typing animation completed"));
 		return;
 	}
 	// 한 글자씩 추가
@@ -224,7 +239,7 @@ void UTPlayerUIWidget::StartFlashingAndChangeText(const FString& NewText)
 {
 	if (!ObjectText) return;
 
-	UE_LOG(LogTemp,Warning,TEXT("Starting flash effect for mission change"));
+	//UE_LOG(LogTemp,Warning,TEXT("Starting flash effect for mission change"));
 
 	// 깜빡임 시작
 	GetWorld()->GetTimerManager().SetTimer(
@@ -271,7 +286,7 @@ void UTPlayerUIWidget::StopFlashing()
 		ObjectText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	}
 
-	UE_LOG(LogTemp,Warning,TEXT("Flash effect stopped"));
+	//UE_LOG(LogTemp,Warning,TEXT("Flash effect stopped"));
 }
 
 bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString& NewText)
@@ -279,7 +294,7 @@ bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString
 
 	if (OldText==TEXT("Mission:")&& NewText != TEXT("Mission:"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Mission initialization: 'Mission:' -> '%s' = REAL CHANGE"), *NewText);
+		//UE_LOG(LogTemp, Warning, TEXT("Mission initialization: 'Mission:' -> '%s' = REAL CHANGE"), *NewText);
 		return true;
 	}
 
@@ -323,11 +338,11 @@ void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 	if (WeaponNameText)
 	{
 		WeaponNameText->SetText(FText::FromString(WeaponName));
-		UE_LOG(LogTemp,Warning,TEXT("Weapon name updated: %s"),*WeaponName);
+		//UE_LOG(LogTemp,Warning,TEXT("Weapon name updated: %s"),*WeaponName);
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT("WeaponNameText is NULL! Check widget binding,"));
+		//UE_LOG(LogTemp,Error,TEXT("WeaponNameText is NULL! Check widget binding,"));
 	}
 	
 }
