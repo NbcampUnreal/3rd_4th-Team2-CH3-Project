@@ -59,4 +59,5 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TObjectPtr<UBehaviorTree> SwordNPCBehaviorTree;
+
 };

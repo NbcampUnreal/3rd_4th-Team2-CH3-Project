@@ -5,6 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Area/TCapturePoint.h"
 #include "TGameMode.h"
+#include "Navigation/PathFollowingComponent.h"
+#include "GameFramework/Character.h"
 
 int32 ATSwordAIController::ShowSwordAIDebug(0);
 
@@ -28,7 +30,6 @@ ATSwordAIController::ATSwordAIController()
 	
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("SwordNPCBrainComponent"));
-	
 	
 }
 
@@ -54,6 +55,7 @@ void ATSwordAIController::OnPossess(APawn* InPawn)
 	{
 		GameMode->RegisterAISwordController(this);
 	}
+	
 	
 }
 

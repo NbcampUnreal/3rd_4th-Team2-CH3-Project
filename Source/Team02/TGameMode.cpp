@@ -68,9 +68,6 @@ void ATGameMode::InitializeGameState()
 	WaveIndex = 0;
 	LastCapturedPoint = nullptr;
 	
-	// AI Controller 배열 초기화
-	AIControllers.Empty();
-	SwordAIControllers.Empty();
 	
 	// 모든 Enemy Spawner 비활성화
 	for (ATEnemySpawner* Spawner : EnemySpawners)
