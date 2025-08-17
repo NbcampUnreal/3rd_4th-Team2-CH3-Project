@@ -32,7 +32,7 @@ void UBTService_IsInWave_DetectPlayer::TickNode(UBehaviorTreeComponent& OwnerCom
 			{
 				//중심점
 				FVector CenterPosition = NPC->GetActorLocation();
-				float DetectRadius = 100000.0f;
+				float DetectRadius = 500000.0f;
 				
 				TArray<FOverlapResult> OverlapResults;
 				FCollisionQueryParams CollisionQueryParams(NAME_None, false, NPC);
@@ -167,7 +167,7 @@ void UBTService_IsInWave_DetectPlayer::TickNode(UBehaviorTreeComponent& OwnerCom
 			{
 				//중심점
 				FVector CenterPosition = NPC->GetActorLocation();
-				float DetectRadius = 50000.0f;
+				float DetectRadius = 800000.0f;
 				
 				TArray<FOverlapResult> OverlapResults;
 				FCollisionQueryParams CollisionQueryParams(NAME_None, false, NPC);

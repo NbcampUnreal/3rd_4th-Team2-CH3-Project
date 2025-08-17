@@ -237,8 +237,6 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 void ATNonPlayerCharacterSword::HandleOnPostCharacterDead()
 {
 	Super::HandleOnPostCharacterDead();
-
-	
 }
 
 
