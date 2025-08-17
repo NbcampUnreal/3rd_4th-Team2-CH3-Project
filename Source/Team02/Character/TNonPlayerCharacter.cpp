@@ -42,7 +42,7 @@ void ATNonPlayerCharacter::BeginPlay()
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetCharacterMovement()->MaxWalkSpeed = 400.f;
 
 		AttachWeapon(Rifle);
 	}
@@ -194,7 +194,6 @@ void ATNonPlayerCharacter::HandleOnCheckHit()
 		ATCharacterBase* HittedCharacter = Cast<ATCharacterBase>(HitResult.GetActor());
 		if (IsValid(HittedCharacter) == true)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Hit Actor Name: %s"), *HitResult.GetActor()->GetName()));
 			FDamageEvent DamageEvent;
 			HittedCharacter->TakeDamage(
 				AttackDamage,
