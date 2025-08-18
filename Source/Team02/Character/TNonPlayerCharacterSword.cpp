@@ -40,6 +40,7 @@ void ATNonPlayerCharacterSword::BeginPlay()
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
+
 		//NPC의 최고속도
 		GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 
@@ -233,10 +234,4 @@ void ATNonPlayerCharacterSword::HandleOnCheckSwordHit()
 		);
 	}
 }
-
-void ATNonPlayerCharacterSword::HandleOnPostCharacterDead()
-{
-	Super::HandleOnPostCharacterDead();
-}
-
 
