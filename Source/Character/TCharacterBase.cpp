@@ -73,8 +73,11 @@ void ATCharacterBase::EquipWeapon(ATWeaponBase* NewWeapon)
 	case EWeaponType::Rifle:
 	case EWeaponType::Shotgun:
 		SocketToAttach = TEXT("Rifle_Socket");
+		UE_LOG(LogTemp, Warning, TEXT("SocketToAttach : %s"), *SocketToAttach.ToString());
+				
 		break;
 	}
+	
 	if (SocketToAttach != NAME_None)
 	{
 		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketToAttach);
