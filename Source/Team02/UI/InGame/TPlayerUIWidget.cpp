@@ -1,11 +1,15 @@
 #include "TPlayerUIWidget.h"
 
+#include "LandscapeLayerInfoObject.h"
+#include "MeshPaintVisualize.h"
 #include "Character/TNonPlayerCharacter.h"
 #include "Character/TNonPlayerCharacterSword.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "DSP/DelayStereo.h"
+#include "Editor/PropertyEditorTestObject.h"
+#include "Kismet/ImportanceSamplingLibrary.h"
 
 void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 {
@@ -326,8 +330,8 @@ bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString
 	// 미션 유형이 다르면 진짜 변경
 	bool bIsRealChange=(OldType != NewType) && !NewType.IsEmpty();
 
-	UE_LOG(LogTemp, Warning, TEXT("Mission change check: '%s' -> '%s' = %s"), 
-		  *OldType, *NewType, bIsRealChange ? TEXT("REAL CHANGE") : TEXT("NUMBER UPDATE"));
+	// UE_LOG(LogTemp, Warning, TEXT("Mission change check: '%s' -> '%s' = %s"), 
+	// 	  *OldType, *NewType, bIsRealChange ? TEXT("REAL CHANGE") : TEXT("NUMBER UPDATE"));
 
 	return bIsRealChange;
 	
@@ -407,6 +411,59 @@ void UTPlayerUIWidget::ShowHitMarker()
 	}
 }
 
+void UTPlayerUIWidget::ShowDashReady()
+{
+	if (DashText)
+	{
+		DashText->SetText(FText::FromString(TEXT("Dash Ready!")));
+		DashText->SetVisibility(ESlateVisibility::Visible);
+		DashText->SetColorAndOpacity(FSlateColor(FLinearColor::Green));
+		DashText->SetRenderScale(FVector2D(1.0f,1.0f));
+	}
+}
+
+void UTPlayerUIWidget::ShowDashCooldown(float RemainingSeconds)
+{
+	if (DashText)
+	{
+		//쿨다운 시간 소숫점 1자리까지만 표시
+		FString CooldownText=FString::Printf(TEXT("Dash: %.1fs"),RemainingSeconds);
+		DashText->SetText(FText::FromString(CooldownText));
+		DashText->SetVisibility(ESlateVisibility::Visible);
+
+		//쿨다운 진행에 따른 색상(빨->노->초)
+		float Progress=1.0f-(RemainingSeconds/2.0f);
+		Progress=FMath::Clamp(Progress,0.0f,1.0f);
+
+		if (Progress<0.5f)
+		{
+			// 빨강->노랑
+			float Red=1.0f;
+			float Green=Progress*2.0f;
+			DashText->SetColorAndOpacity(FSlateColor(FLinearColor(Red, Green, 0.0f, 1.0f)));
+			
+		}
+		else
+		{
+			//노랑 -> 초록
+			float Red=1.0f-((Progress-0.5f)*2.0f);
+			float Green=1.0f;
+			DashText->SetColorAndOpacity(FSlateColor(FLinearColor(Red, Green, 0.0f, 1.0f)));
+		}
+		
+	}
+}
+
+
+void UTPlayerUIWidget::HideDashText()
+{
+	if (DashText)
+	{
+		DashText->SetVisibility(ESlateVisibility::Hidden);
+		DashText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+		DashText->SetRenderScale(FVector2D(1.0f,1.0f));
+	}
+}
 
 
 
