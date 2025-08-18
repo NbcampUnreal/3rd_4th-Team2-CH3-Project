@@ -59,7 +59,7 @@ void ATPlayerCharacter::BeginPlay()
     }
   }
   
-  if (DefaultWeaponClass) // 스폰단계를 처리함
+  if (DefaultWeaponClass)
   {
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = this;
@@ -81,27 +81,6 @@ void ATPlayerCharacter::Tick(float DeltaSeconds)
   CameraComponent->SetFieldOfView(CurrentFOV);
 
   const FVector Velocity = GetVelocity();
-  
-  // if (Velocity.SizeSquared() > KINDA_SMALL_NUMBER)
-  // {
-  //   const FVector ForwardVector = GetActorForwardVector();
-  //   const FVector RightVector = GetActorRightVector();
-  //   
-  //   const float ForwardValue = FVector::DotProduct(Velocity.GetSafeNormal(), ForwardVector);
-  //   const float RightValue = FVector::DotProduct(Velocity.GetSafeNormal(), RightVector);
-  //
-  //   bIsMovingForward = ForwardValue > 0.5f;
-  //   bIsMovingBackward = ForwardValue < -0.5f;
-  //   bIsMovingRight = RightValue > 0.5f;
-  //   bIsMovingLeft = RightValue < -0.5f;
-  // }
-  // else
-  // {
-  //   bIsMovingForward = false;
-  //   bIsMovingBackward = false;
-  //   bIsMovingRight = false;
-  //   bIsMovingLeft = false;
-  // }
 }
 
 void ATPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -163,7 +142,7 @@ void ATPlayerCharacter::InputEndZoom(const FInputActionValue& InputActionValue)
 
 void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 {
-  if (CurrentWeapon)
+  if (CurrentWeapon && CurrentWeapon->CanFire())
   {
     // (1) 카메라 위치/회전 얻기
     FVector CameraLoc;
@@ -192,7 +171,6 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
     // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
     CurrentWeapon->FireFrom(MuzzleLoc, FireDir); 
     
-
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (IsValid(AnimInstance) == true)
     {
@@ -209,8 +187,6 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
   if (CurrentWeapon)
   {
     CurrentWeapon->Reload();
-
-    
   }
 }
 
@@ -268,18 +244,7 @@ void ATPlayerCharacter::HandleOnPostCharacterDead()
   DisableInput(Cast<APlayerController>(GetController()));
   GetCharacterMovement()->DisableMovement();
 
-  // 2. 이펙트/애니메이션 등 사망 연출 (선택)
-  // ex) 죽는 애니메이션, 이펙트
-
-  // // 3. 일정 시간 뒤에 Respawn 트리거 (ex: 2초 후)
-  // FTimerHandle RespawnTimerHandle;
-  // GetWorld()->GetTimerManager().SetTimer(
-  //     RespawnTimerHandle,
-  //     this, &ATPlayerCharacter::RequestRespawn,
-  //     2.0f, false
-  // );
-
-  // 4. UI 띄우기
+  // UI 띄우기
   if (APlayerController* PC = Cast<APlayerController>(GetController()))
   {
     // 게임 일시정지
@@ -309,7 +274,6 @@ void ATPlayerCharacter::HandleOnPostCharacterDead()
     }
   }
 }
-
 
 void ATPlayerCharacter::RequestRespawn()
 {
