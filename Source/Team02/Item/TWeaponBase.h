@@ -76,7 +76,7 @@ public:
 	// --- 무기 동작 ---
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void FireFrom(FVector Start, FVector FireDir);
+	virtual void FireFrom(FVector MuzzleLoc,FVector FireDir);
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Reload();

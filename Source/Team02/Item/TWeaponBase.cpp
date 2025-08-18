@@ -48,9 +48,9 @@ void ATWeaponBase::OnOverlapBegin(
 
 
 
-void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
+void ATWeaponBase::FireFrom(FVector MuzzleLoc, FVector FireDir)
 {
-    if (!CanFire()) return;
+	if (!CanFire()) return;
 
     // 0) Owner/Controller
     APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -60,7 +60,7 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
     FVector CamLoc; FRotator CamRot;
     if (Ctrl)        Ctrl->GetPlayerViewPoint(CamLoc, CamRot);
     else if (OwnerPawn) OwnerPawn->GetActorEyesViewPoint(CamLoc, CamRot);
-    else             { CamLoc = Start; CamRot = FRotator::ZeroRotator; }
+    else             { CamLoc = MuzzleLoc; CamRot = FRotator::ZeroRotator; }
 
     // 카메라가 본 지점 (없으면 카메라 전방으로 Range만큼)
     const FVector CamEnd = CamLoc + CamRot.Vector() * Range;
@@ -76,20 +76,20 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
         AimPoint = CamLoc + CamRot.Vector() * MinAimDist;
 
     // 2) 최종 발사 방향
-    const FVector Dir = (AimPoint - Start).GetSafeNormal();
+    const FVector Dir = (AimPoint - MuzzleLoc).GetSafeNormal();
 
     // 3) 실제 판정 라인트레이스: 사거리 고정(Start + Dir * Range)
-	const FVector TraceEnd = Start + Dir * Range;
+	const FVector TraceEnd = MuzzleLoc + Dir * Range;
 	FHitResult HitResult;
-	const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, TraceEnd, ECC_ATTACK, Q);
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, MuzzleLoc, TraceEnd, ECC_ATTACK, Q);
 
 	// ⬇️ 이 길이를 이펙트에 그대로 넘기면 “뚫고 가지 않음”
 	const FVector FinalPoint = bHit ? HitResult.ImpactPoint : TraceEnd;
-	float BeamLength = (FinalPoint - Start).Size();  // 히트면 충돌 지점까지, 미스면 사거리
+	float BeamLength = (FinalPoint - MuzzleLoc).Size();  // 히트면 충돌 지점까지, 미스면 사거리
     // 4) FX/사운드/데미지
     //    - 트레이서는 항상 Range 길이
-    FireEffect(Start, const_cast<FVector&>(Dir), BeamLength); // Length=Range로 세팅하도록 구현:contentReference[oaicite:1]{index=1}
-    FireSounds(Start);                                                       // 위치 넘겨 재생:contentReference[oaicite:2]{index=2}
+    FireEffect(MuzzleLoc, const_cast<FVector&>(Dir), BeamLength); // Length=Range로 세팅하도록 구현:contentReference[oaicite:1]{index=1}
+    FireSounds(MuzzleLoc);                                                       // 위치 넘겨 재생:contentReference[oaicite:2]{index=2}
 
     if (bHit && HitResult.GetActor())
     {
@@ -106,7 +106,39 @@ void ATWeaponBase::FireFrom(FVector Start, FVector FireDir)
     // 5) 쿨타임/탄약
     bCanFire = false;
     GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATWeaponBase::ResetCanFire, FireRate, false); //:contentReference[oaicite:4]{index=4}
-    SetCurrentAmmo(GetCurrentAmmo() - 1);
+    SetCurrentAmmo(GetCurrentAmmo() - 1); 
+
+	// 카메라 기준 → 조준선 (빨강)
+	DrawDebugLine(
+		GetWorld(),
+		CamLoc,
+		CamEnd,
+		FColor::Red,
+		false, 2.f, 0, 1.f
+	);
+
+	// 머즐 기준 → 발사선 (파랑)
+	DrawDebugLine(
+		GetWorld(),
+		MuzzleLoc,
+		TraceEnd,
+		FColor::Blue,
+		false, 2.f, 0, 1.f
+	);
+
+	// 카메라가 맞춘 위치 (노랑)
+	DrawDebugSphere(
+		GetWorld(),
+		CamHit.bBlockingHit ? CamHit.ImpactPoint : CamEnd,
+		10.f, // 반지름
+		12,   // 세그먼트 수
+		FColor::Yellow,
+		false, 2.f
+	);
+    // --- (디버그 원하면 주석 해제) ---
+    // DrawDebugLine(GetWorld(), CamLoc, AimPoint, FColor::Red,   false, 1.5f, 0, 2.f);  // 카메라선
+    // DrawDebugLine(GetWorld(), Start,  FinalPoint, FColor::Blue, false, 1.5f, 0, 2.f);  // 머즐선(판정/이펙트와 동일)
+    // DrawDebugSphere(GetWorld(), FinalPoint, 6.f, 12, FColor::Yellow, false, 1.5f);
 }
 
 void ATWeaponBase::Reload()

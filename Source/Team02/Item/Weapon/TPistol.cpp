@@ -10,7 +10,6 @@ ATPistol::ATPistol()
 	SetTotalAmmo(99999999);
 	MaxAmmo = 7;
 	CurrentAmmo = 7;
-	
 	FireRate = 4.0f;
 	ReloadTime = 2.0f;
 	Range = 200.0f;

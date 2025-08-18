@@ -179,7 +179,7 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
     Params.AddIgnoredActor(this);
     Params.AddIgnoredActor(CurrentWeapon);
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLoc, TraceEnd, ECC_ATTACK, Params);
+    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLoc, TraceEnd, ECC_Visibility, Params);
 
     FVector AimTarget = bHit ? Hit.ImpactPoint : TraceEnd;
 
@@ -191,7 +191,7 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 
     // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
     CurrentWeapon->FireFrom(MuzzleLoc, FireDir); 
-
+    
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (IsValid(AnimInstance) == true)
