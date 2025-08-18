@@ -19,12 +19,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-
-
-public:
-	// 리스폰 전에 게임오버 UI 요청하는 코드
-	UFUNCTION(BlueprintCallable, Category="Respawn")
-	void RequestRespawnFromUI();
 	
 private:
 	// UI 매니저 참조 관련
