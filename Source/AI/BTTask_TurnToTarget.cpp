@@ -17,6 +17,7 @@ EBTNodeResult::Type UBTTask_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	ATAIController* GunAIController = Cast<ATAIController>(OwnerComp.GetAIOwner());
 	ATSwordAIController* SwordAIController = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
 
+	//원거리 NPC용
 	if (IsValid(GunAIController) == true)
 	{
 		ATNonPlayerCharacter* NPC = Cast<ATNonPlayerCharacter>(GunAIController->GetPawn());
@@ -33,6 +34,7 @@ EBTNodeResult::Type UBTTask_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 		}
 	}
 
+	//근접 NPC 용
 	if (IsValid(SwordAIController) == true)
 	{
 		ATNonPlayerCharacterSword* NPC = Cast<ATNonPlayerCharacterSword>(SwordAIController->GetPawn());
