@@ -196,7 +196,7 @@ protected:
 
 	//현재 추적 중인 몬스터들
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
+	TArray<class ATCharacterBase*> TrackedMonsters;
 
 	// 이전 프레임 몬스터 수(변화 감지용)
 	UPROPERTY()
@@ -212,10 +212,10 @@ protected:
 
 	//웨이브로 스폰된 몬스터만 추적
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> WaveSpawnedMonsters;
+	TArray<class ATCharacterBase*> WaveSpawnedMonsters;
 	
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> PreExistingMonsters;
+	TArray<class ATCharacterBase*> PreExistingMonsters;
 
 	//웨이브 시작시 총 몬스터 수
 	UPROPERTY()
@@ -255,12 +255,24 @@ private:
 	//히트 감지 함수들
 	UFUNCTION()
 	void CheckForHits();
-
 	UFUNCTION()
 	bool CheckMonsterHPChanges();
-
 	UFUNCTION()
 	void UpdateMonsterHPList();
+
+
+	// 대시 감지 변수, 함수
+	FVector LastPlayerLocation;
+	float LastLocationCheckTime=0.0f;
+	float DashDistanceThreshold=200.0f; // 대시로 판단하는 최소 이동 거리
+	float DashTimeWindow=0.1f;// 이 시간 안에 이동시 대시로 판단
+	float DashDetectionCooldown=1.5f; // 실제 쿨다운 시간
+	float LastDashDetectionTime=0.0f;
+	bool bDashSystemInitialized=false;
+	
+	void DetectTeleportDash();
+
+	
 
 	
 };

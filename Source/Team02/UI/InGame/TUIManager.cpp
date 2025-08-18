@@ -20,8 +20,9 @@ void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	//테스트 로그
-	UE_LOG(LogTemp,Warning,TEXT("UIManager Initialized!!"));
+	//대시 감지 변수 초기화
+	LastDashDetectionTime=0.0f;
+	bDashSystemInitialized=false;
 }
 
 void UTUIManager::Deinitialize()
@@ -47,19 +48,14 @@ void UTUIManager::CreatePlayerUI()
         
 		if (!PlayerUIWidgetClass)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to load WBP_PlayerUI! Check the path."));
 			return;
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("WBP_PlayerUI loaded successfully!"));
-		}
+		
 	}
 
 	if (GetWorld())
 	{
-
-		// ⭐ 여기서 GameMode 참조 설정
+		// 여기서 GameMode 참조 설정
 		GameModeRef = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
 		if (GameModeRef)
 		{
@@ -75,7 +71,6 @@ void UTUIManager::CreatePlayerUI()
 		if (PlayerUIWidget)
 		{
 			PlayerUIWidget->AddToViewport();
-			UE_LOG(LogTemp, Warning, TEXT("Player UI Created Successfully!"));
 			
 			// UI 업데이트 타이머
 			GetWorld()->GetTimerManager().SetTimer(
@@ -94,9 +89,7 @@ void UTUIManager::CreatePlayerUI()
 			// 스포너 및 몬스터 모너터링 시작
 			FindAndRegisterEnemySpawners();
 			StartMonitoringMonsters();
-
 			
-
 			//초기 미션 설정
 			CurrentMissionObjective=TEXT("Mission:");
 			PlayerUIWidget->UpdateMissionObjective(TEXT("Mission:"));
@@ -116,11 +109,10 @@ void UTUIManager::CreatePlayerUI()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create PlayerUIWidget!"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to create PlayerUIWidget!"));
 		}
 	}
 }
-
 
 
 void UTUIManager::SetPlayerCharacter(ATCharacterBase* PlayerChar)
@@ -186,8 +178,7 @@ void UTUIManager::UpdateWeaponInfo()
 					bWeaponPickedUp=true;
 					bWeaponUnlocked=true;
 					MoveToNextCapturePoint(); // 2번쨰 거점으로 이동
-
-					UE_LOG(LogTemp, Warning, TEXT("🔫 New weapon '%s' picked up! Moving to next objective"), *WeaponName);
+					
 					UpdateMissionState(); // 미션 업데이트
 				}
 				else
@@ -205,14 +196,14 @@ void UTUIManager::UpdateWeaponInfo()
 					if (PreviousWeapon && WeaponName != PreviousWeapon->GetWeaponTypeString())
 					{
 						bSecondWeaponPickedUp=true;
-						UE_LOG(LogTemp, Warning, TEXT("🔫 Second weapon '%s' picked up!"), *WeaponName);
+						UE_LOG(LogTemp, Warning, TEXT("Second weapon '%s' picked up!"), *WeaponName);
 						UpdateMissionState();// 미션 업데이트
 					}
 				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("🔫 Weapon change detected but conditions not met:"));
+				UE_LOG(LogTemp, Warning, TEXT("Weapon change detected but conditions not met:"));
 				UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
 				UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
 			}
@@ -270,7 +261,7 @@ void UTUIManager::FindAndRegisterCapturePoints()
         ATCapturePoint* FirstPoint = nullptr;
         ATCapturePoint* SecondPoint = nullptr;
 
-        UE_LOG(LogTemp, Warning, TEXT("Searching for capture points by name..."));
+        //UE_LOG(LogTemp, Warning, TEXT("Searching for capture points by name..."));
 
         // 모든 거점 찾기
         for (TActorIterator<ATCapturePoint> ActorItr(World); ActorItr; ++ActorItr)
@@ -279,7 +270,7 @@ void UTUIManager::FindAndRegisterCapturePoints()
             if (CapturePoint)
             {
                 FString ActorName = CapturePoint->GetName();
-                UE_LOG(LogTemp, Warning, TEXT("Found CapturePoint: %s"), *ActorName);
+                //UE_LOG(LogTemp, Warning, TEXT("Found CapturePoint: %s"), *ActorName);
                 
                 // ⭐ 이름으로 1거점/2거점 구분
                 if (ActorName.Contains(TEXT("First")) || 
@@ -287,24 +278,24 @@ void UTUIManager::FindAndRegisterCapturePoints()
                     ActorName.Contains(TEXT("One")))
                 {
                     FirstPoint = CapturePoint;
-                    UE_LOG(LogTemp, Warning, TEXT("Identified as FIRST capture point: %s"), *ActorName);
+                    //UE_LOG(LogTemp, Warning, TEXT("Identified as FIRST capture point: %s"), *ActorName);
                 }
                 else if (ActorName.Contains(TEXT("Second")) || 
                          ActorName.Contains(TEXT("2")) || 
                          ActorName.Contains(TEXT("Two")))
                 {
                     SecondPoint = CapturePoint;
-                    UE_LOG(LogTemp, Warning, TEXT("Identified as SECOND capture point: %s"), *ActorName);
+                    //UE_LOG(LogTemp, Warning, TEXT("Identified as SECOND capture point: %s"), *ActorName);
                 }
                 else
                 {
                     // 이름에 식별자가 없는 경우 경고
-                    UE_LOG(LogTemp, Warning, TEXT("CapturePoint name doesn't contain identifier: %s"), *ActorName);
+                    //UE_LOG(LogTemp, Warning, TEXT("CapturePoint name doesn't contain identifier: %s"), *ActorName);
                 }
             }
         }
 
-        // ⭐ 순서대로 배열에 추가 (1거점 먼저, 2거점 나중에)
+        // 순서대로 배열에 추가 (1거점 먼저, 2거점 나중에)
         if (FirstPoint)
         {
             AllCapturePoints.Add(FirstPoint);
@@ -331,16 +322,12 @@ void UTUIManager::FindAndRegisterCapturePoints()
             // 첫 번째 거점을 현재 거점으로 설정
             CurrentCapturePoint = AllCapturePoints[CurrentCaptureIndex];
             CapturePointName = CurrentCapturePoint->GetName();
-
-            UE_LOG(LogTemp, Warning, TEXT("✅ Successfully set up %d capture points:"), AllCapturePoints.Num());
-            UE_LOG(LogTemp, Warning, TEXT("   1st Point (Index 0): %s"), *AllCapturePoints[0]->GetName());
-            UE_LOG(LogTemp, Warning, TEXT("   2nd Point (Index 1): %s"), *AllCapturePoints[1]->GetName());
-            UE_LOG(LogTemp, Warning, TEXT("   Starting with: %s"), *CapturePointName);
+        	
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("❌ Need exactly 2 capture points! Found: %d"), AllCapturePoints.Num());
-            UE_LOG(LogTemp, Error, TEXT("   Make sure actor names contain 'First'/'1' and 'Second'/'2'"));
+            //UE_LOG(LogTemp, Error, TEXT("❌ Need exactly 2 capture points! Found: %d"), AllCapturePoints.Num());
+            //UE_LOG(LogTemp, Error, TEXT("   Make sure actor names contain 'First'/'1' and 'Second'/'2'"));
         }
     }
 }
@@ -366,16 +353,6 @@ void UTUIManager::UpdateMissionProgress()
 void UTUIManager::UpdateMissionState()
 {
     FString NewObjective;
-    
-    // 임무 확인 로그
-    UE_LOG(LogTemp, Warning, TEXT("🎯 Mission State Update:"));
-    UE_LOG(LogTemp, Warning, TEXT("  bSecondCaptureCompleted: %s"), bSecondCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bFirstCaptureCompleted: %s"), bFirstCaptureCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWeaponPickedUp: %s"), bWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bSecondWeaponPickedUp: %s"), bSecondWeaponPickedUp ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  CurrentCaptureIndex: %d"), CurrentCaptureIndex);
 
     // 게임 완료
     if (bSecondCaptureCompleted)
@@ -383,7 +360,7 @@ void UTUIManager::UpdateMissionState()
         NewObjective = TEXT("Victory!");  // 짧게 수정
         //승리 이벤트 발생
         OnVictoryEvent.Broadcast();
-        UE_LOG(LogTemp, Warning, TEXT("Game Completed! All Capture points secured!!"));
+        //UE_LOG(LogTemp, Warning, TEXT("Game Completed! All Capture points secured!!"));
     }
     // 2거점 점령 관련 (두 번째 무기 습득 완료 후)
     else if (bSecondWeaponPickedUp && CurrentCaptureIndex == 1)
@@ -463,8 +440,7 @@ void UTUIManager::FindAndRegisterEnemySpawners()
 	if (UWorld* World=GetWorld())
 	{
 		RegisteredSpawners.Empty();
-
-		UE_LOG(LogTemp,Warning,TEXT("Searching for enemy spawners..."));
+		
 		// 월드에서 모든 스포너 찾기
 		for (TActorIterator<ATEnemySpawner> ActorItr(World); ActorItr; ++ActorItr)
 		{
@@ -472,18 +448,15 @@ void UTUIManager::FindAndRegisterEnemySpawners()
 			if (Spawner)
 			{
 				RegisteredSpawners.Add(Spawner);
-				UE_LOG(LogTemp,Warning,TEXT("Found spawner: %s (MaxSpawn:%d)"),
-					*Spawner->GetName(),Spawner->MaxSpawnCount);
 			}
 		}
 		if (RegisteredSpawners.Num()>0)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Total %d spawners registered"),RegisteredSpawners.Num());
 			UpdateWaveInfoFromSpawners();
 		}
 		else
 		{
-			UE_LOG(LogTemp,Warning,TEXT("No enemy spawners found!"));
+			//UE_LOG(LogTemp,Warning,TEXT("No enemy spawners found!"));
 		}
 	}
 }
@@ -500,7 +473,7 @@ void UTUIManager::StartMonitoringMonsters()
 			0.5f,
 			true);
 
-		UE_LOG(LogTemp,Warning,TEXT("Monster monitoring started!"));
+		//UE_LOG(LogTemp,Warning,TEXT("Monster monitoring started!"));
 	}
 }
 
@@ -509,7 +482,7 @@ void UTUIManager::StopMonitoringMonsters()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MonsterMonitorTimer);
-		UE_LOG(LogTemp, Warning, TEXT("Monster monitoring stopped"));
+		//UE_LOG(LogTemp, Warning, TEXT("Monster monitoring stopped"));
 	}
 }
 
@@ -518,23 +491,15 @@ void UTUIManager::UpdateMonsterStatus()
 	FindAllMonstersInWorld();
 	
     int32 CurrentMonsterCount = TrackedMonsters.Num();
-
-    // 🔍 강화된 디버그 로그
-    UE_LOG(LogTemp, Warning, TEXT("🔍 Monster Status Check:"));
-    UE_LOG(LogTemp, Warning, TEXT("  Tracked Monsters: %d"), CurrentMonsterCount);
-    UE_LOG(LogTemp, Warning, TEXT("  MonsterKillCount: %d"), MonsterKillCount);
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveActive: %s"), bWaveActive ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogTemp, Warning, TEXT("  bWaveCompleted: %s"), bWaveCompleted ? TEXT("YES") : TEXT("NO"));
-
-    // 🔍 GameMode 웨이브 상태 확인
+	
+    // GameMode 웨이브 상태 확인
     bool bGameModeWaveActive = false;
     if (GameModeRef)
     {
         bGameModeWaveActive = GameModeRef->bIsWaveActive;
-        UE_LOG(LogTemp, Warning, TEXT("  GameMode Wave Active: %s"), bGameModeWaveActive ? TEXT("YES") : TEXT("NO"));
     }
 
-    // 🔍 스포너 상태 상세 체크
+    // 스포너 상태 상세 체크
     bool bAnySpawnerActive = false;
     int32 TotalSpawnersCompleted = 0;
     int32 SpawnerBasedMax = 0;
@@ -564,14 +529,9 @@ void UTUIManager::UpdateMonsterStatus()
    
     if (!bWaveActive && !bWaveCompleted)
     {
-
-    	UE_LOG(LogTemp, Warning, TEXT("🔍 Checking wave start conditions:"));
-    	UE_LOG(LogTemp, Warning, TEXT("  bGameModeWaveActive: %s"), bGameModeWaveActive ? TEXT("YES") : TEXT("NO"));
-    	UE_LOG(LogTemp, Warning, TEXT("  bAnySpawnerActive: %s"), bAnySpawnerActive ? TEXT("YES") : TEXT("NO"));
-    	UE_LOG(LogTemp, Warning, TEXT("  CurrentMonsterCount: %d"), CurrentMonsterCount)
     	
         // 조건 1: GameMode나 스포너에서 웨이브 시작
-        // 조건 2: 필드에 몬스터가 있으면 즉시 시작 (새로 추가!)
+        // 조건 2: 필드에 몬스터가 있으면 즉시 시작 (새로 추가)
         if (bGameModeWaveActive || bAnySpawnerActive || CurrentMonsterCount > 0)
         {
             bWaveActive = true;
@@ -581,15 +541,14 @@ void UTUIManager::UpdateMonsterStatus()
 
             // 웨이브 시작 전 기존 몬스터 목록을 저장
             PreExistingMonsters.Empty();
-            for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+            for (ATCharacterBase* Monster : TrackedMonsters)
             {
                 PreExistingMonsters.Add(Monster);
             }
 
             WaveSpawnedMonsters.Empty();
             TotalWaveMonsters = 0;
-            
-            UE_LOG(LogTemp, Warning, TEXT("🔥 WAVE STARTED! Reason: Field monsters detected (%d)"), CurrentMonsterCount);
+        	
 
             if (PlayerUIWidget)
             {
@@ -611,26 +570,25 @@ void UTUIManager::UpdateMonsterStatus()
         }
     }
     
-    // ✅ 핵심 수정: 필드 몬스터와 웨이브 몬스터 모두 카운트!
+    // 필드 몬스터와 웨이브 몬스터 모두 카운트
     if (bWaveActive && !bWaveCompleted)
     {
         // 새로 스폰된 몬스터 감지 (기존 로직)
-        for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+        for (ATCharacterBase* Monster : TrackedMonsters)
         {
             if (!WaveSpawnedMonsters.Contains(Monster) && 
                 !PreExistingMonsters.Contains(Monster))
             {
                 WaveSpawnedMonsters.Add(Monster);
                 TotalWaveMonsters++;
-                UE_LOG(LogTemp, Warning, TEXT("📍 NEW wave monster detected: %s"), *Monster->GetName());
             }
         }
 
-        WaveSpawnedMonsters.RemoveAll([](ATNonPlayerCharacter* Monster) {
+        WaveSpawnedMonsters.RemoveAll([](ATCharacterBase* Monster) {
             return !Monster || Monster->GetCurrentHP() <= 0;
         });
 
-        // ✅ 수정된 킬 카운트 로직: 전체 몬스터 수 기준으로 계산
+        // 수정된 킬 카운트 로직: 전체 몬스터 수 기준으로 계산
         if (CurrentMonsterCount < LastFrameMonsterCount)
         {
             int32 KilledCount = LastFrameMonsterCount - CurrentMonsterCount;
@@ -638,14 +596,12 @@ void UTUIManager::UpdateMonsterStatus()
             for (int32 i = 0; i < KilledCount; i++)
             {
                 MonsterKillCount++;
-                UE_LOG(LogTemp, Warning, TEXT("🗡️ Monster killed! Count: %d/%d"), MonsterKillCount, SpawnerBasedMax);
             }
 
             // UI 업데이트
             if (PlayerUIWidget)
             {
                 PlayerUIWidget->UpdateKillCount(MonsterKillCount, SpawnerBasedMax);
-                UE_LOG(LogTemp, Warning, TEXT("🔄 UI Updated: %d/%d"), MonsterKillCount, SpawnerBasedMax);
             }
             
             UpdateMissionState();
@@ -658,8 +614,7 @@ void UTUIManager::UpdateMonsterStatus()
             bWaveActive = false;
             WaveSpawnedMonsters.Empty();
             LastWaveMonsterCount = 0;
-            
-            UE_LOG(LogTemp, Warning, TEXT("🏆 WAVE COMPLETED! All monsters eliminated!"));
+        	
             UpdateMissionState();
         }
     }
@@ -674,11 +629,10 @@ void UTUIManager::FindAllMonstersInWorld()
 	{
 		TrackedMonsters.Empty();
 
-		// 🔍 강화된 몬스터 검색
 		int32 TotalFound = 0;
 		int32 AliveCount = 0;
         
-		// 월드에서 살아있는 모든 NPC 찾기
+		// 1. Gun 몬스터 찾기 (ATNonPlayerCharacter)
 		for (TActorIterator<ATNonPlayerCharacter> ActorItr(World); ActorItr; ++ActorItr)
 		{
 			ATNonPlayerCharacter* Monster = *ActorItr;
@@ -687,19 +641,33 @@ void UTUIManager::FindAllMonstersInWorld()
 			if (Monster)
 			{
 				float HP = Monster->GetCurrentHP();
-				// UE_LOG(LogTemp, Warning, TEXT("🔍 Found Monster: %s (HP: %.1f)"), 
-				// 	   *Monster->GetName(), HP);
                 
 				if (HP > 0)
 				{
-					TrackedMonsters.Add(Monster);
+					TrackedMonsters.Add(Cast<ATCharacterBase>(Monster));
 					AliveCount++;
 				}
 			}
 		}
-        
-		// UE_LOG(LogTemp, Warning, TEXT("🔍 Monster Search Results: %d total found, %d alive"), 
-		// 	   TotalFound, AliveCount);
+
+		// 2. Sword 몬스터 찾기 (ATNonPlayerCharacterSword)
+		for (TActorIterator<ATNonPlayerCharacterSword> SwordActorItr(World); SwordActorItr; ++SwordActorItr)
+		{
+			ATNonPlayerCharacterSword* SwordMonster = *SwordActorItr;
+			TotalFound++;
+            
+			if (SwordMonster)
+			{
+				float HP = SwordMonster->GetCurrentHP();
+                
+				if (HP > 0)
+				{
+					TrackedMonsters.Add(Cast<ATCharacterBase>(SwordMonster));
+					AliveCount++;
+				}
+			}
+		}
+		
 	}
 }
 
@@ -728,7 +696,6 @@ void UTUIManager::UpdateWaveInfoFromSpawners()
 			PlayerUIWidget->UpdateKillCount(0,TotalMaxMonsters);
 		}
 		
-		UE_LOG(LogTemp, Warning, TEXT("Wave info updated: %d total monsters expected"), TotalMaxMonsters);
 	}
 }
 
@@ -739,9 +706,7 @@ void UTUIManager::MoveToNextCapturePoint()
 		CurrentCaptureIndex++;
 		CurrentCapturePoint=AllCapturePoints[CurrentCaptureIndex];
 		CapturePointName=CurrentCapturePoint->GetName();
-
-		UE_LOG(LogTemp, Warning, TEXT("Moved to capture point %d: %s"), 
-			   CurrentCaptureIndex + 1, *CapturePointName);
+		
 		
 	}
 }
@@ -750,9 +715,7 @@ void UTUIManager::UnlockWeapon()
 {
 	bWeaponUnlocked=true;
 	MoveToNextCapturePoint(); //2번쨰 거점으로 이동
-
-	UE_LOG(LogTemp, Warning, TEXT("Moved to capture point %d: %s"), 
-			   CurrentCaptureIndex + 1, *CapturePointName);
+	
 }
 
 
@@ -768,6 +731,8 @@ void UTUIManager::UpdateAllUI()
 	UpdatePlayerHP();
 	UpdatePlayerAmmo();
 	UpdateWeaponInfo();
+	DetectTeleportDash();
+	
 	
 // 거점 상태 감시 및 UI 업데이트
     if (CurrentCapturePoint && PlayerUIWidget)
@@ -785,7 +750,7 @@ void UTUIManager::UpdateAllUI()
             float ProgressPercent = CurrentCapturePoint->CapturePercent / 100.0f;
             UpdateCaptureProgress(ProgressPercent);
 
-            // ⭐ 거점 완료시 GameMode에 알림 추가
+            // 거점 완료시 GameMode에 알림 추가
             if (CurrentCapturePoint->CapturePercent >= 100.0f)
             {
                 if (CurrentCaptureIndex == 0 && !bFirstCaptureCompleted)
@@ -794,15 +759,14 @@ void UTUIManager::UpdateAllUI()
                     bCapturePhase = false;
                     HideCaptureUI();
                     
-                    // ⭐ GameMode에 거점 완료 알림
+                    // GameMode에 거점 완료 알림
                     if (GameModeRef)
                     {
                         GameModeRef->LastCapturedPoint = CurrentCapturePoint;
                         //GameModeRef->OnCapturePointCompleted(); // 보스 한방에 나와서 주석처리함..(기인)
                         UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: First capture completed"));
                     }
-                    
-                    UE_LOG(LogTemp, Warning, TEXT("First capture point completed!"));
+                	
                     UpdateMissionState();
                 }
                 else if (CurrentCaptureIndex == 1 && !bSecondCaptureCompleted)
@@ -816,10 +780,8 @@ void UTUIManager::UpdateAllUI()
                     {
                         GameModeRef->LastCapturedPoint = CurrentCapturePoint;
                         //GameModeRef->OnCapturePointCompleted();// 보스 한방에 나와서 주석처리함..(기인)
-                        UE_LOG(LogTemp, Warning, TEXT("Notified GameMode: Second capture completed"));
                     }
-                    
-                    UE_LOG(LogTemp, Warning, TEXT("Second capture point completed!"));
+                	
                     UpdateMissionState();
                 }
             }
@@ -829,7 +791,6 @@ void UTUIManager::UpdateAllUI()
             bNearCapturePoint = false;
             if (PlayerUIWidget->IsCaptureUIVisible())
             {
-                UE_LOG(LogTemp, Warning, TEXT("Hiding capture UI"));
                 HideCaptureUI();
             }
         }
@@ -907,7 +868,7 @@ void UTUIManager::UpdateAllUI()
 
 void UTUIManager::RestartGameUI()
 {
-	UE_LOG(LogTemp,Error,TEXT("Resetting Game UI..."));
+	UE_LOG(LogTemp,Warning,TEXT("Resetting Game UI..."));
 
 	//미션 관련 변수 초기화
 	bWaveActive=false;
@@ -928,7 +889,7 @@ void UTUIManager::RestartGameUI()
 	//히트 감지 변수 초기화
 	LastWeaponAmmo=-1;
 	LastMonsterHPs.Empty();
-
+	
 	//무기 관련 초기화
 	bWeaponSpawned=false;
 	bWeaponPickedUp=false;
@@ -946,6 +907,11 @@ void UTUIManager::RestartGameUI()
 	TrackedMonsters.Empty();
 	WaveSpawnedMonsters.Empty();
 	PreExistingMonsters.Empty();
+	
+	//대시 시스템 리셋
+	LastLocationCheckTime=0.0f;
+	LastDashDetectionTime=0.0f;
+	bDashSystemInitialized=false;
 
 	//UI요소 초기화
 	if (PlayerUIWidget)
@@ -962,6 +928,9 @@ void UTUIManager::RestartGameUI()
 
 		// 알람 숨기기
 		PlayerUIWidget->HideEnemyIncomingAlarm();
+
+		//대시 UI 숨기기
+		PlayerUIWidget->ShowDashReady();
 
 		// 🔧 실제 플레이어 정보로 업데이트
 		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
@@ -1004,17 +973,17 @@ void UTUIManager::RestartGameUI()
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("❌ Failed to cast to ATPlayerCharacter"));
+					//UE_LOG(LogTemp, Error, TEXT("❌ Failed to cast to ATPlayerCharacter"));
 				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("❌ PlayerPawn is NULL"));
+				//UE_LOG(LogTemp, Error, TEXT("❌ PlayerPawn is NULL"));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("❌ Failed to get PlayerController for UI update"));
+			//UE_LOG(LogTemp, Error, TEXT("❌ Failed to get PlayerController for UI update"));
 		}
 
 		
@@ -1046,7 +1015,7 @@ void UTUIManager::RestartGameUI()
 			0.1f,
 			true
 			);
-				UE_LOG(LogTemp, Warning, TEXT("✅ Monitoring systems restarted after delay"));
+				//UE_LOG(LogTemp, Warning, TEXT("✅ Monitoring systems restarted after delay"));
 			},
 			0.5f,
 			false
@@ -1071,8 +1040,7 @@ void UTUIManager::RestartGameUI()
 		false
 		);
 
-	UE_LOG(LogTemp,Warning,TEXT("Game UI reset completed!"));
-	
+		
 }
 
 void UTUIManager::StartHitDetection()
@@ -1111,14 +1079,14 @@ void UTUIManager::CheckForHits()
     ATWeaponBase* Weapon = Player->CurrentWeapon;
     if (!Weapon) return;
     
-    // 🔫 무기 발사 감지 (탄약 변화)
+    // 무기 발사 감지 (탄약 변화)
     int32 CurrentAmmo = Weapon->GetCurrentAmmo();
     
     if (LastWeaponAmmo > 0 && CurrentAmmo < LastWeaponAmmo)
     {
         UE_LOG(LogTemp, Warning, TEXT("🔫 Weapon fired! Ammo: %d -> %d"), LastWeaponAmmo, CurrentAmmo);
         
-        // 🎯 몬스터 HP 변화 체크
+        // 몬스터 HP 변화 체크
         if (CheckMonsterHPChanges())
         {
             // 히트마커 표시!
@@ -1153,8 +1121,6 @@ bool UTUIManager::CheckMonsterHPChanges()
             {
                 if (CurrentHP < LastMonsterHPs[i])
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("🩸 Monster %s HP decreased: %.1f -> %.1f"), 
-                           *TrackedMonsters[i]->GetName(), LastMonsterHPs[i], CurrentHP);
                     return true; // 히트 감지!
                 }
             }
@@ -1169,7 +1135,7 @@ void UTUIManager::UpdateMonsterHPList()
     LastMonsterHPs.Empty();
     
     // 현재 추적 중인 모든 몬스터의 HP 저장
-    for (ATNonPlayerCharacter* Monster : TrackedMonsters)
+    for (ATCharacterBase* Monster : TrackedMonsters)
     {
         if (Monster && IsValid(Monster))
         {
@@ -1184,10 +1150,150 @@ void UTUIManager::TestHitMarker()
     if (PlayerUIWidget)
     {
         PlayerUIWidget->ShowHitMarker();
-        UE_LOG(LogTemp, Warning, TEXT("🎯 Test red hitmarker called"));
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is null!"));
+        //UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is null!"));
+    }
+}
+
+void UTUIManager::DetectTeleportDash()
+{
+    if (!PlayerCharacter || !PlayerUIWidget) return;
+    
+    float CurrentTime = GetWorld()->GetTimeSeconds();
+    FVector CurrentLocation = PlayerCharacter->GetActorLocation();
+    
+    // 팀원분의 정확한 블루프린트 변수 읽기
+    bool bCanDashFromBP = true; // 기본값
+    float TimeValue = 0.0f;
+    float DashDurationValue = 2.0f; // 기본값
+    
+    if (ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(PlayerCharacter))
+    {
+        UClass* PlayerClass = Player->GetClass();
+        
+        // 정확한 변수명으로 검색
+        for (FProperty* Property = PlayerClass->PropertyLink; Property; Property = Property->PropertyLinkNext)
+        {
+            FString PropName = Property->GetName();
+            
+            // bCanDash 변수 읽기
+            if (PropName == TEXT("bCanDash"))
+            {
+                if (FBoolProperty* BoolProp = CastField<FBoolProperty>(Property))
+                {
+                    bCanDashFromBP = BoolProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 bCanDash = %s"), 
+                           bCanDashFromBP ? TEXT("TRUE") : TEXT("FALSE"));
+                }
+            }
+            
+            // Time 변수 읽기
+            else if (PropName == TEXT("Time"))
+            {
+                if (FFloatProperty* FloatProp = CastField<FFloatProperty>(Property))
+                {
+                    TimeValue = FloatProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 Time = %.2f"), TimeValue);
+                }
+            }
+            
+            // DashDuration 변수 읽기
+            else if (PropName == TEXT("DashDuration"))
+            {
+                if (FFloatProperty* FloatProp = CastField<FFloatProperty>(Property))
+                {
+                    DashDurationValue = FloatProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 DashDuration = %.2f"), DashDurationValue);
+                }
+            }
+        }
+    }
+    
+    //  블루프린트 기반 대시 상태 판단
+    bool bCanDash = bCanDashFromBP;
+    float CooldownPercent = 0.0f;
+    
+    if (DashDurationValue > 0.0f)
+    {
+        CooldownPercent = FMath::Clamp(TimeValue / DashDurationValue, 0.0f, 1.0f);
+    }
+    
+    //  UI 업데이트
+    if (bCanDash)
+    {
+        // 대시 사용 가능
+        PlayerUIWidget->ShowDashReady();
+    }
+    else
+    {
+        // 쿨다운 중 - 남은 시간 계산
+        float RemainingCooldown = DashDurationValue - TimeValue;
+        if (RemainingCooldown > 0.0f)
+        {
+            PlayerUIWidget->ShowDashCooldown(RemainingCooldown);
+        }
+        else
+        {
+            // 쿨다운 완료되었는데 bCanDash가 false인 경우
+            PlayerUIWidget->ShowDashReady();
+        }
+    }
+    
+    // 위치 기반 대시 사용 감지 (보조 기능)
+    static FVector StaticLastLocation = FVector::ZeroVector;
+    static float StaticLastCheckTime = 0.0f;
+    static bool bFirstLocationSet = false;
+    static bool bPreviousCanDash = true;
+    
+    if (!bFirstLocationSet)
+    {
+        StaticLastLocation = CurrentLocation;
+        StaticLastCheckTime = CurrentTime;
+        bFirstLocationSet = true;
+        bPreviousCanDash = bCanDash;
+        return;
+    }
+    
+    // 대시 사용 감지 (bCanDash가 true에서 false로 변할 때)
+    if (bPreviousCanDash && !bCanDash)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DASH USED! bCanDash: TRUE → FALSE"));
+    }
+    
+    // 대시 쿨다운 완료 감지 (false에서 true로 변할 때)
+    if (!bPreviousCanDash && bCanDash)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DASH READY! bCanDash: FALSE → TRUE"));
+    }
+    
+    bPreviousCanDash = bCanDash;
+    
+    // 위치 정보 업데이트
+    float TimeDelta = CurrentTime - StaticLastCheckTime;
+    if (TimeDelta >= 0.05f)
+    {
+        float DistanceMoved = FVector::Dist(CurrentLocation, StaticLastLocation);
+        
+        // 대시 사용 시 위치 변화 로그
+        if (!bCanDash && DistanceMoved > 100.0f && TimeDelta < 0.2f)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Position jump detected: %.1f units in %.3fs"), 
+                   DistanceMoved, TimeDelta);
+        }
+        
+        StaticLastLocation = CurrentLocation;
+        StaticLastCheckTime = CurrentTime;
+    }
+    
+    // 🐛 주기적 디버그 로그 (10초마다)
+    static float LastDebugTime = 0.0f;
+    if (CurrentTime - LastDebugTime > 10.0f)
+    {
+        UE_LOG(LogTemp, Warning, TEXT(" Dash Status: bCanDash=%s, Time=%.2f/%.2f, Cooldown=%.1f%%"), 
+               bCanDash ? TEXT("YES") : TEXT("NO"), 
+               TimeValue, DashDurationValue, CooldownPercent * 100.0f);
+        LastDebugTime = CurrentTime;
     }
 }
