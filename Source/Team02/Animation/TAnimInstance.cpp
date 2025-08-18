@@ -55,13 +55,6 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
 	}
-	// if (ATPlayerCharacter* PlayerCharacter = Cast<ATPlayerCharacter>(OwnerCharacter))
-	// {
-	// 	bIsMovingForward = PlayerCharacter->bIsMovingForward;
-	// 	bIsMovingBackward = PlayerCharacter->bIsMovingBackward;
-	// 	bIsMovingRight = PlayerCharacter->bIsMovingRight;
-	// 	bIsMovingLeft = PlayerCharacter->bIsMovingLeft;
-	// }
 }
 
 void UTAnimInstance::AnimNotify_CheckHit()

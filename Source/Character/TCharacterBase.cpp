@@ -73,8 +73,6 @@ void ATCharacterBase::EquipWeapon(ATWeaponBase* NewWeapon)
 	case EWeaponType::Rifle:
 	case EWeaponType::Shotgun:
 		SocketToAttach = TEXT("Rifle_Socket");
-		UE_LOG(LogTemp, Warning, TEXT("SocketToAttach : %s"), *SocketToAttach.ToString());
-				
 		break;
 	}
 	
@@ -132,7 +130,6 @@ void ATCharacterBase::EndAttack(UAnimMontage* InMontage, bool bInterruped)
 
 	if (OnNormalAttackMontageEndedDelegate.IsBound() == true)
 	{
-		//바인딩 했던 함수 해재
 		OnNormalAttackMontageEndedDelegate.Unbind();
 	}
 }
