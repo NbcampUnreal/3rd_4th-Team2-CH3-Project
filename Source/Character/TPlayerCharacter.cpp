@@ -163,7 +163,7 @@ void ATPlayerCharacter::InputEndZoom(const FInputActionValue& InputActionValue)
 
 void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
 {
-  if (CurrentWeapon)
+  if (CurrentWeapon && CurrentWeapon->CanFire())
   {
     // (1) 카메라 위치/회전 얻기
     FVector CameraLoc;
@@ -192,7 +192,6 @@ void ATPlayerCharacter::OnFire(const FInputActionValue& InValue)
     // (5) 무기에게 발사 명령 (위치, 방향 넘기기)
     CurrentWeapon->FireFrom(MuzzleLoc, FireDir); 
     
-
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (IsValid(AnimInstance) == true)
     {
@@ -209,8 +208,6 @@ void ATPlayerCharacter::OnReload(const FInputActionValue& InValue)
   if (CurrentWeapon)
   {
     CurrentWeapon->Reload();
-
-    
   }
 }
 
