@@ -33,12 +33,6 @@ ATAIController::ATAIController()
 	
 }
 
-void ATAIController::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 void ATAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -58,8 +52,6 @@ void ATAIController::OnPossess(APawn* InPawn)
 	}
 }
 
-
-
 //플레이를 종료할때 출력되는 함수
 void ATAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
@@ -67,8 +59,6 @@ void ATAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	Super::EndPlay(EndPlayReason);
 }
-
-
 
 void ATAIController::BeginAI(APawn* InPawn)
 {
