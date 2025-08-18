@@ -28,16 +28,12 @@ public:
 	void HideHealthBar();
 
 protected:
-	// widget binding
-
+	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UProgressBar> BossHealthBar;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> BossName;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> HealthText;
-
-
-
 	
 };

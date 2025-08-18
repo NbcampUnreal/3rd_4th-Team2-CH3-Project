@@ -67,16 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowDashReady();
 
-	UFUNCTION(BlueprintCallable)
-	void ShowDashCooldown(float RemainingSeconds);
-
-	UFUNCTION(BlueprintCallable)
-	void HideDashText();
-
-
 
 protected:
-	// ⭐ 각 이름이 한 번씩만 나와야 함
+	// 바인딩 리스트
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UProgressBar> HPBar;
 
@@ -106,9 +99,7 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> WeaponNameText;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UWidget> Crosshair;
+	
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UWidget> HitMarker;
@@ -143,14 +134,8 @@ private:
 
 	//히트 마커 타이머
 	FTimerHandle HitMarkerTimerHandle;
-
-	//힌트 감지 타이머
-	FTimerHandle HitDetectionTimer;
-
-	// 이전 상태 저장용
-	int32 LastWeaponAmmo = -1;
-	TArray<float> LastMonsterHPs;
-	bool bLastFireButtonPressed = false;
+	
+	
 	
 	
 	

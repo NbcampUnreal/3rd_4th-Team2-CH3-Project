@@ -22,7 +22,6 @@ void UTMonsterHealthBarWidget::SetMonsterNameByType(AActor* OwnerMonster)
 {
 	if (!OwnerMonster || !MonsterNameText)
 	{
-		UE_LOG(LogTemp,Error,TEXT("OwnerMonster or MonsterNameText is null"));
 		return;
 	}
 
@@ -44,9 +43,6 @@ void UTMonsterHealthBarWidget::SetMonsterNameByType(AActor* OwnerMonster)
 	}
 	
 	MonsterNameText->SetText(FText::FromString(MonsterTypeName));
-	UE_LOG(LogTemp, Warning, TEXT("🏷️ Monster name set to: %s for %s"), 
-		  *MonsterTypeName, *OwnerMonster->GetName());
-	
 }
 
 
