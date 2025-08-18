@@ -49,7 +49,7 @@ void ATCapturePoint::Tick(float DeltaTime)
 
 		if (CapturePercent >= 100.f)
 		{
-			CompleteCapture(); // << 여기서만 한 번 호출!
+			CompleteCapture(); 
 		}
 	}
 
@@ -145,7 +145,7 @@ void ATCapturePoint::OnOverlapEnd(UPrimitiveComponent* OverlappedComp,
 
 	if (OtherActor->ActorHasTag(TEXT("Enemy")))
 	{
-		// 깔끔하게 파괴 델리게이트도 해제(선택)
+		// 깔끔하게 파괴 델리게이트도 해제
 		OtherActor->OnDestroyed.RemoveDynamic(this, &ATCapturePoint::OnOverlappingEnemyDestroyed);
 
 		EnemiesInArea.Remove(OtherActor);

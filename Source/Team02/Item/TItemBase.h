@@ -38,11 +38,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Root")
 	USceneComponent* SceneRoot;
-	// ★★ 총 본체(3D 모델) ★★
+	// 총 본체(3D 모델) 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
 	UStaticMeshComponent* StaticMesh;
 
-	// ★★ 충돌 박스(혹은 캡슐) ★★
+	// 충돌 박스(혹은 캡슐)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
 	UBoxComponent* Collider; // 박스 형태, 필요에 따라 UCapsuleComponent, USphereComponent 등도 가능
 
