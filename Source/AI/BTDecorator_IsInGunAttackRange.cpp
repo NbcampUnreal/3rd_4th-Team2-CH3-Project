@@ -3,7 +3,6 @@
 #include "Controller/TSwordAIController.h"
 #include "Character/TNonPlayerCharacter.h"
 #include "Character/TNonPlayerCharacterSword.h"
-#include "TAIBossMonster/TAIBossMonster.h"
 #include "TAIBossMonster/TBossAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -20,10 +19,9 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 	checkf(bResult == true, TEXT("Super::CalculateRawConditionValue() function has returned false."));
 
 	ATAIController* AIController1 = Cast<ATAIController>(OwnerComp.GetAIOwner());
-	/*ATBossAIController* AIController2 = Cast<ATBossAIController>(OwnerComp.GetAIOwner());*/
 	ATSwordAIController* AIController3 = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
 	
-	
+	//원거리 NPC 공격 범위
 	if (IsValid(AIController1) == true)
 	{
 
@@ -41,19 +39,7 @@ bool UBTDecorator_IsInGunAttackRange::CalculateRawConditionValue(UBehaviorTreeCo
 		}
 	}
 
-	/*if (IsValid(AIController2) == true)
-	{
-
-		ATAIBossMonster* NPC = Cast<ATAIBossMonster>(AIController2->GetPawn());
-		checkf(IsValid(NPC)==true, TEXT("NPC is invalid"));
-
-		ATCharacterBase* TargetPlayerCharacter = Cast<ATCharacterBase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ATBossAIController::TargetCharacterKey));
-		if (IsValid(TargetPlayerCharacter)==true && TargetPlayerCharacter->IsPlayerControlled()==true)
-		{
-			return NPC->GetDistanceTo(TargetPlayerCharacter) <= (AttackRange - 1200);
-		}
-	}*/
-
+	//근점 NPC 공격 범위
 	if (IsValid(AIController3) == true)
 	{
 
