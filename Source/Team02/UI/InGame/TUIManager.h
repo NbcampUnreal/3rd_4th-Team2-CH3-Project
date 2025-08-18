@@ -196,7 +196,7 @@ protected:
 
 	//현재 추적 중인 몬스터들
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> TrackedMonsters;
+	TArray<class ATCharacterBase*> TrackedMonsters;
 
 	// 이전 프레임 몬스터 수(변화 감지용)
 	UPROPERTY()
@@ -212,10 +212,10 @@ protected:
 
 	//웨이브로 스폰된 몬스터만 추적
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> WaveSpawnedMonsters;
+	TArray<class ATCharacterBase*> WaveSpawnedMonsters;
 	
 	UPROPERTY()
-	TArray<class ATNonPlayerCharacter*> PreExistingMonsters;
+	TArray<class ATCharacterBase*> PreExistingMonsters;
 
 	//웨이브 시작시 총 몬스터 수
 	UPROPERTY()
