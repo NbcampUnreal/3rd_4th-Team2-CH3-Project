@@ -15,6 +15,7 @@ bool UBTDecorator_StartWave::CalculateRawConditionValue(UBehaviorTreeComponent& 
 	
 	ATAIController* AIController = Cast<ATAIController>(OwnerComp.GetAIOwner());
 
+	//원거리 NPC 용
 	if (IsValid(AIController) == true)
 	{
 		UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AIController->GetBlackboardComponent());
@@ -29,7 +30,8 @@ bool UBTDecorator_StartWave::CalculateRawConditionValue(UBehaviorTreeComponent& 
 	}
 
 	ATSwordAIController* AISwordController = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
-	
+
+	//근접 NPC용
 	if (IsValid(AISwordController) == true)
 	{
 		UBlackboardComponent* BlackboardComponent = Cast<UBlackboardComponent>(AISwordController->GetBlackboardComponent());
