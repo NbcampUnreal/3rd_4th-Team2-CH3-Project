@@ -4,14 +4,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
-#include "Components/Button.h"
-
-
-// ATitleUIPlayerController::ATitleUIPlayerController()
-// 	: MainMenuWidgetInstance(nullptr),
-// 	  MainMenuWidgetClass(nullptr)
-// {
-// }
 
 void ATitleUIPlayerController::BeginPlay()
 {

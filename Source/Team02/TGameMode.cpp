@@ -59,8 +59,6 @@ void ATGameMode::BeginPlay()
 // 게임 상태 초기화
 void ATGameMode::InitializeGameState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Initializing Game State..."));
-	
 	// GameMode 상태 초기화
 	CurrentWave = 0;
 	MaxWave = 1;
@@ -77,26 +75,17 @@ void ATGameMode::InitializeGameState()
 			Spawner->SetSpawnerActive(false);
 		}
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Game State Initialized!"));
 }
 
 // UIManager 초기화
 void ATGameMode::InitializeUIManager()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Initializing UIManager..."));
-	
 	if (UGameInstance* GI = GetGameInstance())
 	{
 		UTUIManager* UIManager = GI->GetSubsystem<UTUIManager>();
 		if (UIManager)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("UIManager found, calling RestartGameUI()"));
 			UIManager->RestartGameUI();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UIManager not found during initialization!"));
 		}
 	}
 }
@@ -229,55 +218,6 @@ void ATGameMode::OnZoneOverlap(int32 ZoneIndex)
 	
 }
 
-// 플레이어 리스폰
-void ATGameMode::RespawnPlayer(AController* DeadController)
-{
-	if (!DeadController) return;
-
-	// 1. 게임 일시정지 해제
-	if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		UGameplayStatics::SetGamePaused(GetWorld(), false);
-	}
-
-	// 2. 입력 모드 게임 전용으로 변경
-	if (APlayerController* PC = Cast<APlayerController>(DeadController))
-	{
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = false; // 커서 숨기기
-	}
-
-	// 3. 기존 Pawn 제거
-	if (APawn* Pawn = DeadController->GetPawn())
-	{
-		DeadController->UnPossess();
-		Pawn->Destroy();
-	}
-
-	// 4. 리스폰 위치 결정
-	FTransform RespawnTransform;
-	if (LastCapturedPoint)
-	{
-		RespawnTransform = LastCapturedPoint->RespawnTransform;
-	}
-	else if (AActor* PlayerStart = FindPlayerStart(DeadController))
-	{
-		RespawnTransform = PlayerStart->GetActorTransform();
-	}
-	else
-	{
-		return;
-	}
-
-	// 5. 새 Pawn 스폰 후 Possess
-	APawn* NewPawn = SpawnDefaultPawnAtTransform(DeadController, RespawnTransform);
-	if (!NewPawn) return;
-
-	DeadController->Possess(NewPawn);
-}
-
-
 // 플레이어 사망
 void ATGameMode::OnPlayerDied(AController* DeadController)
 {
@@ -300,8 +240,6 @@ void ATGameMode::OnPlayerDied(AController* DeadController)
 // RestartGame 함수 오버라이드
 void ATGameMode::RestartGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ATGameMode::RestartGame() override called"));
-    
 	// 부모 클래스의 RestartGame 호출
 	Super::RestartGame();
     
@@ -312,27 +250,15 @@ void ATGameMode::RestartGame()
 // Blueprint에서 호출할 수 있는 함수 구현
 void ATGameMode::RestartGameFromUI()
 {
-    UE_LOG(LogTemp, Warning, TEXT("ATGameMode::RestartGameFromUI() called"));
-    
     // 1. UIManager 가져오기
     if (UGameInstance* GI = GetGameInstance())
     {
         UTUIManager* UIManager = GI->GetSubsystem<UTUIManager>();
         if (UIManager)
         {
-            UE_LOG(LogTemp, Warning, TEXT("UIManager found, calling RestartGameUI()"));
-            
             // 2. UIManager의 RestartGameUI 호출
             UIManager->RestartGameUI();
         }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("UIManager not found!"));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("GameInstance not found!"));
     }
     
     // 3. GameMode 자체 상태 초기화
@@ -372,12 +298,9 @@ void ATGameMode::RestartGameFromUI()
         if (IsValid(Spawner))
         {
             Spawner->SetSpawnerActive(false);
-            UE_LOG(LogTemp, Warning, TEXT("Spawner %s deactivated"), *Spawner->GetName());
         }
     }
     
     // 6. LastCapturedPoint 초기화
     LastCapturedPoint = nullptr;
-    
-    UE_LOG(LogTemp, Warning, TEXT("🎮 Game restart completed!"));
 }

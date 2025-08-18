@@ -14,6 +14,14 @@ class TEAM02_API AOutGameUIManager : public AActor
 	
 public:
 	AOutGameUIManager();
+
+	// Restart 시 호출 (이벤트 해제 → UI 제거 → 이벤트 재구독)
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void HandleRestart();
+	
+	// Quit 버튼용 함수 선언 추가
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void QuitToMainMenu();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -51,13 +59,5 @@ private:
 
 	// UI와 게임 상태 초기화 (Restart 대비)
 	void ResetUIAndState();
-
-public:
-	// Restart 시 호출 (이벤트 해제 → UI 제거 → 이벤트 재구독)
-	UFUNCTION(BlueprintCallable, Category = "Game")
-	void HandleRestart();
 	
-	// Quit 버튼용 함수 선언 추가
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void QuitToMainMenu();
 };

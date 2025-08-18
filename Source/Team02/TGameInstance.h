@@ -6,9 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "TGameInstance.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class TEAM02_API UTGameInstance : public UGameInstance
 {
