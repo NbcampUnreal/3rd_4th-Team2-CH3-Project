@@ -81,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Reload();
 
+	// 재장전 완료 콜백
+	UFUNCTION()
+	void FinishReload();
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual bool CanFire() const;
 	
@@ -113,8 +117,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
 	USoundBase* FireSound;
 protected:
-	FTimerHandle FireRateTimerHandle;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|State")
+	bool bIsReloading = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|State")
 	bool bCanFire = true;
+	FTimerHandle FireRateTimerHandle;
+	
 	
 	FTimerHandle ReloadTimerHandle;
 

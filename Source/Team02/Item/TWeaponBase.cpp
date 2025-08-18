@@ -154,10 +154,15 @@ void ATWeaponBase::Reload()
 		return;
 	}
 
-	int32 AmmoToReload = FMath::Min(NeedAmmo, GetTotalAmmo());
+	
+	bIsReloading = true;
 
-	SetCurrentAmmo(GetCurrentAmmo() + AmmoToReload);
-	SetTotalAmmo(GetTotalAmmo() - AmmoToReload);
+	// 여기서 즉시 탄약을 채우지 말고, ReloadTime 뒤에 채우도록 처리
+	GetWorld()->GetTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this, &ATWeaponBase::FinishReload,
+		ReloadTime, false
+	);
 	
 
 	if (ReloadMontage) // Reload시에 재생하는 몽타주 구현
@@ -175,7 +180,8 @@ void ATWeaponBase::Reload()
 
 bool ATWeaponBase::CanFire() const
 {
-	return CurrentAmmo > 0 && bCanFire;
+	// 기본: 탄약 있고, 발사 쿨타임 끝났고, 재장전 중이 아니어야 함
+	return (GetCurrentAmmo() > 0) && bCanFire && !bIsReloading;
 }
 
 
@@ -228,4 +234,17 @@ void ATWeaponBase::FireSounds(FVector& MuzzleLoc)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, MuzzleLoc);
 	}
+}
+
+
+void ATWeaponBase::FinishReload()
+{
+	// 실제 장전 처리 (최대 탄창까지, 예비 탄약에서 차감)
+	const int32 NeedAmmo = MaxAmmo - GetCurrentAmmo();
+	const int32 AmmoToLoad = FMath::Min(NeedAmmo, GetTotalAmmo());
+
+	SetCurrentAmmo(GetCurrentAmmo() + AmmoToLoad);
+	SetTotalAmmo(GetTotalAmmo() - AmmoToLoad);
+
+	bIsReloading = false;
 }
