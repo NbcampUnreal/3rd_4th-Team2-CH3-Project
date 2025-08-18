@@ -15,14 +15,12 @@ public:
 	ATGameState();
 	virtual void BeginPlay() override;
 	
-	UFUNCTION(BlueprintCallable, Category="Game State")
+	UFUNCTION(BlueprintCallable, Category="Game")
 	void GameOver();
-	UFUNCTION(BlueprintCallable, Category="Game State")
+	UFUNCTION(BlueprintCallable, Category="Game")
 	void GameClear();
 
 	void GameStart();
 	void GameEnd();
 	void UpdateHUD();
-	// 탈환지와 관련된 코드 필요
-	// 레드존과 관련된 코드 필요
 };

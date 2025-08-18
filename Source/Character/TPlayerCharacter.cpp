@@ -275,27 +275,3 @@ void ATPlayerCharacter::HandleOnPostCharacterDead()
   }
 }
 
-void ATPlayerCharacter::RequestRespawn()
-{
-  // 컨트롤러 소유자 구하기
-  AController* PlayerController = GetController();
-
-  // 1. 게임모드에 RespawnPlayer 요청 (LastCapturedPoint 위치)
-  if (GetWorld())
-  {
-    ATGameMode* GM = Cast<ATGameMode>(GetWorld()->GetAuthGameMode());
-    if (GM && PlayerController)
-    {
-      GM->RespawnPlayer(PlayerController);
-    }
-  }
-
-  if (CurrentWeapon)
-  {
-    CurrentWeapon -> Destroy();
-  }
-  
-  // 2. 본인은 제거
-  Destroy();
-}
-
