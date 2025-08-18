@@ -22,6 +22,7 @@ ATNonPlayerCharacter::ATNonPlayerCharacter()
 	: bIsNowAttacking(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
 	//npc 컨트롤 가져오기
 	AIControllerClass = ATAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -30,6 +31,7 @@ ATNonPlayerCharacter::ATNonPlayerCharacter()
 void ATNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	//플레이어 캐릭터가 아니라면
 	if (false == IsPlayerControlled())
 	{
@@ -50,7 +52,7 @@ void ATNonPlayerCharacter::BeginPlay()
 
 void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 {
-	if (Weapon)
+	if (IsValid(Weapon) == true)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
@@ -60,7 +62,7 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 		//부착 규칙
 		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 		
-		if (CurrentRifle)
+		if (IsValid(CurrentRifle) == true)
 		{
 			//소켓에 부착
 			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
@@ -72,7 +74,6 @@ void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 			{
 				WeaponRoot->SetSimulatePhysics(false);
 			}
-				
 		}
 	}
 }

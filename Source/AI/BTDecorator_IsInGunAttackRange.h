@@ -14,11 +14,10 @@ class TEAM02_API UBTDecorator_IsInGunAttackRange : public UBTDecorator
 
 public:
 	UBTDecorator_IsInGunAttackRange();
+	
+	//공격 범위
+	static const float AttackRange;
 
 protected:
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
-
-public:
-	//공격 범위
-	static const float AttackRange;
 };

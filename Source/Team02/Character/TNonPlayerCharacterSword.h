@@ -27,6 +27,19 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void AttachWeapon();
+	
+	void HandleOnCheckSwordHit();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackSwordMontage;
+
+	static int32 SwordAttackSwordDebug;
+	
+	bool bIsNowAttacking;
+
 protected:
 	virtual void BeginAttack() override;
 
@@ -44,26 +57,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float AttackDamage;
 
-public: 
-	static int32 SwordAttackSwordDebug;
-	
-	bool bIsNowAttacking;
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-	void AttachWeapon();
-
-	UFUNCTION()
-	void HandleOnCheckSwordHit();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AttackSwordMontage;
-	
-	virtual void HandleOnPostCharacterDead() override;
-	
-protected:
-	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackSwordRange = 50.f;
 
@@ -72,4 +65,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bSwordNPCIsDead;
+
+	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;
 };

@@ -21,7 +21,8 @@ void UBTService_IsInWave_DetectPlayer::TickNode(UBehaviorTreeComponent& OwnerCom
 
 	ATAIController* GunAIC = Cast<ATAIController>(OwnerComp.GetAIOwner());
 	ATSwordAIController* SwordAIC = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
-	
+
+	//원거리 NPC 용
 	if (IsValid(GunAIC) == true)
 	{
 		ATNonPlayerCharacter* NPC = Cast<ATNonPlayerCharacter>(GunAIC->GetPawn());
@@ -157,6 +158,7 @@ void UBTService_IsInWave_DetectPlayer::TickNode(UBehaviorTreeComponent& OwnerCom
 		}
 	}
 
+	//근접 NPC 용
 	if (IsValid(SwordAIC) == true)
 	{
 		ATNonPlayerCharacterSword* NPC = Cast<ATNonPlayerCharacterSword>(SwordAIC->GetPawn());

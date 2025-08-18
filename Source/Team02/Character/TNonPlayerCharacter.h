@@ -24,6 +24,17 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon);
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
+	void HandleOnCheckHit();
+
+	static int32 ShowGunAttackDebug;
+
+	bool bIsNowAttacking;
+	
+
 protected:
 	virtual void BeginAttack();
 
@@ -45,21 +56,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
 	bool SwordNPCIsDead;
-
-public: 
 	
-	bool bIsNowAttacking;
-
-	void AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon);
-
-	static int32 ShowGunAttackDebug;
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-	UFUNCTION()
-	virtual void HandleOnCheckHit();
-	
-protected:
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
 	
 };

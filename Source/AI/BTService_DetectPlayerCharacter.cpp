@@ -5,7 +5,6 @@
 #include "Character/TNonPlayerCharacter.h"
 #include "Character/TNonPlayerCharacterSword.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Engine/OverlapResult.h"
 
 UBTService_DetectPlayerCharacter::UBTService_DetectPlayerCharacter(const FObjectInitializer& ObjectInitializer)
@@ -21,7 +20,8 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 
 	ATAIController* GunAIC = Cast<ATAIController>(OwnerComp.GetAIOwner());
 	ATSwordAIController* SwordAIC = Cast<ATSwordAIController>(OwnerComp.GetAIOwner());
-	
+
+	//원거리 NPC 시야
 	if (IsValid(GunAIC) == true)
 	{
 		ATNonPlayerCharacter* NPC = Cast<ATNonPlayerCharacter>(GunAIC->GetPawn());
@@ -186,6 +186,7 @@ void UBTService_DetectPlayerCharacter::TickNode(UBehaviorTreeComponent& OwnerCom
 		}
 	}
 
+	//근접 NPC 시야
 	if (IsValid(SwordAIC) == true)
 	{
 		ATNonPlayerCharacterSword* NPC = Cast<ATNonPlayerCharacterSword>(SwordAIC->GetPawn());
