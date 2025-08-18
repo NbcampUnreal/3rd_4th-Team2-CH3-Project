@@ -27,9 +27,6 @@ public:
 
 	virtual void HandleOnPostCharacterDead() override;
 
-	UFUNCTION()
-	void RequestRespawn();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 

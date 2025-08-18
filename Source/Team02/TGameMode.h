@@ -53,8 +53,6 @@ public:
 
 	UFUNCTION()
 	void OnZoneOverlap(int32 ZoneIndex);
-	UFUNCTION(BlueprintCallable, Category = "Respawn")
-	void RespawnPlayer(AController* DeadController);
 
 	// 사망 처리
 	UFUNCTION()
