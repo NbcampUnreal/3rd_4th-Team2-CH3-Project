@@ -107,38 +107,7 @@ void ATWeaponBase::FireFrom(FVector MuzzleLoc, FVector FireDir)
     bCanFire = false;
     GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATWeaponBase::ResetCanFire, FireRate, false); //:contentReference[oaicite:4]{index=4}
     SetCurrentAmmo(GetCurrentAmmo() - 1); 
-
-	// // 카메라 기준 → 조준선 (빨강)
-	// DrawDebugLine(
-	// 	GetWorld(),
-	// 	CamLoc,
-	// 	CamEnd,
-	// 	FColor::Red,
-	// 	false, 2.f, 0, 1.f
-	// );
-	//
-	// // 머즐 기준 → 발사선 (파랑)
-	// DrawDebugLine(
-	// 	GetWorld(),
-	// 	MuzzleLoc,
-	// 	TraceEnd,
-	// 	FColor::Blue,
-	// 	false, 2.f, 0, 1.f
-	// );
-
-	// // 카메라가 맞춘 위치 (노랑)
-	// DrawDebugSphere(
-	// 	GetWorld(),
-	// 	CamHit.bBlockingHit ? CamHit.ImpactPoint : CamEnd,
-	// 	10.f, // 반지름
-	// 	12,   // 세그먼트 수
-	// 	FColor::Yellow,
-	// 	false, 2.f
-	// );
-    // --- (디버그 원하면 주석 해제) ---
-    // DrawDebugLine(GetWorld(), CamLoc, AimPoint, FColor::Red,   false, 1.5f, 0, 2.f);  // 카메라선
-    // DrawDebugLine(GetWorld(), Start,  FinalPoint, FColor::Blue, false, 1.5f, 0, 2.f);  // 머즐선(판정/이펙트와 동일)
-    // DrawDebugSphere(GetWorld(), FinalPoint, 6.f, 12, FColor::Yellow, false, 1.5f);
+	
 }
 
 void ATWeaponBase::Reload()
