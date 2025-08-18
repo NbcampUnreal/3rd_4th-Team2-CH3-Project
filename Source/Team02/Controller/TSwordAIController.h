@@ -19,25 +19,19 @@ class TEAM02_API ATSwordAIController : public AAIController
 
 public:
 	ATSwordAIController();
-
-protected:
-	virtual void BeginPlay() override;
-
-	virtual void OnPossess(APawn* InPawn) override;
 	
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	TObjectPtr<UBlackboardData> SwordNPCBlackboardDataAsset;
 
-	void BeginAI(APawn* InPawn);
-
-	void EndAI();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	TObjectPtr<UBehaviorTree> SwordNPCBehaviorTree;
 
 public:
 	//경계 반원 크기
 	float SwordNPCPatrolRadius;
-
 	//AI디버깅 용
 	static int32 ShowSwordAIDebug;
-
 	//경계 시작 지점
 	static const FName SwordNPCStartPatrolLocationKey;
 	//경계 종료 지점
@@ -51,13 +45,12 @@ public:
 	//보스 점령지 위치
 	static const FName SwordBossCapturePointKey;
 
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+	
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void BeginAI(APawn* InPawn);
 
-private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	TObjectPtr<UBlackboardData> SwordNPCBlackboardDataAsset;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	TObjectPtr<UBehaviorTree> SwordNPCBehaviorTree;
-
+	void EndAI();
 };

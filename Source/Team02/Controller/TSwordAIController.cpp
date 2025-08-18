@@ -5,8 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Area/TCapturePoint.h"
 #include "TGameMode.h"
-#include "Navigation/PathFollowingComponent.h"
-#include "GameFramework/Character.h"
 
 int32 ATSwordAIController::ShowSwordAIDebug(0);
 
@@ -30,12 +28,6 @@ ATSwordAIController::ATSwordAIController()
 	
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BrainComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("SwordNPCBrainComponent"));
-	
-}
-
-void ATSwordAIController::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 void ATSwordAIController::OnPossess(APawn* InPawn)
@@ -55,8 +47,6 @@ void ATSwordAIController::OnPossess(APawn* InPawn)
 	{
 		GameMode->RegisterAISwordController(this);
 	}
-	
-	
 }
 
 //플레이를 종료할때 출력되는 함수
@@ -66,7 +56,6 @@ void ATSwordAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	Super::EndPlay(EndPlayReason);
 }
-
 
 void ATSwordAIController::BeginAI(APawn* InPawn)
 {
@@ -90,6 +79,7 @@ void ATSwordAIController::BeginAI(APawn* InPawn)
 				TArray<AActor*> FoundCapturePoints;
 				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATCapturePoint::StaticClass(), FoundCapturePoints);
 
+				//웨이브에 따라 점령지 위치 바꾸도록 설정
 				if (FoundCapturePoints.Num() > 0)
 				{
 					if (GameMode->WaveIndex == 0)
@@ -104,7 +94,8 @@ void ATSwordAIController::BeginAI(APawn* InPawn)
 					}
 				}
 			}
-			
+
+			//디버깅용
 			if (ShowSwordAIDebug == 1)
 			{
 				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("BeginAI()")));
