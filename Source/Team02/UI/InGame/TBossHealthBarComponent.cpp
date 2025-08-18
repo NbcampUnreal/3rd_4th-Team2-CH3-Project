@@ -29,10 +29,7 @@ void UTBossHealthBarComponent::BeginPlay()
 		BossHealthBarWidgetComponent->AttachToComponent(
 			OwnerCharacter->GetMesh(),
 			FAttachmentTransformRules::KeepRelativeTransform);
-
-		UE_LOG(LogTemp,Warning,TEXT("Boss Widget attached to Char Mesh"));
 	}
-
 	InitializeBossHealthBar();
 	
 }
@@ -41,8 +38,7 @@ void UTBossHealthBarComponent::BeginPlay()
 void UTBossHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// 체력 변화 감지 및 업데이트
+	
 	if (OwnerCharacter)
 	{
 		float CurrentHP=OwnerCharacter->GetCurrentHP();
@@ -94,9 +90,6 @@ void UTBossHealthBarComponent::InitializeBossHealthBar()
 
 		// 체력바가 플레이어 카메라 바라보게끔
 		BossHealthBarWidgetComponent->SetTwoSided(true);
-
-		//오류 점검용 로그
-		UE_LOG(LogTemp,Warning,TEXT("Boss Widget setup!"));
 		
 	}
 }
