@@ -44,12 +44,14 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
 		}
-	
+
+		//원거리 NPC 이동 확인 변수용
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
-
+		
+		//근점 NPC 이동 확인 변수용
 		if (ATNonPlayerCharacterSword* OwnerNPC = Cast<ATNonPlayerCharacterSword>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
@@ -81,6 +83,7 @@ void UTAnimInstance::AnimNotify_CheckSwordHit()
 	}
 }
 
+//디졸브용 노티파이 델리게이트로 방송
 void UTAnimInstance::AnimNotify_BeginDissolve()
 {
 	if (OnBeginDissolve.IsBound() == true)
