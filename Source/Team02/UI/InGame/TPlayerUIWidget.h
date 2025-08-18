@@ -63,7 +63,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowHitMarker();
 
-	
+	// Dash Text 관련
+	UFUNCTION(BlueprintCallable)
+	void ShowDashReady();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowDashCooldown(float RemainingSeconds);
+
+	UFUNCTION(BlueprintCallable)
+	void HideDashText();
 
 
 
@@ -103,7 +111,10 @@ protected:
 	TObjectPtr<UWidget> Crosshair;
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UWidget> HitMarker; 
+	TObjectPtr<UWidget> HitMarker;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> DashText;
 
 	//타이밍 애니메이션 변수
 	UPROPERTY()
@@ -140,7 +151,7 @@ private:
 	int32 LastWeaponAmmo = -1;
 	TArray<float> LastMonsterHPs;
 	bool bLastFireButtonPressed = false;
-    
+	
 	
 	
 };

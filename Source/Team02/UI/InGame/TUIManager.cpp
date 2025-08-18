@@ -20,8 +20,9 @@ void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	//테스트 로그
-	UE_LOG(LogTemp,Warning,TEXT("UIManager Initialized!!"));
+	//대시 감지 변수 초기화
+	LastDashDetectionTime=0.0f;
+	bDashSystemInitialized=false;
 }
 
 void UTUIManager::Deinitialize()
@@ -768,6 +769,8 @@ void UTUIManager::UpdateAllUI()
 	UpdatePlayerHP();
 	UpdatePlayerAmmo();
 	UpdateWeaponInfo();
+	DetectTeleportDash();
+	
 	
 // 거점 상태 감시 및 UI 업데이트
     if (CurrentCapturePoint && PlayerUIWidget)
@@ -928,7 +931,7 @@ void UTUIManager::RestartGameUI()
 	//히트 감지 변수 초기화
 	LastWeaponAmmo=-1;
 	LastMonsterHPs.Empty();
-
+	
 	//무기 관련 초기화
 	bWeaponSpawned=false;
 	bWeaponPickedUp=false;
@@ -946,6 +949,11 @@ void UTUIManager::RestartGameUI()
 	TrackedMonsters.Empty();
 	WaveSpawnedMonsters.Empty();
 	PreExistingMonsters.Empty();
+	
+	//대시 시스템 리셋
+	LastLocationCheckTime=0.0f;
+	LastDashDetectionTime=0.0f;
+	bDashSystemInitialized=false;
 
 	//UI요소 초기화
 	if (PlayerUIWidget)
@@ -962,6 +970,9 @@ void UTUIManager::RestartGameUI()
 
 		// 알람 숨기기
 		PlayerUIWidget->HideEnemyIncomingAlarm();
+
+		//대시 UI 숨기기
+		PlayerUIWidget->ShowDashReady();
 
 		// 🔧 실제 플레이어 정보로 업데이트
 		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
@@ -1189,5 +1200,146 @@ void UTUIManager::TestHitMarker()
     else
     {
         UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget is null!"));
+    }
+}
+
+void UTUIManager::DetectTeleportDash()
+{
+    if (!PlayerCharacter || !PlayerUIWidget) return;
+    
+    float CurrentTime = GetWorld()->GetTimeSeconds();
+    FVector CurrentLocation = PlayerCharacter->GetActorLocation();
+    
+    // 팀원분의 정확한 블루프린트 변수 읽기
+    bool bCanDashFromBP = true; // 기본값
+    float TimeValue = 0.0f;
+    float DashDurationValue = 2.0f; // 기본값
+    
+    if (ATPlayerCharacter* Player = Cast<ATPlayerCharacter>(PlayerCharacter))
+    {
+        UClass* PlayerClass = Player->GetClass();
+        
+        // 정확한 변수명으로 검색
+        for (FProperty* Property = PlayerClass->PropertyLink; Property; Property = Property->PropertyLinkNext)
+        {
+            FString PropName = Property->GetName();
+            
+            // bCanDash 변수 읽기
+            if (PropName == TEXT("bCanDash"))
+            {
+                if (FBoolProperty* BoolProp = CastField<FBoolProperty>(Property))
+                {
+                    bCanDashFromBP = BoolProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 bCanDash = %s"), 
+                           bCanDashFromBP ? TEXT("TRUE") : TEXT("FALSE"));
+                }
+            }
+            
+            // Time 변수 읽기
+            else if (PropName == TEXT("Time"))
+            {
+                if (FFloatProperty* FloatProp = CastField<FFloatProperty>(Property))
+                {
+                    TimeValue = FloatProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 Time = %.2f"), TimeValue);
+                }
+            }
+            
+            // DashDuration 변수 읽기
+            else if (PropName == TEXT("DashDuration"))
+            {
+                if (FFloatProperty* FloatProp = CastField<FFloatProperty>(Property))
+                {
+                    DashDurationValue = FloatProp->GetPropertyValue_InContainer(Player);
+                    UE_LOG(LogTemp, Warning, TEXT("🔍 DashDuration = %.2f"), DashDurationValue);
+                }
+            }
+        }
+    }
+    
+    //  블루프린트 기반 대시 상태 판단
+    bool bCanDash = bCanDashFromBP;
+    float CooldownPercent = 0.0f;
+    
+    if (DashDurationValue > 0.0f)
+    {
+        CooldownPercent = FMath::Clamp(TimeValue / DashDurationValue, 0.0f, 1.0f);
+    }
+    
+    // 🎨 UI 업데이트
+    if (bCanDash)
+    {
+        // 대시 사용 가능
+        PlayerUIWidget->ShowDashReady();
+    }
+    else
+    {
+        // 쿨다운 중 - 남은 시간 계산
+        float RemainingCooldown = DashDurationValue - TimeValue;
+        if (RemainingCooldown > 0.0f)
+        {
+            PlayerUIWidget->ShowDashCooldown(RemainingCooldown);
+        }
+        else
+        {
+            // 쿨다운 완료되었는데 bCanDash가 false인 경우
+            PlayerUIWidget->ShowDashReady();
+        }
+    }
+    
+    // 위치 기반 대시 사용 감지 (보조 기능)
+    static FVector StaticLastLocation = FVector::ZeroVector;
+    static float StaticLastCheckTime = 0.0f;
+    static bool bFirstLocationSet = false;
+    static bool bPreviousCanDash = true;
+    
+    if (!bFirstLocationSet)
+    {
+        StaticLastLocation = CurrentLocation;
+        StaticLastCheckTime = CurrentTime;
+        bFirstLocationSet = true;
+        bPreviousCanDash = bCanDash;
+        return;
+    }
+    
+    // 🎯 대시 사용 감지 (bCanDash가 true에서 false로 변할 때)
+    if (bPreviousCanDash && !bCanDash)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🚀 DASH USED! bCanDash: TRUE → FALSE"));
+    }
+    
+    // 🎯 대시 쿨다운 완료 감지 (false에서 true로 변할 때)
+    if (!bPreviousCanDash && bCanDash)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("✅ DASH READY! bCanDash: FALSE → TRUE"));
+    }
+    
+    bPreviousCanDash = bCanDash;
+    
+    // 위치 정보 업데이트
+    float TimeDelta = CurrentTime - StaticLastCheckTime;
+    if (TimeDelta >= 0.05f)
+    {
+        float DistanceMoved = FVector::Dist(CurrentLocation, StaticLastLocation);
+        
+        // 대시 사용 시 위치 변화 로그
+        if (!bCanDash && DistanceMoved > 100.0f && TimeDelta < 0.2f)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("💫 Position jump detected: %.1f units in %.3fs"), 
+                   DistanceMoved, TimeDelta);
+        }
+        
+        StaticLastLocation = CurrentLocation;
+        StaticLastCheckTime = CurrentTime;
+    }
+    
+    // 🐛 주기적 디버그 로그 (10초마다)
+    static float LastDebugTime = 0.0f;
+    if (CurrentTime - LastDebugTime > 10.0f)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("📊 Dash Status: bCanDash=%s, Time=%.2f/%.2f, Cooldown=%.1f%%"), 
+               bCanDash ? TEXT("YES") : TEXT("NO"), 
+               TimeValue, DashDurationValue, CooldownPercent * 100.0f);
+        LastDebugTime = CurrentTime;
     }
 }
