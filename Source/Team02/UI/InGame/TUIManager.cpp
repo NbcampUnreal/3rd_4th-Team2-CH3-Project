@@ -67,7 +67,7 @@ void UTUIManager::CreatePlayerUI()
 			FindAndRegisterEnemySpawners(); // 스포너 및 몬스터 모너터링 시작
 			StartMonitoringMonsters();
 			
-			CurrentMissionObjective=TEXT("Mission:"); //초기 미션 설정
+			CurrentMissionObjective=TEXT("Mission:"); 
 			PlayerUIWidget->UpdateMissionObjective(TEXT("Mission:"));
 			
 			FTimerHandle InitMissionTimer; // 첫 임무 시작시 1.5초 지연
@@ -158,7 +158,7 @@ void UTUIManager::UpdateWeaponInfo()
 		
 		else if (!CurrentWeapon && PlayerUIWidget)
 		{
-			PlayerUIWidget->UpdateWeaponName(TEXT("No Weapon")); //무기가 없을때
+			PlayerUIWidget->UpdateWeaponName(TEXT("No Weapon"));
 		}
 		PreviousWeapon=CurrentWeapon; // 이전 무기 업데이트
 	}
@@ -595,12 +595,6 @@ void UTUIManager::MoveToNextCapturePoint()
 		
 		
 	}
-}
-
-void UTUIManager::UnlockWeapon()
-{
-	bWeaponUnlocked=true;
-	MoveToNextCapturePoint(); 
 }
 
 void UTUIManager::UpdateAllUI()

@@ -29,7 +29,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnGameOverDelegate OnGameOverEvent;
 	
-	// initializce Subsystem
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
@@ -47,7 +46,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateWeaponInfo();
 	
-	// Player references
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerCharacter(ATCharacterBase* PlayerChar);
 
@@ -84,14 +82,10 @@ public:
 	// spawner 연동(읽기 전용)
 	UFUNCTION(BlueprintCallable)
 	void FindAndRegisterEnemySpawners();
-
-	// 긴급 수정
+	
 	UFUNCTION(BLueprintCallable)
 	void MoveToNextCapturePoint();
-
-	UFUNCTION(BlueprintCallable)
-	void UnlockWeapon();
-
+	
 	//게임 리스타트 UI 함수
 	UFUNCTION(BlueprintCallable)
 	void RestartGameUI();
@@ -127,8 +121,8 @@ protected:
 
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
-	FTimerHandle MonsterMonitorTimer; // 몬스터 감시 타이머
-	FTimerHandle RestartMissionTimer; // 재시작 타이머
+	FTimerHandle MonsterMonitorTimer; 
+	FTimerHandle RestartMissionTimer; 
 	
 	// 게임 플로우 반영 변수 ( 웨이브 시작> 몬스터 처치 (웨이브클리어) >거점 점령 >보스전 순서 )
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
