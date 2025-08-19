@@ -5,14 +5,11 @@
 #include "Blueprint/UserWidget.h"
 
 
-
 UTMonsterHealthBarComponent::UTMonsterHealthBarComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	// create widget component
 	HealthBarWidgetComponent=CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
 	
-	//initialize values
 	LastKnownCurrentHP=-1.0f;
 	LastKnownMaxHP=-1.0f;
 	
@@ -31,8 +28,6 @@ void UTMonsterHealthBarComponent::BeginPlay()
 			OwnerCharacter->GetMesh(),  // RootComponent 대신 Mesh 사용
 			FAttachmentTransformRules::KeepRelativeTransform
 		);
-		
-		UE_LOG(LogTemp, Warning, TEXT("Widget attached to character mesh"));
 	}
     
 	InitializeHealthBar();
@@ -72,8 +67,7 @@ void UTMonsterHealthBarComponent::TickComponent(float DeltaTime, ELevelTick Tick
 		{
 			FVector CameraLocation=PC->PlayerCameraManager->GetCameraLocation();
 			FVector WidgetLocation= HealthBarWidgetComponent->GetComponentLocation();
-
-			//y축만 회전
+			
 			FVector Direction=CameraLocation-WidgetLocation;
 			Direction.Z=0.0f;
 
@@ -90,16 +84,14 @@ void UTMonsterHealthBarComponent::InitializeHealthBar()
 	{
 		HealthBarWidgetComponent->SetWidgetClass(HealthBarWidgetClass);
 		HealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
-		HealthBarWidgetComponent->SetDrawSize(FVector2D(500.0f, 200.0f));  // 사이즈 설정
-		HealthBarWidgetComponent->SetWorldScale3D(FVector(0.2f, 0.2f, 0.2f)); // 스케일 조정
+		HealthBarWidgetComponent->SetDrawSize(FVector2D(500.0f, 200.0f));  
+		HealthBarWidgetComponent->SetWorldScale3D(FVector(0.2f, 0.2f, 0.2f)); 
 		HealthBarWidgetComponent->SetDrawAtDesiredSize(false);
-		HealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f)); // UI위치
+		HealthBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f)); 
 		
-
 		// 항상 카메라를 바라보도록
 		HealthBarWidgetComponent->SetTwoSided(true);
-		// 오류 점검 로그
-		UE_LOG(LogTemp, Warning, TEXT("Widget setup complete"));
+		
 	}
 }
 
@@ -110,33 +102,20 @@ void UTMonsterHealthBarComponent::InitializeMonsterName()
 		if (UTMonsterHealthBarWidget* MonsterWidget = Cast<UTMonsterHealthBarWidget>(HealthBarWidgetComponent->GetUserWidgetObject()))
 		{
 			MonsterWidget->SetMonsterNameByType(GetOwner());
-			UE_LOG(LogTemp, Warning, TEXT("✅ Monster name initialized for: %s"), 
-				   GetOwner() ? *GetOwner()->GetName() : TEXT("Unknown"));
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("❌ Failed to cast to UTMonsterHealthBarWidget"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ HealthBarWidgetComponent is null"));
+		
 	}
 }
 
 void UTMonsterHealthBarComponent::SetupMonsterNameAfterWidgetCreation()
 {
-	// 위젯이 아직 생성되지 않았다면 잠시 대기 후 재시도
 	if (!HealthBarWidgetComponent->GetUserWidgetObject())
 	{
-		// 0.1초 후 다시 시도
 		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
 		{
 			SetupMonsterNameAfterWidgetCreation();
 		});
 		return;
 	}
-    
-	// 위젯이 준비되면 몬스터 이름 초기화
 	InitializeMonsterName();
 }

@@ -14,7 +14,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverDelegate);
 class ATCharacterBase;
 class ATPlayerCharacter;
 class ATWeaponBase;
-class ATAIBossMonster;
 class ATGameMode;
 
 UCLASS()
@@ -30,8 +29,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnGameOverDelegate OnGameOverEvent;
 	
-	
-	// initializce Subsystem
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
@@ -49,7 +46,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateWeaponInfo();
 	
-	// Player references
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerCharacter(ATCharacterBase* PlayerChar);
 
@@ -62,12 +58,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateCaptureProgress(float Progress);
-
-	// 거점 연동 함수
+	
 	UFUNCTION(BlueprintCallable)
 	void RegisterCapturePoint(class ATCapturePoint* CapturePoint);
-
-	// 거점 자동 검색 함수
+	
 	UFUNCTION(BlueprintCallable)
 	void FindAndRegisterCapturePoints();
 
@@ -77,7 +71,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void UpdateMissionProgress();
-
 	
 	// 몬스터 감지 및 추적
 	UFUNCTION(BlueprintCallable)
@@ -89,18 +82,11 @@ public:
 	// spawner 연동(읽기 전용)
 	UFUNCTION(BlueprintCallable)
 	void FindAndRegisterEnemySpawners();
-
-	// 긴급 수정
+	
 	UFUNCTION(BLueprintCallable)
 	void MoveToNextCapturePoint();
-
-	UFUNCTION(BlueprintCallable)
-	void UnlockWeapon();
-
-	//게임 리스폰, 리스타트 UI 함수
-	// UFUNCTION(BlueprintCallable)
-	// void RespawnGameUI();
 	
+	//게임 리스타트 UI 함수
 	UFUNCTION(BlueprintCallable)
 	void RestartGameUI();
 
@@ -110,8 +96,6 @@ public:
 
 	UFUNCTION(BlueprintCallable,Category="HitMarker")
 	void StopHitDetection();
-
-	
 
 
 protected:
@@ -137,8 +121,8 @@ protected:
 
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
-	FTimerHandle MonsterMonitorTimer; // 몬스터 감시 타이머
-	FTimerHandle RestartMissionTimer; // 재시작 타이머
+	FTimerHandle MonsterMonitorTimer; 
+	FTimerHandle RestartMissionTimer; 
 	
 	// 게임 플로우 반영 변수 ( 웨이브 시작> 몬스터 처치 (웨이브클리어) >거점 점령 >보스전 순서 )
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -179,16 +163,14 @@ protected:
 
 	//임무 관련 변수들
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FString CurrentMissionObjective=TEXT("Kill Monsters"); // 임무 목표 표시
+	FString CurrentMissionObjective=TEXT("Kill Monsters");
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int32 MonsterKillCount=0; // KillCountText UI 업데이트용
 	
-	// 임무 상태 플래그
-	//거점 감지용
+	// 임무 상태 플래그 -거점 감지용
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool bNearCapturePoint=false; 
-
 	
 	// 등록된 스포너들
 	UPROPERTY()
@@ -205,7 +187,6 @@ protected:
 	UPROPERTY()
 	int32 LastWaveMonsterCount=0;
 	
-
 	//GameMode 참조 추가
 	UPROPERTY()
 	TObjectPtr<class ATGameMode> GameModeRef;
@@ -220,11 +201,6 @@ protected:
 	//웨이브 시작시 총 몬스터 수
 	UPROPERTY()
 	int32 TotalWaveMonsters=0;
-
-	//테스트용 히트마커 함수
-	UFUNCTION(BlueprintCallable)
-	void TestHitMarker();
-	
 	
 	// regularly ui update
 	void UpdateAllUI();
@@ -259,20 +235,8 @@ private:
 	bool CheckMonsterHPChanges();
 	UFUNCTION()
 	void UpdateMonsterHPList();
-
-
-	// 대시 감지 변수, 함수
-	FVector LastPlayerLocation;
-	float LastLocationCheckTime=0.0f;
-	float DashDistanceThreshold=200.0f; // 대시로 판단하는 최소 이동 거리
-	float DashTimeWindow=0.1f;// 이 시간 안에 이동시 대시로 판단
-	float DashDetectionCooldown=1.5f; // 실제 쿨다운 시간
-	float LastDashDetectionTime=0.0f;
-	bool bDashSystemInitialized=false;
 	
+	// 대시 감지 함수
 	void DetectTeleportDash();
-
-	
-
 	
 };
