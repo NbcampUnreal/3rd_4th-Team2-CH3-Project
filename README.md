@@ -104,6 +104,6 @@
 ## 📄 플레이영상
 <p align="center">
   <a href="https://youtu.be/hDtpiY93B_4" target="_blank">
-    <img src="https://raw.githubusercontent.com/사용자이름/프로젝트이름/main/images/gameplay_thumbnail.png" alt="게임 플레이 영상 보러가기">
+    <img src="https://media.githubusercontent.com/media/NbcampUnreal/3rd_4th-Team2-CH3-Project/dev/Source/Team02/Feature/Play.png" alt="게임 플레이 영상 보러가기">
   </a>
 </p>
