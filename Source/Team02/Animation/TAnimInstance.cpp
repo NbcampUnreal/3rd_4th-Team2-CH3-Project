@@ -1,7 +1,9 @@
 #include "Animation/TAnimInstance.h"
+#include "Item/TWeaponBase.h"
 #include "Character/TCharacterBase.h"
 #include "Character/TPlayerCharacter.h"
 #include "Character/TNonPlayerCharacter.h"
+#include "Team02/Character/TNonPlayerCharacterSword.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -16,12 +18,19 @@ void UTAnimInstance::NativeInitializeAnimation()
 			OwnerCharacterMovement = OwnerCharacter->GetCharacterMovement();
 		}
 	}
+	bIsUnarmed = true;
 }
 
 void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	if (IsValid(OwnerCharacter) == true && IsValid(OwnerCharacterMovement) == true)
 	{
+		bIsFalling = OwnerCharacterMovement ->IsFalling();
+
+		bIsDead = OwnerCharacter->IsDead();
+
+		bIsUnarmed = OwnerCharacter->GetCurrentWeaponAttackAnimMontage() == nullptr ? true : false;
+		
 		Velocity = OwnerCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
                 
@@ -29,12 +38,24 @@ void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bool bIsAccelerated = FMath::IsNearlyZero(GroundAcceleration) == false;
 		bShouldMove = (KINDA_SMALL_NUMBER < GroundSpeed) && (bIsAccelerated == true);
 
+		WeaponType = OwnerCharacter->GetCurrentWeaponType();
+		
+		if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerCharacter->GetController()))
+		{
+			NormalizedCurrentPitch = UKismetMathLibrary::NormalizeAxis(OwnerPlayerController->GetControlRotation().Pitch);
+		}
+
+		//원거리 NPC 이동 확인 변수용
 		if (ATNonPlayerCharacter* OwnerNPC = Cast<ATNonPlayerCharacter>(OwnerCharacter))
 		{
 			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
 		}
-
-		bIsFalling = OwnerCharacterMovement ->IsFalling();
+		
+		//근점 NPC 이동 확인 변수용
+		if (ATNonPlayerCharacterSword* OwnerNPC = Cast<ATNonPlayerCharacterSword>(OwnerCharacter))
+		{
+			bShouldMove = KINDA_SMALL_NUMBER < GroundSpeed;
+		}
 	}
 }
 
@@ -46,3 +67,27 @@ void UTAnimInstance::AnimNotify_CheckHit()
 	}
 }
 
+void UTAnimInstance::AnimNotify_PostDead()
+{
+	if (OnPostDead.IsBound() == true)
+	{
+		OnPostDead.Broadcast();
+	}
+}
+
+void UTAnimInstance::AnimNotify_CheckSwordHit()
+{
+	if (OnCheckSwordHit.IsBound() == true)
+	{
+		OnCheckSwordHit.Broadcast();
+	}
+}
+
+//디졸브용 노티파이 델리게이트로 방송
+void UTAnimInstance::AnimNotify_BeginDissolve()
+{
+	if (OnBeginDissolve.IsBound() == true)
+	{
+		OnBeginDissolve.Broadcast();
+	}
+}

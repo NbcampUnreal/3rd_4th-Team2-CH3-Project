@@ -6,8 +6,7 @@
 #include "Item/TWeaponBase.h"
 #include "TPistol.generated.h"
 
-class USphereComponent;
-class UBoxComponent;
+
 
 UCLASS()
 class TEAM02_API ATPistol : public ATWeaponBase
@@ -18,9 +17,7 @@ public:
 
 	
 	
-	virtual void Fire() override;
-
-	virtual void Reload() override;
+	
 
 	
 

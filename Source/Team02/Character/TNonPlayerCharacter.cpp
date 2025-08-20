@@ -3,13 +3,26 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/TAnimInstance.h"
 #include "Item/TGunNPCWeapon.h"
-#include "Engine/SkeletalMeshSocket.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
+#include "Team02.h"
+
+
+int32 ATNonPlayerCharacter::ShowGunAttackDebug = 0;
+
+FAutoConsoleVariableRef CVarShowGunAttackDebug(
+	TEXT("TAI.ShowGunAttackDebug"),
+	ATNonPlayerCharacter::ShowGunAttackDebug,
+	TEXT(""),
+	ECVF_Cheat
+	);
 
 ATNonPlayerCharacter::ATNonPlayerCharacter()
 	: bIsNowAttacking(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
 	//npc 컨트롤 가져오기
 	AIControllerClass = ATAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -18,78 +31,115 @@ ATNonPlayerCharacter::ATNonPlayerCharacter()
 void ATNonPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	//플레이어 캐릭터가 아니라면
 	if (false == IsPlayerControlled())
 	{
 		bUseControllerRotationYaw = false;
+		AttackDamage = 2.f;
+		SwordNPCIsDead = false;
+		
 		//NPC의 회전 부드러움 적용
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
 		//NPC의 최고속도
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetCharacterMovement()->MaxWalkSpeed = 400.f;
 
 		AttachWeapon(Rifle);
 	}
 }
 
-void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon) const
+void ATNonPlayerCharacter::AttachWeapon(TSubclassOf<ATGunNPCWeapon> Weapon)
 {
-	if (Weapon)
+	if (IsValid(Weapon) == true)
 	{
-		//무기 스폰
-		AActor* SpawnWeapon = GetWorld()->SpawnActor<ATGunNPCWeapon>(Weapon);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+
+		CurrentRifle = GetWorld()->SpawnActor<ATGunNPCWeapon>(Weapon, SpawnParams);
 
 		//부착 규칙
 		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 		
-		if (SpawnWeapon)
+		if (IsValid(CurrentRifle) == true)
 		{
 			//소켓에 부착
-			SpawnWeapon->AttachToComponent(GetMesh(), AttachmentRules, FName("weapon_r_muzzle"));
-			SpawnWeapon->SetActorEnableCollision(false);
+			CurrentRifle->AttachToComponent(GetMesh(), AttachmentRules, FName("hand_rSocket"));
+			CurrentRifle->SetActorEnableCollision(false);
 
 			//총의 물리 피직스 끄기
-			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(SpawnWeapon->GetRootComponent());
+			UPrimitiveComponent* WeaponRoot = Cast<UPrimitiveComponent>(CurrentRifle->GetRootComponent());
 			if (WeaponRoot)
 			{
 				WeaponRoot->SetSimulatePhysics(false);
 			}
-				
 		}
 	}
 }
 
 void ATNonPlayerCharacter::BeginAttack()
 {
-	if (GetCharacterMovement()->IsFalling() == true)
-	{
-		return;
-	}
-
+	
 	UTAnimInstance* AnimInstance = Cast<UTAnimInstance>(GetMesh()->GetAnimInstance());
 	checkf(IsValid(AnimInstance) == true, TEXT("Invalid AnimInstance."));
-
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	if (IsValid(AnimInstance) == true &&
-		IsValid(AttackFireMontage) == true &&
-		AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+	
+	if (IsValid(AnimInstance) == true&& IsValid(AttackFireMontage) == true && AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
 	{
 		AnimInstance->Montage_Play(AttackFireMontage);
 
 		bIsNowAttacking = true;
 
-		//몽타주 종료
-		OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
-		AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
+		if (OnAttackMontageEndedDelegate.IsBound() == false)
+		{
+			AnimInstance->Montage_Play(AttackFireMontage);
 		
+			//몽타주 종료
+			OnAttackMontageEndedDelegate.BindUObject(this, &ThisClass::EndAttack);
+			AnimInstance->Montage_SetEndDelegate(OnAttackMontageEndedDelegate, AttackFireMontage);
+		}
 	}
 }
 
-void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool)
+float ATNonPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	float FinalDamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		ATAIController* AIController = Cast<ATAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			AIController->EndAI();
+			CurrentRifle->SetLifeSpan(0.7f);
+		}
+	}
+	else
+	{
+		ATAIController* AIController = Cast<ATAIController>(GetController());
+		if (IsValid(AIController) == true)
+		{
+			if (IsValid(HurtSound) == true)
+			{
+				//피격시 사운드 재생
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					HurtSound,
+					GetActorLocation(),
+					0.6f,
+					1.0f,
+					0.f,
+					HurtSoundAttenuation);
+			}
+		}
+	}
+	
+	return FinalDamageAmount;
+}
+
+
+void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool bInterruped)
+{
 	bIsNowAttacking = false;
 
 	if (OnAttackMontageEndedDelegate.IsBound() == true)
@@ -98,3 +148,103 @@ void ATNonPlayerCharacter::EndAttack(UAnimMontage* InMontage, bool)
 		OnAttackMontageEndedDelegate.Unbind();
 	}
 }
+
+void ATNonPlayerCharacter::HandleOnPostCharacterDead()
+{
+	Super::HandleOnPostCharacterDead();
+	
+	SetLifeSpan(1.0f);
+	
+}
+
+
+void ATNonPlayerCharacter::HandleOnCheckHit()
+{
+	if (!IsValid(CurrentRifle))
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("Weapon is not valid."));
+		return;
+	}
+	
+	//무기 메시에서 MuzzleFlash 위치 가져오기
+	const FName MuzzleSocketName = TEXT("MuzzleFlash");
+	FVector StartLocation = CurrentRifle->GetMesh()->GetSocketLocation(MuzzleSocketName);
+	FVector EndLocation = GetActorLocation() + (GetActorForwardVector() * CurrentRifle->GetMaxAttackRange());
+	
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	Params.AddIgnoredActor(CurrentRifle);
+	Params.AddIgnoredActor(this);
+	
+	bool bResult = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_ATTACK,
+		Params
+	);
+
+	if (bResult == false)
+	{
+		HitResult.TraceStart = StartLocation;
+		HitResult.TraceEnd = EndLocation;
+	}
+
+	if (bResult == true)
+	{
+		ATCharacterBase* HittedCharacter = Cast<ATCharacterBase>(HitResult.GetActor());
+		if (IsValid(HittedCharacter) == true)
+		{
+			FDamageEvent DamageEvent;
+			HittedCharacter->TakeDamage(
+				AttackDamage,
+				DamageEvent,
+				GetController(),
+				this
+				);
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (IsValid(AnimInstance) == true)
+	{
+		if (AnimInstance->Montage_IsPlaying(AttackFireMontage) == false)
+		{
+			AnimInstance->Montage_Play(AttackFireMontage);
+		}
+	}
+
+	//디버그용
+	if (1 == ShowGunAttackDebug)
+	{
+		if (bResult == true)
+		{
+			DrawDebugLine(
+				GetWorld(),
+				StartLocation,
+				HitResult.ImpactPoint,
+				FColor::Blue,
+				false,
+				5.f,
+				0,
+				2.f
+				);
+		}
+		else
+		{
+			DrawDebugLine(
+				GetWorld(),
+				StartLocation,
+				EndLocation,
+				FColor::Blue,
+				false,
+				5.f,
+				0,
+				2.f
+			);
+		}
+	}
+}
+
+
+

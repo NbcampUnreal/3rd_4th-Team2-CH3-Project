@@ -4,10 +4,15 @@
 #include "Animation/AnimInstance.h"
 #include "TAnimInstance.generated.h"
 
+enum class EWeaponType : uint8;
+
 class ATCharacterBase;
 class UCharacterMovementComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCheckSwordHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPostDead);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginDissolve);
 
 UCLASS()
 class TEAM02_API UTAnimInstance : public UAnimInstance
@@ -22,10 +27,24 @@ public:
 private:
 	UFUNCTION()
 	void AnimNotify_CheckHit();
+	
+	UFUNCTION()
+	void AnimNotify_PostDead();
+
+	UFUNCTION()
+	void AnimNotify_CheckSwordHit();
+
+	UFUNCTION()
+	void AnimNotify_BeginDissolve();
 
 public:
 	FOnCheckHit OnCheckHit;
 
+	FOnCheckSwordHit OnCheckSwordHit;
+
+	FOnPostDead OnPostDead;
+
+	FOnBeginDissolve OnBeginDissolve;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -36,6 +55,15 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	uint8 bShouldMove : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsDead : 1;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	uint8 bIsUnarmed : 1;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	uint8 bIsFalling : 1;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector Velocity;
@@ -43,7 +71,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float GroundSpeed;
 	
-	//점프중인지 확인
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	uint8 bIsFalling : 1;
+	UPROPERTY(BlueprintReadOnly)
+	float NormalizedCurrentPitch;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	EWeaponType WeaponType;
 };

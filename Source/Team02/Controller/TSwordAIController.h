@@ -1,0 +1,56 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AIController.h"
+#include "TSwordAIController.generated.h"
+
+class UBlackboardData;
+class UBehaviorTree;
+
+/**
+ * 
+ */
+UCLASS()
+class TEAM02_API ATSwordAIController : public AAIController
+{
+	GENERATED_BODY()
+
+	friend class ATNonPlayerCharacterSword;
+
+public:
+	ATSwordAIController();
+	
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	TObjectPtr<UBlackboardData> SwordNPCBlackboardDataAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	TObjectPtr<UBehaviorTree> SwordNPCBehaviorTree;
+
+public:
+	//경계 반원 크기
+	float SwordNPCPatrolRadius;
+	//AI디버깅 용
+	static int32 ShowSwordAIDebug;
+	//경계 시작 지점
+	static const FName SwordNPCStartPatrolLocationKey;
+	//경계 종료 지점
+	static const FName SwordNPCEndPatrolLocationKey;
+	//타겟 캐릭터
+	static const FName SwordNPCTargetCharacterKey;
+	//웨이브인지 아닌지 확인하는 키
+	static const FName SwordIsInWaveKey;
+	//점령지 위치
+	static const FName SwordCapturePointKey;
+	//보스 점령지 위치
+	static const FName SwordBossCapturePointKey;
+
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+	
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	void BeginAI(APawn* InPawn);
+
+	void EndAI();
+};

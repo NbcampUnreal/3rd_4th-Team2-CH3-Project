@@ -34,7 +34,6 @@ ATItemBase::ATItemBase()
 	PickupCollider->OnComponentBeginOverlap.AddDynamic(this, &ATItemBase::OnOverlapBegin);
 }
 
-
 void ATItemBase::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
@@ -43,12 +42,6 @@ void ATItemBase::OnOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	// 예시: 플레이어만 줍기 허용
-	if (OtherActor && OtherActor != this)
-	{
-		// 줍기 로직 (인벤토리 추가 등)
-		// ...
-	}
 }
 
 

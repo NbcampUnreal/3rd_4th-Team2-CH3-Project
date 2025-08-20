@@ -4,10 +4,18 @@
 #include "Item/TWeaponBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Character/TPlayerCharacter.h"
+#include "Character/TCharacterBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Team02.h"
+#include "NiagaraComponent.h" 
+
 ATWeaponBase::ATWeaponBase()
 {
 	Damage = 20.0f;
 	MaxAmmo = 30;
+	TotalAmmo = 180;
 	CurrentAmmo = 30;
 	FireRate = 0.2f;
 	ReloadTime = 1.5f;
@@ -33,112 +41,115 @@ void ATWeaponBase::OnOverlapBegin(
 		ATPlayerCharacter* PC = Cast<ATPlayerCharacter>(OtherActor);
 		if (PC)
 		{
-			// 기존 무기 파괴
-			if (PC->CurrentWeapon)
-			{
-				PC->CurrentWeapon->Destroy();
-			}
-
-			// 새 무기 등록
-			PC->CurrentWeapon = this;
-
-			// 손에 붙이기
-			AttachToComponent(
-				PC->GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				TEXT("Hand_R_Socket")
-			);
-			SetActorHiddenInGame(false);          // <<<<<<<<<< 꼭 해줘야 함!
-			SetActorEnableCollision(false);
+			PC->EquipWeapon(this);
 		}
-		// 추가: 효과음, UI 표시, 인벤토리 추가 등
-		
 	}
 }
 
 
-void ATWeaponBase::Fire()
+
+void ATWeaponBase::FireFrom(FVector MuzzleLoc, FVector FireDir)
 {
-	if (CanFire())
-	{
-		// 1. 총구 위치/회전 구하기
-		FVector MuzzleLoc = MuzzlePoint->GetComponentLocation();
-		FRotator MuzzleRot = MuzzlePoint->GetComponentRotation();
+	if (!CanFire()) return;
 
-		// 2. Spawn 파라미터 준비
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = GetOwner();
+    // 0) Owner/Controller
+    APawn* OwnerPawn = Cast<APawn>(GetOwner());
+    AController* Ctrl = OwnerPawn ? OwnerPawn->GetController() : nullptr;
 
-		// 3. 총알(Projectile) 스폰!
-		ATBullet* Bullet = GetWorld()->SpawnActor<ATBullet>(
-		BulletClass,
-		MuzzleLoc,
-		MuzzleRot,
-		SpawnParams
-		);
-		if (Bullet)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("총알 생성 OK!"));
-			Bullet->SetDamage(Damage);
-			Bullet->SetRange(Range);
-			// 기타 세팅
-		}
+    // 1) 카메라(또는 Eyes)로 조준 "방향"만 얻기
+    FVector CamLoc; FRotator CamRot;
+    if (Ctrl)        Ctrl->GetPlayerViewPoint(CamLoc, CamRot);
+    else if (OwnerPawn) OwnerPawn->GetActorEyesViewPoint(CamLoc, CamRot);
+    else             { CamLoc = MuzzleLoc; CamRot = FRotator::ZeroRotator; }
 
-		bCanFire = false;
-		GetWorld()->GetTimerManager().SetTimer(
-			FireRateTimerHandle,
-			this, &ATWeaponBase::ResetCanFire,
-			FireRate, false
-		);
-		UKismetSystemLibrary::PrintString(this, TEXT("Fire() called!"));
-		
-		// TODO: 투사체 발사 로직
-		CurrentAmmo--;
-	}
-	else if (!bCanFire)
-	{
-		UKismetSystemLibrary::PrintString(this, TEXT("Fire(): FireRate!!"));
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(this, TEXT("Fire(): No ammo!"));
-		return;
-	}
+    // 카메라가 본 지점 (없으면 카메라 전방으로 Range만큼)
+    const FVector CamEnd = CamLoc + CamRot.Vector() * Range;
+    FCollisionQueryParams Q; Q.AddIgnoredActor(this); if (OwnerPawn) Q.AddIgnoredActor(OwnerPawn);
+    FHitResult CamHit;
+    const bool bCamHit = GetWorld()->LineTraceSingleByChannel(CamHit, CamLoc, CamEnd, ECC_ATTACK, Q);
+    FVector AimPoint = bCamHit ? CamHit.ImpactPoint : CamEnd;
+
+    // 너무 가까운 목표 보정(패럴랙스 완화)
+    const float MinAimDist = 200.f;
+    const float DistFromCam = (AimPoint - CamLoc).Size();
+    if (DistFromCam < MinAimDist)
+        AimPoint = CamLoc + CamRot.Vector() * MinAimDist;
+
+    // 2) 최종 발사 방향
+    const FVector Dir = (AimPoint - MuzzleLoc).GetSafeNormal();
+
+    // 3) 실제 판정 라인트레이스: 사거리 고정(Start + Dir * Range)
+	const FVector TraceEnd = MuzzleLoc + Dir * Range;
+	FHitResult HitResult;
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, MuzzleLoc, TraceEnd, ECC_ATTACK, Q);
+
+	// ⬇️ 이 길이를 이펙트에 그대로 넘기면 “뚫고 가지 않음”
+	const FVector FinalPoint = bHit ? HitResult.ImpactPoint : TraceEnd;
+	float BeamLength = (FinalPoint - MuzzleLoc).Size();  // 히트면 충돌 지점까지, 미스면 사거리
+    // 4) FX/사운드/데미지
+    //    - 트레이서는 항상 Range 길이
+    FireEffect(MuzzleLoc, const_cast<FVector&>(Dir), BeamLength); // Length=Range로 세팅하도록 구현:contentReference[oaicite:1]{index=1}
+    FireSounds(MuzzleLoc);                                                       // 위치 넘겨 재생:contentReference[oaicite:2]{index=2}
+
+    if (bHit && HitResult.GetActor())
+    {
+        UGameplayStatics::ApplyPointDamage(
+            HitResult.GetActor(), Damage, Dir, HitResult,
+            OwnerPawn ? OwnerPawn->GetController() : nullptr,
+            this, nullptr);                                                  //:contentReference[oaicite:3]{index=3}
+    }
+    else
+    {
+        
+    }
+
+    // 5) 쿨타임/탄약
+    bCanFire = false;
+    GetWorld()->GetTimerManager().SetTimer(FireRateTimerHandle, this, &ATWeaponBase::ResetCanFire, FireRate, false); //:contentReference[oaicite:4]{index=4}
+    SetCurrentAmmo(GetCurrentAmmo() - 1); 
+	
 }
 
 void ATWeaponBase::Reload()
 {
-	if (!CanReload())
+	int32 NeedAmmo = MaxAmmo - GetCurrentAmmo();
+
+	if (NeedAmmo <= 0)
 	{
-		UKismetSystemLibrary::PrintString(this, TEXT("Reload(): Ammo full!"));
 		return;
 	}
+	if (GetTotalAmmo() <= 0)
+	{
+		return;
+	}
+	
+	bIsReloading = true;
 
-	UKismetSystemLibrary::PrintString(this, TEXT("Reload() called!"));
-	CurrentAmmo = MaxAmmo;
-	// TODO: 장전 애니메이션/딜레이 처리
+	// 여기서 즉시 탄약을 채우지 말고, ReloadTime 뒤에 채우도록 처리
+	GetWorld()->GetTimerManager().SetTimer(
+		ReloadTimerHandle,
+		this, &ATWeaponBase::FinishReload,
+		ReloadTime, false
+	);
+	
+
+	if (ReloadMontage) // Reload시에 재생하는 몽타주 구현
+	{
+		if (ATPlayerCharacter* PlayerCharacter = Cast<ATPlayerCharacter>(GetOwner()))
+		{
+			UAnimInstance* AnimInstance = PlayerCharacter->GetMesh()->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(ReloadMontage);
+			}
+		}
+	}
 }
 
 bool ATWeaponBase::CanFire() const
 {
-	return CurrentAmmo > 0 && bCanFire;
-}
-
-bool ATWeaponBase::CanReload() const
-{
-	return CurrentAmmo < MaxAmmo;
-}
-
-void ATWeaponBase::Equip()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("Equip() called!"));
-	// TODO: 무기 장착 연출/효과 등
-}
-
-void ATWeaponBase::Unequip()
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("Unequip() called!"));
-	// TODO: 무기 해제 연출/효과 등
+	// 기본: 탄약 있고, 발사 쿨타임 끝났고, 재장전 중이 아니어야 함
+	return (GetCurrentAmmo() > 0) && bCanFire && !bIsReloading;
 }
 
 FString ATWeaponBase::GetWeaponTypeString() const
@@ -146,14 +157,59 @@ FString ATWeaponBase::GetWeaponTypeString() const
 	switch (WeaponType)
 	{
 	case EWeaponType::Shotgun: return TEXT("Shotgun");
-	case EWeaponType::Rifle:   return TEXT("Rifle");
-	case EWeaponType::Pistol:  return TEXT("Pistol");
-		// 필요에 따라 추가
-	default:                   return TEXT("Unknown");
+	case EWeaponType::Rifle: return TEXT("Rifle");
+	case EWeaponType::Pistol: return TEXT("Pistol");
+	// 필요에 따라 추가
+	default: return TEXT("Unknown");
 	}
 }
 
 void ATWeaponBase::ResetCanFire()
 {
 	bCanFire = true;
+}
+
+UAnimMontage* ATWeaponBase::GetAttackMontage()
+{
+	return AttackMontage;
+}
+
+
+void ATWeaponBase::FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot, float& BeamLength) const
+{
+	// Niagara 빔 스폰 + 사용자 파라미터 설정
+	if (BeamFlashFX)
+	{
+		
+		UNiagaraComponent* BeamComp =
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), BeamFlashFX, MuzzleLoc, MuzzleRot.Rotation());
+
+		if (BeamComp)
+		{
+			// 사용자 파라미터 이름이 "Length" 라고 가정
+			BeamComp->SetVectorParameter(FName("Length"),
+										 FVector(BeamLength, 0.f, 0.f));
+		}
+	}
+}
+
+void ATWeaponBase::FireSounds(FVector& MuzzleLoc)
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, MuzzleLoc);
+	}
+}
+
+void ATWeaponBase::FinishReload()
+{
+	// 실제 장전 처리 (최대 탄창까지, 예비 탄약에서 차감)
+	const int32 NeedAmmo = MaxAmmo - GetCurrentAmmo();
+	const int32 AmmoToLoad = FMath::Min(NeedAmmo, GetTotalAmmo());
+
+	SetCurrentAmmo(GetCurrentAmmo() + AmmoToLoad);
+	SetTotalAmmo(GetTotalAmmo() - AmmoToLoad);
+
+	bIsReloading = false;
 }

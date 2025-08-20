@@ -12,20 +12,22 @@ class TEAM02_API UTMonsterHealthBarWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// healthbar update function
+	
 	UFUNCTION(BlueprintCallable)
 	void UpdateHealthBar(float CurrentHP,float MaxHP);
-
-	// monster name function
+	
 	UFUNCTION(BlueprintCallable)
-	void SetMonsterName(const FString& Name);
-
-	// show or hide UI wigets
+	void SetMonsterName(const FString& NewName);
+	
 	UFUNCTION(BlueprintCallable)
 	void ShowHealthBar();
 
 	UFUNCTION(BlueprintCallable)
 	void HideHealthBar();
+	
+	UFUNCTION(BLueprintCallable)
+	void SetMonsterNameByType(AActor* OwnerMonster);
+
 
 protected:
 	// widget binding

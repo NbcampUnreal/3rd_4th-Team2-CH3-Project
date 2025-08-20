@@ -22,8 +22,7 @@ void ATConsumableBase::Use_Implementation(AActor* Target)
 	switch (ConsumableType)
 	{
 	case EConsumableType::Potion: ItemTypeString = TEXT("포션"); break;
-	//case EConsumableType::Ammo:   ItemTypeString = TEXT("탄약"); break;
-	//case EConsumableType::Buff:   ItemTypeString = TEXT("버프"); break;
+	
 	default:                      ItemTypeString = TEXT("소모품"); break;
 	}
 	if (GEngine)

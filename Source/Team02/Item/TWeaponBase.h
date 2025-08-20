@@ -4,22 +4,31 @@
 #include "Item/TItemBase.h"
 #include "Bullet/TBullet.h"
 #include "TWeaponBase.generated.h"
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
+	Unarmed, // 비무장 상태를 추가함 
 	Shotgun,
 	Rifle,
 	Pistol,
 };
+
 class ATItemBase;
+class UAnimMontage;
+class UNiagaraSystem;
+class USoundBase;
 
 UCLASS()
 class TEAM02_API ATWeaponBase : public ATItemBase
 {
 	GENERATED_BODY()
+	
+protected:
+	int32 TotalAmmo = 180;
+	int32 CurrentAmmo = 30;   // 탄창에 남은 탄약 (기본값)
 public:
 	ATWeaponBase();
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MuzzlPoint")
 	USceneComponent* MuzzlePoint;
@@ -28,12 +37,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float Damage;
 
+	// 총 총알 최대치 가져오기
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	int32 GetTotalAmmo() const { return TotalAmmo; }
+
+	// 총 총알 최대치 세팅
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void SetTotalAmmo(int32 NewAmmo) { TotalAmmo = FMath::Clamp(NewAmmo, 0, MaxTotalAmmo); }
+
+	// 총 총알의 최대치
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
+	int32 MaxTotalAmmo = 9999999;
+
+	//장전할 수 있는 총알의 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int32 MaxAmmo;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	int32 CurrentAmmo;
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	int32 GetCurrentAmmo() const { return CurrentAmmo; }
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetCurrentAmmo(int32 NewAmmo)
+	{
+		CurrentAmmo = FMath::Clamp(NewAmmo, 0, MaxAmmo);
+	}
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float FireRate;        // 연사 속도
 
@@ -47,24 +74,20 @@ public:
 	TSubclassOf<ATBullet> BulletClass;
 
 	// --- 무기 동작 ---
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Fire();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void FireFrom(FVector MuzzleLoc,FVector FireDir);
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Reload();
 
+	// 재장전 완료 콜백
+	UFUNCTION()
+	void FinishReload();
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual bool CanFire() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual bool CanReload() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Equip();
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Unequip();
-
+	
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	FString GetWeaponTypeString() const;
 
@@ -81,10 +104,36 @@ public:
 	);
 	virtual void ResetCanFire();
 
+	UAnimMontage* GetAttackMontage();
 	
+	// === 파티클/사운드 ===
+	UFUNCTION()
+	void FireSounds(FVector& MuzzleLoc);
+	UFUNCTION()
+	void FireEffect(FVector& MuzzleLoc, FVector& MuzzleRot, float& BeamLength) const;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
+	UNiagaraSystem* BeamFlashFX; // 총구 이펙트
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FX")
+	USoundBase* FireSound;
 protected:
-	FTimerHandle FireRateTimerHandle;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|State")
+	bool bIsReloading = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|State")
 	bool bCanFire = true;
+	FTimerHandle FireRateTimerHandle;
+	
 	
 	FTimerHandle ReloadTimerHandle;
+
+#pragma region Montage
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackMontage;
+
+#pragma endregion
 };

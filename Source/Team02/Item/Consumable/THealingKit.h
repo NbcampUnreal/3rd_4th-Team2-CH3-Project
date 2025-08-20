@@ -6,9 +6,7 @@
 #include "Item/TConsumableBase.h"
 #include "THealingKit.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class TEAM02_API ATHealingKit : public ATConsumableBase
 {
@@ -25,4 +23,7 @@ public:
 	bool bFromSweep,
 	const FHitResult& SweepResult
 ) override;
+	virtual void Use_Implementation(AActor* Target) override;
 };
+
+	
