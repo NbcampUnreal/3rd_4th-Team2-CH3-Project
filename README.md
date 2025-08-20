@@ -1,11 +1,11 @@
-# [게임 프로젝트 이름] (예: Project TPS)
+# [REDLine]
 
-> 언리얼 엔진 5로 개발한 3인칭 TPS 게임 프로젝트입니다. [프로젝트의 핵심 컨셉이나 특징을 한 줄로 요약]
+> 언리얼 엔진 5로 개발한 3인칭 점령전 TPS 게임 프로젝트입니다.
 
 <br>
 
 <p align="center">
-  <img src="[게임 플레이 GIF 또는 스크린샷 경로]" alt="Gameplay Demo">
+  <img src="https://media.githubusercontent.com/media/NbcampUnreal/3rd_4th-Team2-CH3-Project/dev/Source/Team02/Feature/2TELLIGENCE_Logo.png">
 </p>
 
 ---
@@ -14,9 +14,9 @@
 
 이 프로젝트를 열거나 빌드하기 위해 필요한 **필수 환경 정보**입니다. 버전이 맞지 않으면 프로젝트가 정상적으로 열리지 않을 수 있습니다.
 
-* **언리얼 엔진 버전 (UE Version):** `5.x.x` (예: 5.4.1)
+* **언리얼 엔진 버전 (UE Version):** `5.5.4`
 * **타겟 플랫폼 (Target Platform):** `Windows 64-bit`
-* **IDE:** `Visual Studio 2022` (C++ 프로젝트인 경우)
+* **IDE:** `Visual Studio 2022 and Rider`
 
 <br>
 
