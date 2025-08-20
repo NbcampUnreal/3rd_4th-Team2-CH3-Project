@@ -9,7 +9,7 @@
 #include "Item/TWeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "TGameMode.h"
+#include "Game/TGameMode.h"
 #include "Team02.h"
 
 ATPlayerCharacter::ATPlayerCharacter()

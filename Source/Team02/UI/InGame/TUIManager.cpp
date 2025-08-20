@@ -10,7 +10,7 @@
 #include "Character/TNonPlayerCharacter.h"
 #include "Character/TNonPlayerCharacterSword.h"
 #include "Spawner/TEnemySpawner.h"
-#include "TGameMode.h"
+#include "Game/TGameMode.h"
 
 
 void UTUIManager::Initialize(FSubsystemCollectionBase& Collection)

@@ -1,7 +1,7 @@
 // TGameMode.cpp
 
 #include "TGameMode.h"
-#include "TPlayerController.h"
+#include "Controller/TPlayerController.h"
 #include "Engine/World.h"
 #include "UI/InGame/TUIManager.h"
 #include "Engine/GameInstance.h"

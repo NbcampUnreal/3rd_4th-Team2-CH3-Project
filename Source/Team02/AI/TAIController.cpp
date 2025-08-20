@@ -4,7 +4,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Area/TCapturePoint.h"
-#include "TGameMode.h"
+#include "Game/TGameMode.h"
 
 
 //순찰 범위

@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Gimmick/TMovingWall.h"
 #include "Engine/StaticMeshActor.h" 
-#include "TGameMode.h"
+#include "Game/TGameMode.h"
 #include "Team02.h"
 
 
