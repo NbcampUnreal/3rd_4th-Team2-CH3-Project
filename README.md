@@ -96,12 +96,14 @@
 
 이 프로젝트는 다음 플러그인을 사용하고 있습니다. 에디터의 `플러그인` 메뉴에서 활성화해야 합니다.
 
-* [플러그인 이름 1] (예: `Enhanced Input`)
-* [플러그인 이름 2] (예: `Gameplay Abilities`)
-* [마켓플레이스에서 받은 에셋 플러그인 등]
+* Enhanced Input
+* Gameplay Abilities
 
 <br>
 
 ## 📄 플레이영상
-
-(https://youtu.be/hDtpiY93B_4)
+<p align="center">
+  <a href="https://youtu.be/hDtpiY93B_4" target="_blank">
+    <img src="https://raw.githubusercontent.com/사용자이름/프로젝트이름/main/images/gameplay_thumbnail.png" alt="게임 플레이 영상 보러가기">
+  </a>
+</p>
