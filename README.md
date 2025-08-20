@@ -10,6 +10,17 @@
 
 ---
 
+## 👥 팀원 소개 (Our Team)
+
+| 역할 (Role) | 이름 (Name) | GitHub | 이메일 (Contact) |
+| :---: | :---: | :---: | :---: |
+| 팀장 / PlayerCharacter | 천재우 | [@Baek-gu](https://github.com/Baek-gu) | gugugong814@gmail.com |
+| 부팀장 / NonPlayerChararter Monster | 남승우 | [@Eldia](https://github.com/Eldia-01) | nsw22122@gmail.com |
+| 팀원 / OutGameUI / GameMode / GameState | 곽준상 | [@jerrykwak](https://github.com/jerrykwak) | junsang0129@gmaill.com |
+| 팀원 / 레벨 디자인 | 강탁완 | [@KANGTAKWAN](https://github.com/KANGTAKWAN) | xkvk2012@gmail.com |
+| 팀원 / Gimmick | 김기인 | [@Ulari](https://github.com/kki6700) | kki43474347@gmail.com |
+| 팀원 / InGameUI | 김예준 | [@NonPlayer95](https://github.com/Nonplayer95) | yejoongreat@gmail.com |
+
 ## 📋 프로젝트 기본 정보 (Project Specification)
 
 이 프로젝트를 열거나 빌드하기 위해 필요한 **필수 환경 정보**입니다. 버전이 맞지 않으면 프로젝트가 정상적으로 열리지 않을 수 있습니다.
