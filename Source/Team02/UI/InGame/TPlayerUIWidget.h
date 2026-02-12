@@ -12,6 +12,13 @@ class TEAM02_API UTPlayerUIWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	// Android 초기화 타이밍 이슈 해결을 위한 NativeConstruct 오버라이드
+	virtual void NativeConstruct() override;
+
+	// 위젯 초기화 완료 여부 확인
+	UFUNCTION(BlueprintCallable)
+	bool IsWidgetFullyInitialized() const { return bIsWidgetInitialized; }
+
 	// 체력, 탄창
 	UFUNCTION(BlueprintCallable)
 	void UpdateHPBar(float CurrentHP, float MaxHP);
@@ -124,6 +131,10 @@ protected:
 	FTimerHandle FlashTimerHandle; 
 
 private:
+	// Android 초기화 타이밍 이슈 해결용 플래그
+	UPROPERTY()
+	bool bIsWidgetInitialized = false;
+
 	// 타이핑 애니메이션 함수
 	void UpdateTypingText();
 	void FlashText();

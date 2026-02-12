@@ -3,16 +3,24 @@
 #include "Character/TCharacterBase.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 UTMonsterHealthBarComponent::UTMonsterHealthBarComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	HealthBarWidgetComponent=CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	
+
 	LastKnownCurrentHP=-1.0f;
 	LastKnownMaxHP=-1.0f;
-	
+
+	// Widget 클래스 자동 로드
+	static ConstructorHelpers::FClassFinder<UTMonsterHealthBarWidget> WidgetClassFinder(
+		TEXT("/Game/UI/InGame/WBP_MonsterHealthBar"));
+	if (WidgetClassFinder.Succeeded())
+	{
+		HealthBarWidgetClass = WidgetClassFinder.Class;
+	}
 }
 
 void UTMonsterHealthBarComponent::BeginPlay()

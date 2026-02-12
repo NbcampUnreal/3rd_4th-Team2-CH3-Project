@@ -7,6 +7,7 @@
 DECLARE_DELEGATE_TwoParams(FOnSwordAttackMontageEnded, UAnimMontage*, bool)
 
 class UAnimMontage;
+class UTMonsterHealthBarComponent;
 
 /**
  * 
@@ -67,4 +68,8 @@ protected:
 	bool bSwordNPCIsDead;
 
 	FOnSwordAttackMontageEnded OnSwordAttackMontageEndedDelegate;
+
+	// 몬스터 체력바 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UTMonsterHealthBarComponent> HealthBarComponent;
 };

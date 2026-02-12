@@ -3,8 +3,50 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
+void UTPlayerUIWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// 위젯 바인딩 상태 로그
+	UE_LOG(LogTemp, Log, TEXT("[TPlayerUIWidget] NativeConstruct called"));
+	UE_LOG(LogTemp, Log, TEXT("[TPlayerUIWidget] HPBar: %s"), HPBar ? TEXT("Valid") : TEXT("NULL"));
+	UE_LOG(LogTemp, Log, TEXT("[TPlayerUIWidget] HPText: %s"), HPText ? TEXT("Valid") : TEXT("NULL"));
+
+	// Android에서 위젯 바인딩이 완전히 완료될 때까지 약간의 지연 후 초기화 플래그 설정
+	if (UWorld* World = GetWorld())
+	{
+		FTimerHandle InitTimerHandle;
+		World->GetTimerManager().SetTimer(
+			InitTimerHandle,
+			[this]()
+			{
+				bIsWidgetInitialized = true;
+				UE_LOG(LogTemp, Log, TEXT("[TPlayerUIWidget] Widget fully initialized"));
+			},
+			0.1f,
+			false
+		);
+	}
+	else
+	{
+		// World가 없으면 즉시 초기화 (에디터 등)
+		bIsWidgetInitialized = true;
+	}
+}
+
 void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 {
+	// Android 초기화 타이밍 이슈 방지
+	if (!bIsWidgetInitialized)
+	{
+		return;
+	}
+
+	if (!IsValid(HPBar) || !IsValid(HPText))
+	{
+		return;
+	}
+
 	if (HPBar)
 	{
 		float HPPercent=(MaxHP>0.0f) ? (CurrentHP/MaxHP) : 0.0f;
@@ -20,6 +62,11 @@ void UTPlayerUIWidget::UpdateHPBar(float CurrentHP, float MaxHP)
 
 void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 TotalAmmo)
 {
+	if (!bIsWidgetInitialized || !IsValid(AmmoText))
+	{
+		return;
+	}
+
 	if (AmmoText)
 	{
 		FString AmmoString;
@@ -42,8 +89,13 @@ void UTPlayerUIWidget::UpdateAmmoInfo(int32 CurrentAmmo, int32 TotalAmmo)
 
 void UTPlayerUIWidget::ShowCaptureUI(const FString& AreaName)
 {
+	if (!bIsWidgetInitialized)
+	{
+		return;
+	}
+
 	// 거점 UI 요소들 표시
-	if (CaptureBar)
+	if (IsValid(CaptureBar))
 	{
 		CaptureBar->SetVisibility(ESlateVisibility::Visible);
 		CaptureBar->SetPercent(0.0f); // 초기 진행도 0%
@@ -69,8 +121,13 @@ void UTPlayerUIWidget::ShowCaptureUI(const FString& AreaName)
 
 void UTPlayerUIWidget::HideCaptureUI()
 {
+	if (!bIsWidgetInitialized)
+	{
+		return;
+	}
+
 	//거점 UI 요소들 숨김
-	if (CaptureBar)
+	if (IsValid(CaptureBar))
 	{
 		CaptureBar->SetVisibility(ESlateVisibility::Hidden);
 	}
@@ -89,10 +146,15 @@ void UTPlayerUIWidget::HideCaptureUI()
 
 void UTPlayerUIWidget::UpdateCaptureProgress(float Progress)
 {
+	if (!bIsWidgetInitialized)
+	{
+		return;
+	}
+
 	// 진행도 업데이트
 	Progress=FMath::Clamp(Progress,0.0f,1.0f);
 
-	if (CaptureBar)
+	if (IsValid(CaptureBar))
 	{
 		CaptureBar->SetPercent(Progress);
 	}
@@ -121,6 +183,11 @@ bool UTPlayerUIWidget::IsCaptureUIVisible() const
 
 void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 {
+	if (!bIsWidgetInitialized || !IsValid(ObjectText))
+	{
+		return;
+	}
+
 	if (ObjectText)
 	{
 		FString CurrentText=ObjectText->GetText().ToString();
@@ -149,6 +216,11 @@ void UTPlayerUIWidget::UpdateMissionObjective(const FString& ObjectiveText)
 
 void UTPlayerUIWidget::UpdateKillCount(int32 CurrentKills,int32 TotalMonsters)
 {
+	if (!bIsWidgetInitialized || !IsValid(KillCountText))
+	{
+		return;
+	}
+
 	if (KillCountText)
 	{
 		FString KillString=FString::Printf(TEXT("Monster: %d/%d"),CurrentKills,TotalMonsters);
@@ -159,6 +231,11 @@ void UTPlayerUIWidget::UpdateKillCount(int32 CurrentKills,int32 TotalMonsters)
 
 void UTPlayerUIWidget::ShoWEnemyIncomingAlarm()
 {
+	if (!bIsWidgetInitialized || !IsValid(WaveAlarmText))
+	{
+		return;
+	}
+
 	if (WaveAlarmText)
 	{
 		WaveAlarmText->SetText(FText::FromString(TEXT("Enemy Incoming!!")));
@@ -168,6 +245,11 @@ void UTPlayerUIWidget::ShoWEnemyIncomingAlarm()
 
 void UTPlayerUIWidget::HideEnemyIncomingAlarm()
 {
+	if (!bIsWidgetInitialized || !IsValid(WaveAlarmText))
+	{
+		return;
+	}
+
 	if (WaveAlarmText)
 	{
 		WaveAlarmText->SetVisibility(ESlateVisibility::Hidden);
@@ -178,7 +260,10 @@ void UTPlayerUIWidget::HideEnemyIncomingAlarm()
 
 void UTPlayerUIWidget::StartTypingAnimation(const FString& FullText)
 {
-	if (!ObjectText) return;
+	if (!bIsWidgetInitialized || !IsValid(ObjectText) || !GetWorld())
+	{
+		return;
+	}
 
 	// 기존 타이핑 중이면 중단
 	GetWorld()->GetTimerManager().ClearTimer(TypingTimerHandle);
@@ -202,6 +287,11 @@ void UTPlayerUIWidget::StartTypingAnimation(const FString& FullText)
 
 void UTPlayerUIWidget::UpdateTypingText()
 {
+	if (!bIsWidgetInitialized || !IsValid(ObjectText) || !GetWorld())
+	{
+		return;
+	}
+
 	if (!bIsTyping || CurrentCharIndex>=TargetText.Len())
 	{
 		//타이핑 완료
@@ -219,8 +309,11 @@ void UTPlayerUIWidget::UpdateTypingText()
 
 void UTPlayerUIWidget::StartFlashingAndChangeText(const FString& NewText)
 {
-	if (!ObjectText) return;
-	
+	if (!bIsWidgetInitialized || !IsValid(ObjectText) || !GetWorld())
+	{
+		return;
+	}
+
 	// 깜빡임 시작
 	GetWorld()->GetTimerManager().SetTimer(
 		FlashTimerHandle,
@@ -246,7 +339,10 @@ void UTPlayerUIWidget::StartFlashingAndChangeText(const FString& NewText)
 
 void UTPlayerUIWidget::FlashText()
 {
-	if (!ObjectText) return;
+	if (!bIsWidgetInitialized || !IsValid(ObjectText))
+	{
+		return;
+	}
 
 	static bool bVisible=false;
 	bVisible=!bVisible;
@@ -258,9 +354,14 @@ void UTPlayerUIWidget::FlashText()
 
 void UTPlayerUIWidget::StopFlashing()
 {
+	if (!GetWorld())
+	{
+		return;
+	}
+
 	GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
 
-	if (ObjectText)
+	if (IsValid(ObjectText))
 	{
 		ObjectText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	}
@@ -307,6 +408,11 @@ bool UTPlayerUIWidget::IsRealMissionChange(const FString& OldText, const FString
 
 void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 {
+	if (!bIsWidgetInitialized || !IsValid(WeaponNameText))
+	{
+		return;
+	}
+
 	if (WeaponNameText)
 	{
 		WeaponNameText->SetText(FText::FromString(WeaponName));
@@ -316,9 +422,14 @@ void UTPlayerUIWidget::UpdateWeaponName(const FString& WeaponName)
 
 void UTPlayerUIWidget::ShowHitMarker()
 {
+	if (!bIsWidgetInitialized || !IsValid(HitMarker) || !GetWorld())
+	{
+		return;
+	}
+
 	if (HitMarker)
 	{
-		// 🔧 UImage로 캐스팅해서 함수 사용
+		// UImage로 캐스팅해서 함수 사용
 		if (UImage* HitMarkerImage = Cast<UImage>(HitMarker))
 		{
 			
@@ -363,6 +474,11 @@ void UTPlayerUIWidget::ShowHitMarker()
 
 void UTPlayerUIWidget::ShowDashReady()
 {
+	if (!bIsWidgetInitialized || !IsValid(DashText))
+	{
+		return;
+	}
+
 	if (DashText)
 	{
 		DashText->SetText(FText::FromString(TEXT("Dash Ready!")));

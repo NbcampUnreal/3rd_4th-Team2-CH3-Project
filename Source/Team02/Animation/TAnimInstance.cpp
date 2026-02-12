@@ -23,6 +23,14 @@ void UTAnimInstance::NativeInitializeAnimation()
 
 void UTAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
+	// [Mobile Debug] 애니메이션 업데이트 확인 (첫 5초만)
+	static float DebugTimer = 0.f;
+	DebugTimer += DeltaSeconds;
+	if (DebugTimer < 5.0f && FMath::Fmod(DebugTimer, 1.0f) < DeltaSeconds)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] NativeUpdateAnimation called - DeltaSeconds: %f"), DeltaSeconds);
+	}
+
 	if (IsValid(OwnerCharacter) == true && IsValid(OwnerCharacterMovement) == true)
 	{
 		bIsFalling = OwnerCharacterMovement ->IsFalling();

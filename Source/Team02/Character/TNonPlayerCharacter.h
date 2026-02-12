@@ -5,6 +5,7 @@
 #include "TNonPlayerCharacter.generated.h"
 
 class ATGunNPCWeapon;
+class UTMonsterHealthBarComponent;
 
 DECLARE_DELEGATE_TwoParams(FOnAttackMontageEnded, UAnimMontage*, bool bInterrupted)
 
@@ -58,5 +59,8 @@ protected:
 	bool SwordNPCIsDead;
 	
 	FOnAttackMontageEnded OnAttackMontageEndedDelegate;
-	
+
+	// 몬스터 체력바 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UTMonsterHealthBarComponent> HealthBarComponent;
 };

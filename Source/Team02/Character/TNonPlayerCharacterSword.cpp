@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Team02.h"
+#include "UI/InGame/TMonsterHealthBarComponent.h"
 
 
 int32 ATNonPlayerCharacterSword::SwordAttackSwordDebug = 0;
@@ -25,6 +26,9 @@ ATNonPlayerCharacterSword::ATNonPlayerCharacterSword()
 	//건 npc 컨트롤 가져오기
 	AIControllerClass = ATSwordAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	// 몬스터 체력바 컴포넌트 생성
+	HealthBarComponent = CreateDefaultSubobject<UTMonsterHealthBarComponent>(TEXT("HealthBarComponent"));
 }
 
 void ATNonPlayerCharacterSword::BeginPlay()

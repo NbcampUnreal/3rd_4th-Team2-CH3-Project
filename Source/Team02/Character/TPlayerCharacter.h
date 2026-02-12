@@ -47,7 +47,7 @@ private:
 	void InputMove(const FInputActionValue& InValue);
 
 	void InputLook(const FInputActionValue& InValue);
-	
+
 	void OnFire(const FInputActionValue& InValue);
 
 	void OnReload(const FInputActionValue& InValue);

@@ -7,6 +7,7 @@
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "Team02.h"
+#include "UI/InGame/TMonsterHealthBarComponent.h"
 
 
 int32 ATNonPlayerCharacter::ShowGunAttackDebug = 0;
@@ -22,10 +23,13 @@ ATNonPlayerCharacter::ATNonPlayerCharacter()
 	: bIsNowAttacking(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 	//npc 컨트롤 가져오기
 	AIControllerClass = ATAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	// 몬스터 체력바 컴포넌트 생성
+	HealthBarComponent = CreateDefaultSubobject<UTMonsterHealthBarComponent>(TEXT("HealthBarComponent"));
 }
 
 void ATNonPlayerCharacter::BeginPlay()

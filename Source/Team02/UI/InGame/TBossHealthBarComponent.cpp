@@ -3,6 +3,7 @@
 #include "Character/TCharacterBase.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 UTBossHealthBarComponent::UTBossHealthBarComponent()
 {
@@ -14,7 +15,14 @@ UTBossHealthBarComponent::UTBossHealthBarComponent()
 	//set initialize value
 	LastKnownCurrentHP=-1.0f;
 	LastKnownMaxHP=-1.0f;
-	
+
+	// Widget 클래스 자동 로드
+	static ConstructorHelpers::FClassFinder<UTBossHealthBarWidget> WidgetClassFinder(
+		TEXT("/Game/UI/InGame/WBP_BossHealthBar"));
+	if (WidgetClassFinder.Succeeded())
+	{
+		BossHealthBarWidgetClass = WidgetClassFinder.Class;
+	}
 }
 
 void UTBossHealthBarComponent::BeginPlay()

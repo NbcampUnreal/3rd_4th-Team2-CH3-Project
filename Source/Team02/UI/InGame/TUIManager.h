@@ -1,11 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "TPlayerUIWidget.h"
-#include "Area/TCapturePoint.h"
-#include "Character/TNonPlayerCharacterSword.h"
 #include "TUIManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictoryDelegate);
@@ -15,6 +11,10 @@ class ATCharacterBase;
 class ATPlayerCharacter;
 class ATWeaponBase;
 class ATGameMode;
+class ATCapturePoint;
+class ATEnemySpawner;
+class UTPlayerUIWidget;
+class APlayerController; 
 
 UCLASS()
 class TEAM02_API UTUIManager : public UGameInstanceSubsystem
@@ -34,7 +34,7 @@ public:
 
 	//create UI
 	UFUNCTION(BlueprintCallable)
-	void CreatePlayerUI();
+	void CreatePlayerUI(APlayerController* OwningPC);
 
 	// update ui functions
 	UFUNCTION(BlueprintCallable)
@@ -119,6 +119,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ATWeaponBase> PreviousWeapon;
 
+	UPROPERTY()
+	TWeakObjectPtr<APlayerController> CachedPC;
+	UWorld* GetWorldSafe() const;
+	
 	// Timer
 	FTimerHandle UIUpdateTimerHandle;
 	FTimerHandle MonsterMonitorTimer; 

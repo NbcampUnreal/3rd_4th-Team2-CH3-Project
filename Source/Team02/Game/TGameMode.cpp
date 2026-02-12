@@ -33,6 +33,25 @@ void ATGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// [Mobile Debug] 게임 상태 확인
+	UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] ===== Game State Check ====="));
+	UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] IsPaused: %s"), UGameplayStatics::IsGamePaused(GetWorld()) ? TEXT("TRUE") : TEXT("FALSE"));
+	UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] TimeDilation: %f"), UGameplayStatics::GetGlobalTimeDilation(GetWorld()));
+
+	// Pause 상태면 강제 해제
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Mobile Debug] Game was PAUSED! Unpausing..."));
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+	}
+
+	// TimeDilation이 0이면 복구
+	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) < 0.01f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Mobile Debug] TimeDilation was ZERO! Resetting to 1.0..."));
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+	}
+
 	// 게임 시작 시 항상 모든 상태 초기화
 	InitializeGameState();
 	
@@ -232,7 +251,6 @@ void ATGameMode::OnPlayerDied(AController* DeadController)
 		GameOverUI->AddToViewport();
 		PC->SetShowMouseCursor(true);
 		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(GameOverUI->TakeWidget());
 		PC->SetInputMode(InputMode);
 	}
 }

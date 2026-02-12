@@ -45,6 +45,40 @@ void ATPlayerCharacter::BeginPlay()
 {
   Super::BeginPlay();
 
+  // 모바일 AnimInstance 디버그 로그
+  if (GetMesh())
+  {
+    USkeletalMeshComponent* MeshComp = GetMesh();
+
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] ===== SkeletalMesh Debug ====="));
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] SkeletalMesh: %s"), MeshComp->GetSkeletalMeshAsset() ? *MeshComp->GetSkeletalMeshAsset()->GetName() : TEXT("NULL"));
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] AnimClass: %s"), MeshComp->AnimClass ? *MeshComp->AnimClass->GetName() : TEXT("NULL"));
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] AnimationMode: %d"), (int32)MeshComp->GetAnimationMode());
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] bPauseAnims: %s"), MeshComp->bPauseAnims ? TEXT("TRUE") : TEXT("FALSE"));
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] bNoSkeletonUpdate: %s"), MeshComp->bNoSkeletonUpdate ? TEXT("TRUE") : TEXT("FALSE"));
+    UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] VisibilityBasedAnimTickOption: %d"), (int32)MeshComp->VisibilityBasedAnimTickOption);
+
+    UAnimInstance* AnimInstance = MeshComp->GetAnimInstance();
+    if (AnimInstance)
+    {
+      UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] AnimInstance OK - Class: %s"), *AnimInstance->GetClass()->GetName());
+
+      // 현재 재생 중인 애니메이션 확인
+      if (UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage())
+      {
+        UE_LOG(LogTemp, Warning, TEXT("[Mobile Debug] Playing Montage: %s"), *CurrentMontage->GetName());
+      }
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("[Mobile Debug] AnimInstance is NULL!"));
+    }
+  }
+  else
+  {
+    UE_LOG(LogTemp, Error, TEXT("[Mobile Debug] GetMesh() is NULL!"));
+  }
+
   APlayerController* PlayerController = Cast<APlayerController>(GetController());
   if (IsValid(PlayerController))
   {
@@ -112,19 +146,21 @@ void ATPlayerCharacter::InputMove(const FInputActionValue& InValue)
 {
   FVector2D MovementVector = InValue.Get<FVector2D>();
 
+
   const FRotator ControlRotation = GetController()->GetControlRotation();
   const FRotator ControlRotationYaw(0.f, ControlRotation.Yaw, 0.f);
-  
+
   const FVector ForwardVector = FRotationMatrix(ControlRotationYaw).GetUnitAxis(EAxis::X);
   const FVector RightVector = FRotationMatrix(ControlRotationYaw).GetUnitAxis(EAxis::Y);
 
-  AddMovementInput(ForwardVector, MovementVector.X);
-  AddMovementInput(RightVector, MovementVector.Y);
+  AddMovementInput(ForwardVector, MovementVector.Y);
+  AddMovementInput(RightVector, MovementVector.X);
 }
 
 void ATPlayerCharacter::InputLook(const FInputActionValue& InValue)
 {
   FVector2D LookVector = InValue.Get<FVector2D>();
+
 
   AddControllerYawInput(LookVector.X);
   AddControllerPitchInput(LookVector.Y);
